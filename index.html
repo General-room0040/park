@@ -57,8 +57,9 @@
 
 <!-- ============ แอปหลัก ============ -->
 <div id="appView" hidden>
-<header class="topo text-white">
-  <div class="max-w-6xl mx-auto px-4 py-5 md:py-8">
+<header class="topo text-white relative overflow-hidden">
+  <svg class="absolute right-0 bottom-0 w-full md:w-3/5 h-32 pointer-events-none" viewBox="0 0 400 64" preserveAspectRatio="xMaxYMax slice" aria-hidden="true"><path d="M0 64V34L45 12l35 24 45-30 55 40 45-26 70 36 50-30 55 38V64z" fill="#c9d5b0" opacity=".10"/><path d="M0 64V46L60 24l40 22 55-26 60 34 50-20 70 26 65-18V64z" fill="#c9d5b0" opacity=".14"/></svg>
+  <div class="relative max-w-6xl mx-auto px-4 py-5 md:py-8">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
         <h1 class="serif text-xl md:text-3xl font-extrabold leading-tight">สมุดเช็กอินอุทยานแห่งชาติไทย</h1>
@@ -84,7 +85,7 @@
 
 <div class="sticky top-0 z-20 bg-[#eef1e8]/95 backdrop-blur border-b border-stone-300/60">
   <div class="max-w-6xl mx-auto px-4 py-3 grid gap-3">
-    <input id="q" type="search" placeholder="ค้นหาชื่ออุทยานหรือจังหวัด" aria-label="ค้นหา" class="field">
+    <input id="q" type="search" placeholder="ค้นหาชื่ออุทยานหรือจังหวัด เช่น เขาใหญ่ เชียงใหม่" aria-label="ค้นหา" class="field">
     <div class="flex gap-2 items-center">
       <div id="fStatus" class="flex gap-2 shrink-0" role="group" aria-label="กรองตามสถานะ"></div>
       <span class="w-px h-6 bg-stone-300 shrink-0" aria-hidden="true"></span>
@@ -143,6 +144,13 @@
 <script>
 const REGIONS = ["เหนือ", "ตะวันออกเฉียงเหนือ", "กลาง", "ตะวันออก", "ตะวันตก", "ใต้"];
 const RC = {"เหนือ":["⛰️","#dfe8c8"],"ตะวันออกเฉียงเหนือ":["🌾","#efe3c0"],"กลาง":["🌿","#cfe3d2"],"ตะวันออก":["🏝️","#cfe2e6"],"ตะวันตก":["🌲","#d5dfc3"],"ใต้":["🌴","#d3e6d9"]};
+/* ภาพประกอบ SVG ประจำภาค (ฝังในไฟล์ ไม่ต้องโหลดรูปจากข้างนอก) */
+const SCENE = {
+  hills: '<circle cx="330" cy="20" r="10" fill="#fff" opacity=".55"/><path d="M0 64V34L45 12l35 24 45-30 55 40 45-26 70 36 50-30 55 38V64z" fill="#4f7a3a" opacity=".28"/><path d="M0 64V46L60 24l40 22 55-26 60 34 50-20 70 26 65-18V64z" fill="#2d5230" opacity=".45"/>',
+  field: '<circle cx="70" cy="22" r="11" fill="#fff" opacity=".6"/><path d="M0 64V42Q100 24 200 42T400 38V64z" fill="#4f7a3a" opacity=".28"/><path d="M0 64V52Q110 36 220 52T400 48V64z" fill="#2d5230" opacity=".45"/><path d="M300 52l6-14 6 14zM322 54l5-11 5 11z" fill="#1f3a2e" opacity=".5"/>',
+  sea: '<circle cx="340" cy="22" r="11" fill="#fff" opacity=".6"/><path d="M0 64V40Q25 32 50 40T100 40T150 40T200 40T250 40T300 40T350 40T400 40V64z" fill="#4f7a3a" opacity=".25"/><path d="M0 64V52Q25 45 50 52T100 52T150 52T200 52T250 52T300 52T350 52T400 52V64z" fill="#2d5230" opacity=".45"/><path d="M60 36l14-14 14 14z" fill="#1f3a2e" opacity=".45"/>'
+};
+const RSCENE = {"เหนือ":"hills","ตะวันออกเฉียงเหนือ":"field","กลาง":"field","ตะวันออก":"sea","ตะวันตก":"hills","ใต้":"sea"};
 // จังหวัด -> ภูมิภาค (6 ภูมิภาคตามราชบัณฑิตยสภา)
 const PROV_REGION = {"น่าน": "เหนือ", "พะเยา": "เหนือ", "ลำปาง": "เหนือ", "ลำพูน": "เหนือ", "อุตรดิตถ์": "เหนือ", "เชียงราย": "เหนือ", "เชียงใหม่": "เหนือ", "แพร่": "เหนือ", "แม่ฮ่องสอน": "เหนือ", "ขอนแก่น": "ตะวันออกเฉียงเหนือ", "ชัยภูมิ": "ตะวันออกเฉียงเหนือ", "นครพนม": "ตะวันออกเฉียงเหนือ", "นครราชสีมา": "ตะวันออกเฉียงเหนือ", "มุกดาหาร": "ตะวันออกเฉียงเหนือ", "ศรีสะเกษ": "ตะวันออกเฉียงเหนือ", "สกลนคร": "ตะวันออกเฉียงเหนือ", "หนองบัวลำภู": "ตะวันออกเฉียงเหนือ", "อุดรธานี": "ตะวันออกเฉียงเหนือ", "อุบลราชธานี": "ตะวันออกเฉียงเหนือ", "เลย": "ตะวันออกเฉียงเหนือ", "กำแพงเพชร": "กลาง", "พิษณุโลก": "กลาง", "สระบุรี": "กลาง", "สุพรรณบุรี": "กลาง", "สุโขทัย": "กลาง", "เพชรบูรณ์": "กลาง", "จันทบุรี": "ตะวันออก", "ตราด": "ตะวันออก", "ปราจีนบุรี": "ตะวันออก", "ระยอง": "ตะวันออก", "สระแก้ว": "ตะวันออก", "กาญจนบุรี": "ตะวันตก", "ตาก": "ตะวันตก", "ประจวบคีรีขันธ์": "ตะวันตก", "ราชบุรี": "ตะวันตก", "เพชรบุรี": "ตะวันตก", "กระบี่": "ใต้", "ชุมพร": "ใต้", "ตรัง": "ใต้", "นครศรีธรรมราช": "ใต้", "นราธิวาส": "ใต้", "ปัตตานี": "ใต้", "พังงา": "ใต้", "พัทลุง": "ใต้", "ภูเก็ต": "ใต้", "ยะลา": "ใต้", "ระนอง": "ใต้", "สงขลา": "ใต้", "สตูล": "ใต้", "สุราษฎร์ธานี": "ใต้"};
 // [จังหวัด, ชื่อ, contentId ของ DNP] จากไฟล์ nationalparksname.xlsx
@@ -306,7 +314,8 @@ const RAW = [
 ];
 const PARKS = RAW.map(([p, n, cid]) => {
   if (!PROV_REGION[p]) console.error("ไม่พบภูมิภาคของจังหวัด: " + p);
-  return {id:"p" + cid, n:n.replace(/\s*\(เตรียมการ\)/, "").trim(), p, r:PROV_REGION[p], prep:/เตรียมการ/.test(n), url:"https://portal.dnp.go.th/Content/nationalpark?contentId=" + cid};
+  const short = n.replace(/\s*\(เตรียมการ\)/, "").trim();
+  return {id:"p" + cid, n:short, full:"อุทยานแห่งชาติ" + short, p, r:PROV_REGION[p], prep:/เตรียมการ/.test(n), url:"https://portal.dnp.go.th/Content/nationalpark?contentId=" + cid};
 });
 // id เก่า (รุ่นแรก) -> id ใหม่ เพื่อไม่ให้ข้อมูลเช็กอินที่บันทึกไว้หาย
 const OLD_IDS = {"doi-inthanon": "p915", "doi-suthep": "p914", "doi-phu-kha": "p937", "khao-yai": "p640", "phu-kradueng": "p945", "pha-taem": "p957", "phu-ruea": "p946", "nam-tok-sam-lan": "p893", "phu-toei": "p919", "khao-khitchakut": "p961", "samet": "p990", "ko-chang": "p971", "erawan": "p643", "sai-yok": "p1011", "khao-sam-roi-yot": "p1016", "kaeng-krachan": "p642", "khao-sok": "p1019", "similan": "p865", "tarutao-thale-ban": "p1012", "khao-luang": "p938"};
@@ -436,8 +445,8 @@ function row(p){
   const sub = v ? "เคยไปแล้ว" + (d.date ? " · " + fmtDate(d.date) : "") + (rating ? " · " + "★".repeat(rating) : "") : "ยังไม่เคยไป";
   return `<article class="rounded-xl bg-white border-2 ${v ? "border-[#4f7a3a]" : "border-transparent shadow-sm"} ${open ? "md:col-span-2" : ""}">
     <div class="flex items-center gap-3 p-3">
-      <button data-act="toggle" data-id="${p.id}" aria-pressed="${v}" aria-label="${v ? "ยกเลิกเช็กอิน " : "เช็กอินที่ "}${esc(p.n)}" class="size-10 shrink-0 rounded-full border-2 text-lg font-bold ${v ? "text-white border-[#4f7a3a]" : "border-stone-300 text-transparent hover:border-[#4f7a3a]"}" ${v ? 'style="background:#4f7a3a"' : ""}>✓</button>
-      <div class="flex-1 min-w-0"><div class="font-semibold leading-snug">${esc(p.n)}${p.prep ? ' <span class="text-[11px] font-medium px-1.5 py-0.5 rounded-full bg-[#b8892f]/20 text-[#6b4f3a] align-middle">เตรียมการ</span>' : ""}</div>
+      <button data-act="toggle" data-id="${p.id}" aria-pressed="${v}" aria-label="${v ? "ยกเลิกเช็กอิน " : "เช็กอินที่ "}${esc(p.full)}" class="size-10 shrink-0 rounded-full border-2 text-lg font-bold ${v ? "text-white border-[#4f7a3a]" : "border-stone-300 text-transparent hover:border-[#4f7a3a]"}" ${v ? 'style="background:#4f7a3a"' : ""}>✓</button>
+      <div class="flex-1 min-w-0"><div class="font-semibold leading-snug">${esc(p.full)}${p.prep ? ' <span class="text-[11px] font-medium px-1.5 py-0.5 rounded-full bg-[#b8892f]/20 text-[#6b4f3a] align-middle">เตรียมการ</span>' : ""}</div>
         <div class="text-xs ${v ? "text-[#2d5230]" : "text-stone-500"}">${esc(sub)}</div></div>
       <a href="${p.url}" target="_blank" rel="noopener" class="text-xs underline text-stone-500 shrink-0 p-1">ข้อมูล</a>
       ${v ? `<button data-act="more" data-id="${p.id}" aria-expanded="${open}" aria-label="บันทึกรายละเอียด" class="shrink-0 px-2 py-1 rounded-lg text-stone-600 hover:bg-stone-100">${open ? "▴" : "▾"}</button>` : ""}
@@ -453,13 +462,13 @@ function grid(){
   const q = F.q.trim().toLowerCase();
   const L = PARKS.filter(p => (F.prep || !p.prep) && (F.r === "all" || p.r === F.r) &&
     (F.s === "all" || (F.s === "yes") === isV(p)) &&
-    (!q || p.n.toLowerCase().includes(q) || p.p.toLowerCase().includes(q)));
+    (!q || p.full.toLowerCase().includes(q) || p.p.toLowerCase().includes(q)));
   $("resultInfo").textContent = "แสดง " + L.length + " แห่ง";
   let html = "";
   REGIONS.forEach(r => {
     const inR = L.filter(p => p.r === r); if (!inR.length) return;
     const provs = [...new Set(inR.map(p => p.p))].sort((a, b) => a.localeCompare(b, "th"));
-    html += `<section><h2 class="serif text-xl font-extrabold flex items-center gap-2 pb-1 border-b-2" style="border-color:${RC[r][1]}"><span aria-hidden="true">${RC[r][0]}</span>ภาค${r}<span class="text-sm font-medium text-stone-500">${inR.filter(isV).length}/${inR.length}</span></h2>` +
+    html += `<section><div class="relative rounded-xl overflow-hidden" style="background:${RC[r][1]}"><svg class="absolute inset-0 w-full h-full" viewBox="0 0 400 64" preserveAspectRatio="xMidYMax slice" aria-hidden="true">${SCENE[RSCENE[r]]}</svg><h2 class="relative serif text-xl font-extrabold flex items-center gap-2 px-4 py-5"><span aria-hidden="true">${RC[r][0]}</span>ภาค${r}<span class="text-sm font-medium text-stone-600">${inR.filter(isV).length}/${inR.length}</span></h2></div>` +
       provs.map(pv => `<h3 class="text-sm font-semibold text-stone-600 mt-4 mb-2">จ.${esc(pv)}</h3><div class="grid gap-2 md:grid-cols-2">${inR.filter(p => p.p === pv).map(row).join("")}</div>`).join("") + "</section>";
   });
   $("grid").innerHTML = html || '<p class="text-center text-stone-500 py-12">ไม่พบอุทยานที่ตรงกับเงื่อนไข ลองล้างคำค้นหาหรือเปลี่ยนตัวกรอง</p>';
