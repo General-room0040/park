@@ -10,7 +10,6 @@
   body{font-family:'Sarabun',sans-serif;background:#eef1e8;color:#1f3a2e}
   .serif{font-family:'Noto Serif Thai',serif}
   .topo{background-color:#1f3a2e;background-image:repeating-radial-gradient(circle at 85% 120%,transparent 0 22px,rgba(201,213,176,.10) 22px 23px)}
-  .stamp{transform:rotate(-8deg)}
   :focus-visible{outline:2px solid #b8892f;outline-offset:2px}
   .field{width:100%;border-radius:.75rem;border:1px solid #d6d3d1;background:#fff;padding:.65rem .9rem}
   .field:focus{border-color:#4f7a3a}
@@ -85,19 +84,13 @@
 
 <div class="sticky top-0 z-20 bg-[#eef1e8]/95 backdrop-blur border-b border-stone-300/60">
   <div class="max-w-6xl mx-auto px-4 py-3 grid gap-3">
-    <div class="flex gap-2">
-      <input id="q" type="search" placeholder="ค้นหาชื่ออุทยานหรือจังหวัด" aria-label="ค้นหา" class="field">
-      <select id="fSort" class="field w-auto" aria-label="เรียงลำดับ">
-        <option value="region">เรียงตามภูมิภาค</option>
-        <option value="name">เรียงตามชื่อ</option>
-        <option value="recent">ไปล่าสุดก่อน</option>
-      </select>
-    </div>
+    <input id="q" type="search" placeholder="ค้นหาชื่ออุทยานหรือจังหวัด" aria-label="ค้นหา" class="field">
     <div class="flex gap-2 items-center">
       <div id="fStatus" class="flex gap-2 shrink-0" role="group" aria-label="กรองตามสถานะ"></div>
       <span class="w-px h-6 bg-stone-300 shrink-0" aria-hidden="true"></span>
       <div id="fRegion" class="scroll-x flex gap-2" role="group" aria-label="กรองตามภูมิภาค"></div>
     </div>
+    <label class="flex items-center gap-2 text-sm text-stone-600"><input id="fPrep" type="checkbox" class="size-4 accent-[#4f7a3a]"> แสดงอุทยานที่อยู่ระหว่างเตรียมการ (ยังไม่นับในคะแนนรวม)</label>
   </div>
 </div>
 
@@ -111,9 +104,9 @@
       </label>
     </div>
   </div>
-  <section id="grid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></section>
+  <section id="grid" class="grid gap-8"></section>
 </main>
-<footer class="text-center text-xs text-stone-500 py-8 px-4">ข้อมูลบันทึกในเบราว์เซอร์เครื่องนี้เท่านั้น · ควรกดส่งออกเก็บสำรองไว้เป็นระยะ</footer>
+<footer class="text-center text-xs text-stone-500 py-8 px-4">รายชื่อจากกรมอุทยานแห่งชาติ สัตว์ป่า และพันธุ์พืช · แบ่งภูมิภาคตามเกณฑ์ราชบัณฑิตยสภา · ข้อมูลบันทึกในเบราว์เซอร์เครื่องนี้เท่านั้น · ควรกดส่งออกเก็บสำรองไว้เป็นระยะ</footer>
 </div>
 
 <!-- ============ แผงแอดมิน ============ -->
@@ -148,31 +141,182 @@
 <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg text-sm text-white z-50" style="background:#1f3a2e" role="status" hidden></div>
 
 <script>
-const REGIONS = ["เหนือ","ตะวันออกเฉียงเหนือ","กลาง","ตะวันออก","ตะวันตก","ใต้"];
+const REGIONS = ["เหนือ", "ตะวันออกเฉียงเหนือ", "กลาง", "ตะวันออก", "ตะวันตก", "ใต้"];
 const RC = {"เหนือ":["⛰️","#dfe8c8"],"ตะวันออกเฉียงเหนือ":["🌾","#efe3c0"],"กลาง":["🌿","#cfe3d2"],"ตะวันออก":["🏝️","#cfe2e6"],"ตะวันตก":["🌲","#d5dfc3"],"ใต้":["🌴","#d3e6d9"]};
-// [id, ชื่อ, จังหวัด, ภูมิภาค, คำอธิบายสั้น]  (อย่าเปลี่ยน id ที่แจกจ่ายไปแล้ว ไม่งั้นข้อมูลที่บันทึกไว้จะไม่ตรง)
-const PARKS = [
- ["doi-inthanon","ดอยอินทนนท์","เชียงใหม่","เหนือ","ยอดเขาสูงที่สุดในไทย อากาศเย็นและทะเลหมอก"],
- ["doi-suthep","ดอยสุเทพ-ปุย","เชียงใหม่","เหนือ","ภูเขาคู่เมืองเชียงใหม่ มีพระธาตุดอยสุเทพ"],
- ["doi-phu-kha","ดอยภูคา","น่าน","เหนือ","ป่าต้นน้ำน่าน ชมชมพูภูคาในฤดูหนาว"],
- ["khao-yai","เขาใหญ่","นครราชสีมา","ตะวันออกเฉียงเหนือ","มรดกโลก ป่าดิบชื้น สัตว์ป่าและน้ำตกเหวนรก"],
- ["phu-kradueng","ภูกระดึง","เลย","ตะวันออกเฉียงเหนือ","เดินป่าขึ้นภูยอดนิยม ชมทุ่งหญ้าและหน้าผา"],
- ["pha-taem","ผาแต้ม","อุบลราชธานี","ตะวันออกเฉียงเหนือ","ภาพเขียนสีโบราณริมแม่น้ำโขงและจุดชมพระอาทิตย์ขึ้น"],
- ["phu-ruea","ภูเรือ","เลย","ตะวันออกเฉียงเหนือ","ทะเลหมอกและภูเขาเตี้ยๆ เดินง่ายสำหรับมือใหม่"],
- ["nam-tok-sam-lan","น้ำตกสามหลั่น","สระบุรี","กลาง","น้ำตกขั้นบันไดใกล้กรุงเทพฯ เหมาะกับทริปวันเดียว"],
- ["phu-toei","พุเตย","สุพรรณบุรี","กลาง","ป่าเขาและสวนไม้ดอกในอำเภอด่านช้าง"],
- ["khao-khitchakut","เขาคิชฌกูฏ","จันทบุรี","ตะวันออก","รอยพระพุทธบาทบนยอดเขาและน้ำตกพลิ้ว"],
- ["samet","หมู่เกาะเสม็ด","ระยอง","ตะวันออก","เกาะทรายขาวใกล้กรุงเทพฯ น้ำทะเลใส"],
- ["ko-chang","หมู่เกาะช้าง","ตราด","ตะวันออก","เกาะใหญ่อันดับสองของไทย หาดสวยและน้ำตกในป่า"],
- ["erawan","เอราวัณ","กาญจนบุรี","ตะวันตก","น้ำตกเจ็ดขั้นสีมรกต ยอดนิยมตลอดปี"],
- ["sai-yok","ไทรโยค","กาญจนบุรี","ตะวันตก","น้ำตกไทรโยคน้อย แม่น้ำแควและถ้ำลาวา"],
- ["khao-sam-roi-yot","เขาสามร้อยยอด","ประจวบคีรีขันธ์","ตะวันตก","ทุ่งกกและหาดแหลมศาลา ชมนกน้ำและเรือพายในถ้ำพระยานคร"],
- ["kaeng-krachan","แก่งกระจาน","เพชรบุรี","ตะวันตก","ผืนป่าตะวันตก มรดกโลก ทะเลหมอกบนยอดเขา"],
- ["khao-sok","เขาสก","สุราษฎร์ธานี","ใต้","ป่าฝนเก่าแก่ ล่องเรือในเขื่อนเชี่ยวหลาน"],
- ["similan","หมู่เกาะสิมิลัน","พังงา","ใต้","จุดดำน้ำระดับโลก เปิดเฉพาะฤดูท่องเที่ยว"],
- ["tarutao-thale-ban","ทะเลบัน","สตูล","ใต้","ทะเลสาบกลางป่าบนเขา และหมู่เกาะใกล้ชายแดนมาเลเซีย"],
- ["khao-luang","เขาหลวง","นครศรีธรรมราช","ใต้","ยอดเขาสูงที่สุดในภาคใต้ น้ำตกและป่าดิบ"]
-].map(a => ({id:a[0], n:a[1], p:a[2], r:a[3], d:a[4]}));
+// จังหวัด -> ภูมิภาค (6 ภูมิภาคตามราชบัณฑิตยสภา)
+const PROV_REGION = {"น่าน": "เหนือ", "พะเยา": "เหนือ", "ลำปาง": "เหนือ", "ลำพูน": "เหนือ", "อุตรดิตถ์": "เหนือ", "เชียงราย": "เหนือ", "เชียงใหม่": "เหนือ", "แพร่": "เหนือ", "แม่ฮ่องสอน": "เหนือ", "ขอนแก่น": "ตะวันออกเฉียงเหนือ", "ชัยภูมิ": "ตะวันออกเฉียงเหนือ", "นครพนม": "ตะวันออกเฉียงเหนือ", "นครราชสีมา": "ตะวันออกเฉียงเหนือ", "มุกดาหาร": "ตะวันออกเฉียงเหนือ", "ศรีสะเกษ": "ตะวันออกเฉียงเหนือ", "สกลนคร": "ตะวันออกเฉียงเหนือ", "หนองบัวลำภู": "ตะวันออกเฉียงเหนือ", "อุดรธานี": "ตะวันออกเฉียงเหนือ", "อุบลราชธานี": "ตะวันออกเฉียงเหนือ", "เลย": "ตะวันออกเฉียงเหนือ", "กำแพงเพชร": "กลาง", "พิษณุโลก": "กลาง", "สระบุรี": "กลาง", "สุพรรณบุรี": "กลาง", "สุโขทัย": "กลาง", "เพชรบูรณ์": "กลาง", "จันทบุรี": "ตะวันออก", "ตราด": "ตะวันออก", "ปราจีนบุรี": "ตะวันออก", "ระยอง": "ตะวันออก", "สระแก้ว": "ตะวันออก", "กาญจนบุรี": "ตะวันตก", "ตาก": "ตะวันตก", "ประจวบคีรีขันธ์": "ตะวันตก", "ราชบุรี": "ตะวันตก", "เพชรบุรี": "ตะวันตก", "กระบี่": "ใต้", "ชุมพร": "ใต้", "ตรัง": "ใต้", "นครศรีธรรมราช": "ใต้", "นราธิวาส": "ใต้", "ปัตตานี": "ใต้", "พังงา": "ใต้", "พัทลุง": "ใต้", "ภูเก็ต": "ใต้", "ยะลา": "ใต้", "ระนอง": "ใต้", "สงขลา": "ใต้", "สตูล": "ใต้", "สุราษฎร์ธานี": "ใต้"};
+// [จังหวัด, ชื่อ, contentId ของ DNP] จากไฟล์ nationalparksname.xlsx
+const RAW = [
+["เชียงราย", "ขุนแจ", "903"],
+["เชียงราย", "ดอยหลวง", "904"],
+["เชียงราย", "ถ้ำหลวง - ขุนน้ำนางนอน (เตรียมการ)", "11653"],
+["เชียงราย", "ภูชี้ฟ้า (เตรียมการ)", "7348"],
+["เชียงราย", "ลำน้ำกก (เตรียมการ)", "905"],
+["เชียงใหม่", "ขุนขาน", "907"],
+["เชียงใหม่", "ดอยผ้าห่มปก", "908"],
+["เชียงใหม่", "ดอยเวียงผา (เตรียมการ)", "912"],
+["เชียงใหม่", "ดอยสุเทพ - ปุย", "914"],
+["เชียงใหม่", "ดอยอินทนนท์", "915"],
+["เชียงใหม่", "น้ำตกบัวตอง - น้ำพุเจ็ดสี (เตรียมการ)", "7346"],
+["เชียงใหม่", "ผาแดง", "916"],
+["เชียงใหม่", "แม่ตะไคร้", "917"],
+["เชียงใหม่", "แม่โถ (เตรียมการ)", "918"],
+["เชียงใหม่", "แม่วาง", "920"],
+["เชียงใหม่", "ศรีลานนา", "921"],
+["เชียงใหม่", "ห้วยน้ำดัง", "922"],
+["เชียงใหม่", "ออบขาน (เตรียมการ)", "923"],
+["เชียงใหม่", "ออบหลวง", "925"],
+["น่าน", "ขุนน่าน", "934"],
+["น่าน", "ขุนสถาน", "935"],
+["น่าน", "ดอยภูคา", "937"],
+["น่าน", "ถ้ำสะเกิน", "940"],
+["น่าน", "นันทบุรี (เตรียมการ)", "942"],
+["น่าน", "แม่จริม", "943"],
+["น่าน", "ศรีน่าน", "944"],
+["พะเยา", "ดอยภูนาง", "947"],
+["พะเยา", "ภูซาง", "949"],
+["พะเยา", "แม่ปืม", "952"],
+["แพร่", "ดอยผากลอง", "964"],
+["แพร่", "แม่ยม", "965"],
+["แพร่", "เวียงโกศัย", "967"],
+["แม่ฮ่องสอน", "ถ้ำปลา - น้ำตกผาเสื่อ", "968"],
+["แม่ฮ่องสอน", "น้ำตกแม่สุรินทร์", "969"],
+["แม่ฮ่องสอน", "แม่เงา (เตรียมการ)", "972"],
+["แม่ฮ่องสอน", "แม่สะเรียง (เตรียมการ)", "7349"],
+["แม่ฮ่องสอน", "สาละวิน", "973"],
+["ลำปาง", "เขลางค์บรรพต (เตรียมการ)", "7347"],
+["ลำปาง", "แจ้ซ้อน", "974"],
+["ลำปาง", "ดอยจง", "976"],
+["ลำปาง", "ถ้ำผาไท (เตรียมการ)", "977"],
+["ลำปาง", "แม่วะ", "979"],
+["ลำพูน", "ดอยขุนตาล", "981"],
+["ลำพูน", "แม่ปิง", "982"],
+["อุตรดิตถ์", "ต้นสักใหญ่", "987"],
+["อุตรดิตถ์", "ภูสอยดาว", "991"],
+["อุตรดิตถ์", "ลำน้ำน่าน", "994"],
+["ขอนแก่น", "น้ำพอง", "890"],
+["ขอนแก่น", "ภูผาม่าน", "895"],
+["ขอนแก่น", "ภูเวียง", "896"],
+["ชัยภูมิ", "ตาดโตน", "897"],
+["ชัยภูมิ", "ไทรทอง", "898"],
+["ชัยภูมิ", "ป่าหินงาม", "899"],
+["ชัยภูมิ", "ภูแลนคา", "901"],
+["นครพนม", "ภูลังกา", "906"],
+["นครราชสีมา", "เขาใหญ่", "640"],
+["มุกดาหาร", "ภูผาเทิบ", "911"],
+["มุกดาหาร", "ภูสระดอกบัว", "913"],
+["เลย", "ภูกระดึง", "945"],
+["เลย", "ภูเรือ", "946"],
+["เลย", "ภูสวนทราย", "948"],
+["ศรีสะเกษ", "เขาพระวิหาร", "950"],
+["สกลนคร", "ภูผายล", "951"],
+["สกลนคร", "ภูผาเหล็ก", "953"],
+["สกลนคร", "ภูพาน", "954"],
+["หนองบัวลำภู", "ภูเก้า - ภูพานคำ", "892"],
+["อุดรธานี", "นายูง - น้ำโสม (เตรียมการ)", "955"],
+["อุดรธานี", "ภูหินจอมธาตุ - ภูพระบาท (เตรียมการ)", "2608"],
+["อุบลราชธานี", "แก่งตะนะ", "956"],
+["อุบลราชธานี", "ผาแต้ม", "957"],
+["อุบลราชธานี", "ภูจองนายอย", "958"],
+["กำแพงเพชร", "คลองลาน", "900"],
+["กำแพงเพชร", "คลองวังเจ้า", "902"],
+["กำแพงเพชร", "แม่วงก์", "894"],
+["พิษณุโลก", "แควน้อย (เตรียมการ)", "792"],
+["พิษณุโลก", "ทุ่งแสลงหลวง", "737"],
+["พิษณุโลก", "น้ำตกชาติตระการ", "791"],
+["พิษณุโลก", "ภูหินร่องกล้า", "790"],
+["เพชรบูรณ์", "เขาค้อ", "794"],
+["เพชรบูรณ์", "ตาดหมอก", "959"],
+["เพชรบูรณ์", "น้ำหนาว", "960"],
+["สุโขทัย", "รามคำแหง", "983"],
+["สุโขทัย", "ศรีสัชนาลัย", "985"],
+["สระบุรี", "น้ำตกเจ็ดสาวน้อย", "891"],
+["สระบุรี", "น้ำตกสามหลั่น", "893"],
+["สระบุรี", "เจ็ดคด - โป่งก้อนเส้า (เตรียมการ)", "32645"],
+["สุพรรณบุรี", "พุเตย", "919"],
+["จันทบุรี", "เขาคิชฌกูฏ", "961"],
+["จันทบุรี", "เขาสิบห้าชั้น", "962"],
+["จันทบุรี", "น้ำตกพลิ้ว", "963"],
+["ตราด", "น้ำตกคลองแก้ว", "966"],
+["ตราด", "หมู่เกาะช้าง", "971"],
+["ปราจีนบุรี", "ทับลาน", "986"],
+["ระยอง", "เขาชะเมา - เขาวง", "988"],
+["ระยอง", "เขาแหลมหญ้า - หมู่เกาะเสม็ด", "990"],
+["สระแก้ว", "ตาพระยา", "910"],
+["สระแก้ว", "ปางสีดา", "993"],
+["ตาก", "ขุนพะวอ", "928"],
+["ตาก", "ดอยสอยมาลัย - ไม้กลายเป็นหิน (เตรียมการ)", "2521"],
+["ตาก", "ตากสินมหาราช", "929"],
+["ตาก", "น้ำตกพาเจริญ (เตรียมการ)", "931"],
+["ตาก", "แม่เมย", "932"],
+["ตาก", "ลานสาง", "933"],
+["กาญจนบุรี", "เขาแหลม", "1002"],
+["กาญจนบุรี", "เขื่อนศรีนครินทร์", "1004"],
+["กาญจนบุรี", "เฉลิมรัตนโกสินทร์", "1006"],
+["กาญจนบุรี", "ทองผาภูมิ", "1008"],
+["กาญจนบุรี", "ไทรโยค", "1011"],
+["กาญจนบุรี", "ลำคลองงู", "1013"],
+["กาญจนบุรี", "เอราวัณ", "643"],
+["ประจวบคีรีขันธ์", "กุยบุรี", "1015"],
+["ประจวบคีรีขันธ์", "เขาสามร้อยยอด", "1016"],
+["ประจวบคีรีขันธ์", "น้ำตกห้วยยาง", "1018"],
+["ประจวบคีรีขันธ์", "หาดวนกร", "1020"],
+["ประจวบคีรีขันธ์", "อ่าวสยาม (เตรียมการ)", "2603"],
+["เพชรบุรี", "แก่งกระจาน", "642"],
+["ราชบุรี", "เฉลิมพระเกียรติไทยประจัน", "1021"],
+["กระบี่", "เขาพนมเบญจา", "924"],
+["กระบี่", "ธารโบกขรณี", "926"],
+["กระบี่", "หมู่เกาะลันตา", "927"],
+["กระบี่", "หาดนพรัตน์ธารา - หมู่เกาะพีพี", "930"],
+["ชุมพร", "หมู่เกาะชุมพร", "677"],
+["ตรัง", "หาดเจ้าไหม", "678"],
+["นครศรีธรรมราช", "เขานัน", "936"],
+["นครศรีธรรมราช", "เขาหลวง", "938"],
+["นครศรีธรรมราช", "น้ำตกโยง", "939"],
+["นครศรีธรรมราช", "น้ำตกสี่ขีด", "941"],
+["นครศรีธรรมราช", "หาดขนอม - หมู่เกาะทะเลใต้ (เตรียมการ)", "970"],
+["นราธิวาส", "น้ำตกซีโป (เตรียมการ)", "975"],
+["นราธิวาส", "บูโด - สุไหงปาดี", "978"],
+["นราธิวาส", "อ่าวมะนาว - เขาตันหยง (เตรียมการ)", "980"],
+["ปัตตานี", "น้ำตกทรายขาว", "984"],
+["พังงา", "เขาลำปี - หาดท้ายเหมือง", "989"],
+["พังงา", "เขาหลัก - ลำรู่", "992"],
+["พังงา", "ศรีพังงา", "995"],
+["พังงา", "หมู่เกาะสิมิลัน", "865"],
+["พังงา", "หมู่เกาะสุรินทร์", "996"],
+["พังงา", "อ่าวพังงา", "997"],
+["พัทลุง", "เขาปู่ - เขาย่า", "998"],
+["ภูเก็ต", "สิรินาถ", "889"],
+["ยะลา", "บางลาง", "999"],
+["ระนอง", "น้ำตกหงาว", "1000"],
+["ระนอง", "ลำน้ำกระบุรี", "1001"],
+["ระนอง", "หมู่เกาะระนอง", "1003"],
+["ระนอง", "แหลมสน", "1005"],
+["สงขลา", "เขาน้ำค้าง", "1007"],
+["สงขลา", "สันกาลาคีรี (เตรียมการ)", "1009"],
+["สตูล", "ตะรุเตา", "1010"],
+["สตูล", "ทะเลบัน", "1012"],
+["สตูล", "หมู่เกาะเภตรา", "1014"],
+["สุราษฎร์ธานี", "แก่งกรุง", "1017"],
+["สุราษฎร์ธานี", "เขาสก", "1019"],
+["สุราษฎร์ธานี", "คลองพนม", "1022"],
+["สุราษฎร์ธานี", "ใต้ร่มเย็น", "1023"],
+["สุราษฎร์ธานี", "ธารเสด็จ - เกาะพะงัน", "1024"],
+["สุราษฎร์ธานี", "หมู่เกาะอ่างทอง", "1025"]
+];
+const PARKS = RAW.map(([p, n, cid]) => {
+  if (!PROV_REGION[p]) console.error("ไม่พบภูมิภาคของจังหวัด: " + p);
+  return {id:"p" + cid, n:n.replace(/\s*\(เตรียมการ\)/, "").trim(), p, r:PROV_REGION[p], prep:/เตรียมการ/.test(n), url:"https://portal.dnp.go.th/Content/nationalpark?contentId=" + cid};
+});
+// id เก่า (รุ่นแรก) -> id ใหม่ เพื่อไม่ให้ข้อมูลเช็กอินที่บันทึกไว้หาย
+const OLD_IDS = {"doi-inthanon": "p915", "doi-suthep": "p914", "doi-phu-kha": "p937", "khao-yai": "p640", "phu-kradueng": "p945", "pha-taem": "p957", "phu-ruea": "p946", "nam-tok-sam-lan": "p893", "phu-toei": "p919", "khao-khitchakut": "p961", "samet": "p990", "ko-chang": "p971", "erawan": "p643", "sai-yok": "p1011", "khao-sam-roi-yot": "p1016", "kaeng-krachan": "p642", "khao-sok": "p1019", "similan": "p865", "tarutao-thale-ban": "p1012", "khao-luang": "p938"};
+const OLD_REV = Object.fromEntries(Object.entries(OLD_IDS).map(([o, n]) => [n, o]));
+function migrateData(uid){
+  const k = dataKey(uid), d = jget(k, null); if (!d) return;
+  let ch = false;
+  for (const [o, n] of Object.entries(OLD_IDS)) if (d[o]) { if (!d[n]) d[n] = d[o]; delete d[o]; ch = true; }
+  if (ch) jset(k, d);
+}
 
 /* ---------- ตัวช่วยทั่วไป ---------- */
 const $ = (id) => document.getElementById(id);
@@ -214,7 +358,7 @@ const validUser = (s) => /^[a-z0-9_]{3,20}$/.test(s);
 
 let me = null;   // ผู้ใช้ที่ล็อกอินอยู่
 let data = {};   // ข้อมูลเช็กอินของผู้ใช้คนนี้
-const F = {q:"", r:"all", s:"all", sort:"region"};
+const F = {q:"", r:"all", s:"all", prep:false};
 
 /* ---------- ล็อกกันเดารหัส ---------- */
 function lockInfo(username){ const L = jget(LOCK_KEY, {}); return L[username] || {fails:0, until:0}; }
@@ -262,55 +406,63 @@ function enter(u){
     const old = jget(LEGACY_KEY, null);
     if (old && typeof old === "object") jset(dataKey(u.id), old);
   }
-  data = jget(dataKey(u.id), {});
+  migrateData(u.id); data = jget(dataKey(u.id), {});
   $("authView").hidden = true; $("appView").hidden = false;
   $("whoami").textContent = u.name + (u.role === "admin" ? " · แอดมิน" : "");
   $("btnAdmin").hidden = u.role !== "admin";
-  F.q = ""; F.r = "all"; F.s = "all"; $("q").value = "";
+  F.q = ""; F.r = "all"; F.s = "all"; F.prep = false; $("q").value = ""; $("fPrep").checked = false; OPEN.clear();
   buildFilters(); all(); window.scrollTo(0, 0);
 }
 
 /* ---------- ข้อมูลเช็กอิน ---------- */
 const save = () => { jset(dataKey(me.id), data); };
 const isV = (p) => !!(data[p.id] && data[p.id].visited);
+const OPEN = new Set(); // การ์ดที่กางรายละเอียดอยู่
+const CORE = PARKS.filter(p => !p.prep);
 
 function stats(){
-  const done = PARKS.filter(isV).length, total = PARKS.length, pct = Math.round(done / total * 100);
+  const done = CORE.filter(isV).length, total = CORE.length, pct = Math.round(done / total * 100);
   $("vCount").textContent = done; $("tCount").textContent = " / " + total; $("vPct").textContent = pct + "%";
   $("pfill").style.width = pct + "%"; $("pbar").setAttribute("aria-valuenow", pct);
   $("regionStats").innerHTML = REGIONS.map(r => {
-    const L = PARKS.filter(p => p.r === r), v = L.filter(isV).length;
+    const L = CORE.filter(p => p.r === r), v = L.filter(isV).length;
     return `<div class="rounded-xl bg-white/10 border border-white/15 p-2.5 md:p-3"><div class="text-xs truncate" style="color:#c9d5b0">${RC[r][0]} ${r}</div><div class="serif font-semibold mt-0.5">${v}/${L.length}</div><div class="mt-2 h-1.5 rounded-full bg-white/15 overflow-hidden"><div class="bar h-full" style="width:${L.length ? v / L.length * 100 : 0}%;background:#c9d5b0"></div></div></div>`;
   }).join("");
 }
 
-function card(p){
-  const d = data[p.id] || {}, v = isV(p), rating = d.rating || 0, [emoji, bg] = RC[p.r];
+function row(p){
+  const d = data[p.id] || {}, v = isV(p), open = v && OPEN.has(p.id), rating = d.rating || 0;
   const stars = [1,2,3,4,5].map(i => `<button data-act="rate" data-id="${p.id}" data-v="${i}" aria-label="ให้ ${i} ดาว" class="text-3xl leading-none p-0.5 ${i <= rating ? "" : "opacity-30"}" style="color:#b8892f">★</button>`).join("");
-  return `<article class="relative rounded-2xl bg-white border-2 ${v ? "border-[#4f7a3a]" : "border-transparent shadow-sm"} overflow-hidden flex flex-col">
-    <div class="h-16 px-4 flex items-center justify-between" style="background:${bg}"><span class="text-3xl" aria-hidden="true">${emoji}</span><span class="text-xs font-medium px-2 py-0.5 rounded-full bg-white/70">ภาค${p.r}</span></div>
-    ${v ? `<div class="stamp absolute top-3 right-3 mt-10 text-[11px] font-semibold px-2 py-0.5 rounded border-2" style="color:#6b4f3a;border-color:#6b4f3a;background:#fff9">เคยไปแล้ว${d.date ? " · " + fmtDate(d.date) : ""}</div>` : ""}
-    <div class="p-4 flex flex-col gap-3 flex-1">
-      <div><h3 class="serif font-semibold text-lg leading-snug">${esc(p.n)}</h3><p class="text-sm text-stone-500">จ.${esc(p.p)}</p></div>
-      <p class="text-sm text-stone-700">${esc(p.d)}</p>
-      <button data-act="toggle" data-id="${p.id}" aria-pressed="${v}" class="mt-auto rounded-xl py-2.5 text-sm font-semibold ${v ? "text-white" : "border border-[#4f7a3a] text-[#2d5230] hover:bg-[#eef1e8]"}" ${v ? 'style="background:#4f7a3a"' : ""}>${v ? "✓ เคยไปแล้ว (กดเพื่อยกเลิก)" : "เช็กอินที่นี่"}</button>
-      ${v ? `<div class="border-t border-stone-200 pt-3 grid gap-3">
-        <label class="text-sm">วันที่ไปล่าสุด<input data-act="date" data-id="${p.id}" type="date" value="${esc(d.date || "")}" max="${today()}" class="field mt-1"></label>
-        <div><div class="text-sm">ให้คะแนน</div><div class="flex">${stars}</div></div>
-        <label class="text-sm">บันทึกความทรงจำ<textarea data-act="note" data-id="${p.id}" rows="3" maxlength="2000" placeholder="วันนี้เจออะไรบ้าง…" class="field mt-1">${esc(d.note || "")}</textarea></label>
-      </div>` : ""}
-    </div></article>`;
+  const sub = v ? "เคยไปแล้ว" + (d.date ? " · " + fmtDate(d.date) : "") + (rating ? " · " + "★".repeat(rating) : "") : "ยังไม่เคยไป";
+  return `<article class="rounded-xl bg-white border-2 ${v ? "border-[#4f7a3a]" : "border-transparent shadow-sm"} ${open ? "md:col-span-2" : ""}">
+    <div class="flex items-center gap-3 p-3">
+      <button data-act="toggle" data-id="${p.id}" aria-pressed="${v}" aria-label="${v ? "ยกเลิกเช็กอิน " : "เช็กอินที่ "}${esc(p.n)}" class="size-10 shrink-0 rounded-full border-2 text-lg font-bold ${v ? "text-white border-[#4f7a3a]" : "border-stone-300 text-transparent hover:border-[#4f7a3a]"}" ${v ? 'style="background:#4f7a3a"' : ""}>✓</button>
+      <div class="flex-1 min-w-0"><div class="font-semibold leading-snug">${esc(p.n)}${p.prep ? ' <span class="text-[11px] font-medium px-1.5 py-0.5 rounded-full bg-[#b8892f]/20 text-[#6b4f3a] align-middle">เตรียมการ</span>' : ""}</div>
+        <div class="text-xs ${v ? "text-[#2d5230]" : "text-stone-500"}">${esc(sub)}</div></div>
+      <a href="${p.url}" target="_blank" rel="noopener" class="text-xs underline text-stone-500 shrink-0 p-1">ข้อมูล</a>
+      ${v ? `<button data-act="more" data-id="${p.id}" aria-expanded="${open}" aria-label="บันทึกรายละเอียด" class="shrink-0 px-2 py-1 rounded-lg text-stone-600 hover:bg-stone-100">${open ? "▴" : "▾"}</button>` : ""}
+    </div>
+    ${open ? `<div class="border-t border-stone-200 p-3 grid gap-3 md:grid-cols-2">
+      <label class="text-sm">วันที่ไปล่าสุด<input data-act="date" data-id="${p.id}" type="date" value="${esc(d.date || "")}" max="${today()}" class="field mt-1"></label>
+      <div><div class="text-sm">ให้คะแนน</div><div class="flex">${stars}</div></div>
+      <label class="text-sm md:col-span-2">บันทึกความทรงจำ<textarea data-act="note" data-id="${p.id}" rows="3" maxlength="2000" placeholder="วันนี้เจออะไรบ้าง…" class="field mt-1">${esc(d.note || "")}</textarea></label>
+    </div>` : ""}</article>`;
 }
 
 function grid(){
   const q = F.q.trim().toLowerCase();
-  let L = PARKS.filter(p => (F.r === "all" || p.r === F.r) &&
+  const L = PARKS.filter(p => (F.prep || !p.prep) && (F.r === "all" || p.r === F.r) &&
     (F.s === "all" || (F.s === "yes") === isV(p)) &&
     (!q || p.n.toLowerCase().includes(q) || p.p.toLowerCase().includes(q)));
-  if (F.sort === "name") L = [...L].sort((a, b) => a.n.localeCompare(b.n, "th"));
-  else if (F.sort === "recent") L = [...L].sort((a, b) => ((data[b.id] && data[b.id].date) || "").localeCompare((data[a.id] && data[a.id].date) || "") || (isV(b) - isV(a)));
-  $("resultInfo").textContent = "พบ " + L.length + " จาก " + PARKS.length + " แห่ง";
-  $("grid").innerHTML = L.length ? L.map(card).join("") : '<p class="col-span-full text-center text-stone-500 py-12">ไม่พบอุทยานที่ตรงกับเงื่อนไข ลองล้างคำค้นหาหรือเปลี่ยนตัวกรอง</p>';
+  $("resultInfo").textContent = "แสดง " + L.length + " แห่ง";
+  let html = "";
+  REGIONS.forEach(r => {
+    const inR = L.filter(p => p.r === r); if (!inR.length) return;
+    const provs = [...new Set(inR.map(p => p.p))].sort((a, b) => a.localeCompare(b, "th"));
+    html += `<section><h2 class="serif text-xl font-extrabold flex items-center gap-2 pb-1 border-b-2" style="border-color:${RC[r][1]}"><span aria-hidden="true">${RC[r][0]}</span>ภาค${r}<span class="text-sm font-medium text-stone-500">${inR.filter(isV).length}/${inR.length}</span></h2>` +
+      provs.map(pv => `<h3 class="text-sm font-semibold text-stone-600 mt-4 mb-2">จ.${esc(pv)}</h3><div class="grid gap-2 md:grid-cols-2">${inR.filter(p => p.p === pv).map(row).join("")}</div>`).join("") + "</section>";
+  });
+  $("grid").innerHTML = html || '<p class="text-center text-stone-500 py-12">ไม่พบอุทยานที่ตรงกับเงื่อนไข ลองล้างคำค้นหาหรือเปลี่ยนตัวกรอง</p>';
 }
 function all(){ stats(); grid(); }
 
@@ -323,21 +475,22 @@ function buildFilters(){
 
 $("grid").addEventListener("click", e => {
   const b = e.target.closest("button[data-act]"); if (!b) return;
-  const id = b.dataset.id, d = data[id] = data[id] || {};
-  if (b.dataset.act === "toggle") { d.visited = !d.visited; if (d.visited && !d.date) d.date = today(); }
-  else if (b.dataset.act === "rate") { const v = +b.dataset.v; d.rating = d.rating === v ? 0 : v; }
+  const id = b.dataset.id, d = data[id] = data[id] || {}, act = b.dataset.act;
+  if (act === "toggle") { d.visited = !d.visited; if (d.visited) { if (!d.date) d.date = today(); OPEN.add(id); } else OPEN.delete(id); }
+  else if (act === "rate") { const v = +b.dataset.v; d.rating = d.rating === v ? 0 : v; }
+  else if (act === "more") { OPEN.has(id) ? OPEN.delete(id) : OPEN.add(id); }
   save(); all();
 });
 $("grid").addEventListener("change", e => {
   if (e.target.dataset.act !== "date") return;
   const d = data[e.target.dataset.id] = data[e.target.dataset.id] || {}; d.date = e.target.value; save(); all();
 });
-$("grid").addEventListener("input", e => { // พิมพ์โน้ตแล้วบันทึกเลย ไม่วาดการ์ดใหม่ เพื่อไม่ให้เคอร์เซอร์หลุด
+$("grid").addEventListener("input", e => { // พิมพ์โน้ตแล้วบันทึกเลย ไม่วาดใหม่ เพื่อไม่ให้เคอร์เซอร์หลุด
   if (e.target.dataset.act !== "note") return;
   const d = data[e.target.dataset.id] = data[e.target.dataset.id] || {}; d.note = e.target.value; save();
 });
 $("q").addEventListener("input", e => { F.q = e.target.value; grid(); });
-$("fSort").addEventListener("change", e => { F.sort = e.target.value; grid(); });
+$("fPrep").addEventListener("change", e => { F.prep = e.target.checked; grid(); });
 $("fStatus").addEventListener("click", e => { const b = e.target.closest("button[data-s]"); if (!b) return; F.s = b.dataset.s; buildFilters(); grid(); });
 $("fRegion").addEventListener("click", e => { const b = e.target.closest("button[data-r]"); if (!b) return; F.r = b.dataset.r; buildFilters(); grid(); });
 
@@ -352,7 +505,7 @@ $("fileImport").addEventListener("change", async e => {
     const j = JSON.parse(await f.text()), src = j && j.data && typeof j.data === "object" ? j.data : null;
     if (!src) throw new Error("bad");
     const clean = {};
-    PARKS.forEach(p => { const x = src[p.id]; if (!x || typeof x !== "object") return;
+    PARKS.forEach(p => { const x = src[p.id] || src[OLD_REV[p.id]]; if (!x || typeof x !== "object") return;
       clean[p.id] = { visited: x.visited === true, date: /^\d{4}-\d{2}-\d{2}$/.test(x.date) ? x.date : "", rating: Number.isInteger(x.rating) && x.rating >= 0 && x.rating <= 5 ? x.rating : 0, note: typeof x.note === "string" ? x.note.slice(0, 2000) : "" }; });
     if (!confirm("นำเข้าข้อมูล " + Object.keys(clean).length + " รายการ และแทนที่ข้อมูลปัจจุบันทั้งหมด ต้องการดำเนินการต่อหรือไม่?")) return;
     data = clean; save(); all(); toast("นำเข้าข้อมูลเรียบร้อย");
