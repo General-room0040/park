@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thailand National Parks Tracker</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@600;800&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body{font-family:'Sarabun',sans-serif;background:#eef1e8;color:#1f3a2e}
+  .serif{font-family:'Noto Serif Thai',serif}
+  .topo{background-color:#1f3a2e;background-image:repeating-radial-gradient(circle at 85% 120%,transparent 0 22px,rgba(201,213,176,.10) 22px 23px)}
+  .stamp{transform:rotate(-8deg)}
+  :focus-visible{outline:2px solid #b8892f;outline-offset:2px}
+  @media (prefers-reduced-motion:no-preference){.bar{transition:width .5s ease}}
+</style>
+</head>
+<body>
+<header class="topo text-white">
+  <div class="max-w-6xl mx-auto px-4 py-8 md:py-12">
+    <div class="flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h1 class="serif text-2xl md:text-4xl font-extrabold leading-tight">สมุดเช็กอินอุทยานแห่งชาติไทย</h1>
+        <p class="text-lichen text-sm mt-1" style="color:#c9d5b0">Thailand National Parks Tracker · บันทึกทุกที่ที่คุณไปมาแล้ว</p>
+      </div>
+      <div class="flex gap-2">
+        <button id="btnExport" class="px-3 py-2 rounded-lg text-sm font-medium bg-white/10 hover:bg-white/20 border border-white/25">ส่งออก JSON</button>
+        <label class="px-3 py-2 rounded-lg text-sm font-medium bg-white/10 hover:bg-white/20 border border-white/25 cursor-pointer focus-within:outline">นำเข้า JSON
+          <input id="fileImport" type="file" accept="application/json,.json" class="sr-only">
+        </label>
+      </div>
+    </div>
+    <div class="mt-8 flex items-end gap-4">
+      <div class="serif font-extrabold leading-none"><span id="vCount" class="text-6xl md:text-7xl">0</span><span id="tCount" class="text-2xl md:text-3xl text-white/60"> / 0</span></div>
+      <div class="pb-1"><div class="text-sm" style="color:#c9d5b0">แห่งที่เคยไป</div><div id="vPct" class="serif text-xl font-semibold">0%</div></div>
+    </div>
+    <div class="mt-4 h-3 rounded-full bg-white/15 overflow-hidden" role="progressbar" aria-label="ความคืบหน้าโดยรวม" aria-valuemin="0" aria-valuemax="100" id="pbar">
+      <div id="pfill" class="bar h-full rounded-full" style="width:0;background:#c9d5b0"></div>
+    </div>
+    <div id="regionStats" class="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3"></div>
+  </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 py-6">
+  <section class="grid gap-3 md:grid-cols-[1fr_auto_auto] mb-6" aria-label="ค้นหาและกรอง">
+    <input id="q" type="search" placeholder="ค้นหาชื่ออุทยานหรือจังหวัด" class="w-full rounded-xl border border-stone-300 bg-white px-4 py-2.5">
+    <select id="fRegion" class="rounded-xl border border-stone-300 bg-white px-3 py-2.5" aria-label="กรองตามภูมิภาค"></select>
+    <div id="fStatus" class="inline-flex rounded-xl border border-stone-300 bg-white p-1 text-sm" role="group" aria-label="กรองตามสถานะ"></div>
+  </section>
+  <p id="resultInfo" class="text-sm text-stone-600 mb-3"></p>
+  <section id="grid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></section>
+</main>
+<footer class="text-center text-xs text-stone-500 py-8">ข้อมูลบันทึกในเบราว์เซอร์ของคุณเท่านั้น · ควรกดส่งออก JSON เก็บสำรองไว้เป็นระยะ</footer>
+<div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg text-sm text-white hidden" style="background:#1f3a2e" role="status"></div>
+
+<script>
+const REGIONS = ["เหนือ","ตะวันออกเฉียงเหนือ","กลาง","ตะวันออก","ตะวันตก","ใต้"];
+const RC = {"เหนือ":["⛰️","#dfe8c8"],"ตะวันออกเฉียงเหนือ":["🌾","#efe3c0"],"กลาง":["🌿","#cfe3d2"],"ตะวันออก":["🏝️","#cfe2e6"],"ตะวันตก":["🌲","#d5dfc3"],"ใต้":["🌴","#d3e6d9"]};
+// [id, ชื่อ, จังหวัด, ภูมิภาค, คำอธิบายสั้น]  (อย่าเปลี่ยน id ที่แจกจ่ายไปแล้ว ไม่งั้นข้อมูลที่บันทึกไว้จะไม่ตรง)
+const PARKS = [
+ ["doi-inthanon","ดอยอินทนนท์","เชียงใหม่","เหนือ","ยอดเขาสูงที่สุดในไทย อากาศเย็นและทะเลหมอก"],
+ ["doi-suthep","ดอยสุเทพ-ปุย","เชียงใหม่","เหนือ","ภูเขาคู่เมืองเชียงใหม่ มีพระธาตุดอยสุเทพ"],
+ ["doi-phu-kha","ดอยภูคา","น่าน","เหนือ","ป่าต้นน้ำน่าน ชมชมพูภูคาในฤดูหนาว"],
+ ["khao-yai","เขาใหญ่","นครราชสีมา","ตะวันออกเฉียงเหนือ","มรดกโลก ป่าดิบชื้น สัตว์ป่าและน้ำตกเหวนรก"],
+ ["phu-kradueng","ภูกระดึง","เลย","ตะวันออกเฉียงเหนือ","เดินป่าขึ้นภูยอดนิยม ชมทุ่งหญ้าและหน้าผา"],
+ ["pha-taem","ผาแต้ม","อุบลราชธานี","ตะวันออกเฉียงเหนือ","ภาพเขียนสีโบราณริมแม่น้ำโขงและจุดชมพระอาทิตย์ขึ้น"],
+ ["phu-ruea","ภูเรือ","เลย","ตะวันออกเฉียงเหนือ","ทะเลหมอกและภูเขาเตี้ยๆ เดินง่ายสำหรับมือใหม่"],
+ ["nam-tok-sam-lan","น้ำตกสามหลั่น","สระบุรี","กลาง","น้ำตกขั้นบันไดใกล้กรุงเทพฯ เหมาะกับทริปวันเดียว"],
+ ["phu-toei","พุเตย","สุพรรณบุรี","กลาง","ป่าเขาและสวนไม้ดอกในอำเภอด่านช้าง"],
+ ["khao-khitchakut","เขาคิชฌกูฏ","จันทบุรี","ตะวันออก","รอยพระพุทธบาทบนยอดเขาและน้ำตกพลิ้ว"],
+ ["samet","หมู่เกาะเสม็ด","ระยอง","ตะวันออก","เกาะทรายขาวใกล้กรุงเทพฯ น้ำทะเลใส"],
+ ["ko-chang","หมู่เกาะช้าง","ตราด","ตะวันออก","เกาะใหญ่อันดับสองของไทย หาดสวยและน้ำตกในป่า"],
+ ["erawan","เอราวัณ","กาญจนบุรี","ตะวันตก","น้ำตกเจ็ดขั้นสีมรกต ยอดนิยมตลอดปี"],
+ ["sai-yok","ไทรโยค","กาญจนบุรี","ตะวันตก","น้ำตกไทรโยคน้อย แม่น้ำแควและถ้ำลาวา"],
+ ["khao-sam-roi-yot","เขาสามร้อยยอด","ประจวบคีรีขันธ์","ตะวันตก","ทุ่งกกและหาดแหลมศาลา ชมนกน้ำและเรือพายในถ้ำพระยานคร"],
+ ["kaeng-krachan","แก่งกระจาน","เพชรบุรี","ตะวันตก","ผืนป่าตะวันตก มรดกโลก ทะเลหมอกบนยอดเขา"],
+ ["khao-sok","เขาสก","สุราษฎร์ธานี","ใต้","ป่าฝนเก่าแก่ ล่องเรือในเขื่อนเชี่ยวหลาน"],
+ ["similan","หมู่เกาะสิมิลัน","พังงา","ใต้","จุดดำน้ำระดับโลก เปิดเฉพาะฤดูท่องเที่ยว"],
+ ["tarutao-thale-ban","ทะเลบัน","สตูล","ใต้","ทะเลสาบกลางป่าบนเขา และหมู่เกาะใกล้ชายแดนมาเลเซีย"],
+ ["khao-luang","เขาหลวง","นครศรีธรรมราช","ใต้","ยอดเขาสูงที่สุดในภาคใต้ น้ำตกและป่าดิบ"]
+].map(a => ({id:a[0], n:a[1], p:a[2], r:a[3], d:a[4]}));
+
+const KEY = "tnp-tracker-v1";
+let data = load();
+const F = {q:"", r:"all", s:"all"};
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function load(){ try { const o = JSON.parse(localStorage.getItem(KEY)); return o && typeof o === "object" ? o : {}; } catch(e){ return {}; } }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(data)); } catch(e){ toast("บันทึกไม่ได้ (พื้นที่เบราว์เซอร์เต็มหรือปิดการเก็บข้อมูล)"); } }
+function toast(m){ const t = $("toast"); t.textContent = m; t.classList.remove("hidden"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.add("hidden"), 2600); }
+const today = () => new Date().toLocaleDateString("sv-SE");
+const fmtDate = (s) => s ? new Date(s + "T00:00:00").toLocaleDateString("th-TH", {day:"numeric", month:"short", year:"numeric"}) : "";
+
+function stats(){
+  const done = PARKS.filter(p => data[p.id] && data[p.id].visited).length, total = PARKS.length, pct = Math.round(done / total * 100);
+  $("vCount").textContent = done; $("tCount").textContent = " / " + total; $("vPct").textContent = pct + "%";
+  $("pfill").style.width = pct + "%"; $("pbar").setAttribute("aria-valuenow", pct);
+  $("regionStats").innerHTML = REGIONS.map(r => {
+    const L = PARKS.filter(p => p.r === r), v = L.filter(p => data[p.id] && data[p.id].visited).length;
+    return `<div class="rounded-xl bg-white/10 border border-white/15 p-3"><div class="text-xs" style="color:#c9d5b0">${RC[r][0]} ${r}</div><div class="serif font-semibold mt-0.5">${v}/${L.length}</div><div class="mt-2 h-1.5 rounded-full bg-white/15 overflow-hidden"><div class="bar h-full" style="width:${L.length ? v / L.length * 100 : 0}%;background:#c9d5b0"></div></div></div>`;
+  }).join("");
+}
+
+function card(p){
+  const d = data[p.id] || {}, v = !!d.visited, rating = d.rating || 0, [emoji, bg] = RC[p.r];
+  const stars = [1,2,3,4,5].map(i => `<button data-act="rate" data-id="${p.id}" data-v="${i}" aria-label="ให้ ${i} ดาว" class="text-2xl leading-none ${i <= rating ? "" : "opacity-30"}" style="color:#b8892f">★</button>`).join("");
+  return `<article class="relative rounded-2xl bg-white border ${v ? "border-[#4f7a3a]" : "border-stone-200"} overflow-hidden flex flex-col">
+    <div class="h-16 px-4 flex items-center justify-between" style="background:${bg}"><span class="text-3xl" aria-hidden="true">${emoji}</span><span class="text-xs font-medium px-2 py-0.5 rounded-full bg-white/70">ภาค${p.r}</span></div>
+    ${v ? `<div class="stamp absolute top-3 right-3 mt-10 text-[11px] font-semibold px-2 py-0.5 rounded border-2" style="color:#6b4f3a;border-color:#6b4f3a;background:#fff9">เคยไปแล้ว${d.date ? " · " + fmtDate(d.date) : ""}</div>` : ""}
+    <div class="p-4 flex flex-col gap-3 flex-1">
+      <div><h3 class="serif font-semibold text-lg leading-snug">${esc(p.n)}</h3><p class="text-sm text-stone-500">จ.${esc(p.p)}</p></div>
+      <p class="text-sm text-stone-700">${esc(p.d)}</p>
+      <button data-act="toggle" data-id="${p.id}" aria-pressed="${v}" class="mt-auto rounded-lg py-2 text-sm font-semibold ${v ? "text-white" : "border border-[#4f7a3a] text-[#2d5230] hover:bg-[#eef1e8]"}" ${v ? 'style="background:#4f7a3a"' : ""}>${v ? "✓ เคยไปแล้ว (กดเพื่อยกเลิก)" : "เช็กอินที่นี่"}</button>
+      ${v ? `<div class="border-t border-stone-200 pt-3 grid gap-3">
+        <label class="text-sm">วันที่ไปล่าสุด<input data-act="date" data-id="${p.id}" type="date" value="${esc(d.date || "")}" max="${today()}" class="mt-1 w-full rounded-lg border border-stone-300 px-3 py-1.5"></label>
+        <div><div class="text-sm">ให้คะแนน</div><div class="flex gap-1">${stars}</div></div>
+        <label class="text-sm">บันทึกความทรงจำ<textarea data-act="note" data-id="${p.id}" rows="3" maxlength="2000" placeholder="วันนี้เจออะไรบ้าง…" class="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2">${esc(d.note || "")}</textarea></label>
+      </div>` : ""}
+    </div></article>`;
+}
+
+function grid(){
+  const q = F.q.trim().toLowerCase();
+  const L = PARKS.filter(p => (F.r === "all" || p.r === F.r) &&
+    (F.s === "all" || (F.s === "yes") === !!(data[p.id] && data[p.id].visited)) &&
+    (!q || p.n.toLowerCase().includes(q) || p.p.toLowerCase().includes(q)));
+  $("resultInfo").textContent = "พบ " + L.length + " จาก " + PARKS.length + " แห่ง";
+  $("grid").innerHTML = L.length ? L.map(card).join("") : '<p class="col-span-full text-center text-stone-500 py-12">ไม่พบอุทยานที่ตรงกับเงื่อนไข ลองล้างคำค้นหาหรือเปลี่ยนตัวกรอง</p>';
+}
+function all(){ stats(); grid(); }
+
+function setStatusButtons(){
+  $("fStatus").innerHTML = [["all","ทั้งหมด"],["yes","ไปแล้ว"],["no","ยังไม่ได้ไป"]].map(([k,l]) =>
+    `<button data-s="${k}" class="px-3 py-1.5 rounded-lg ${F.s === k ? "text-white" : "text-stone-600"}" ${F.s === k ? 'style="background:#1f3a2e"' : ""} aria-pressed="${F.s === k}">${l}</button>`).join("");
+}
+
+$("grid").addEventListener("click", e => {
+  const b = e.target.closest("button[data-act]"); if (!b) return;
+  const id = b.dataset.id, d = data[id] = data[id] || {};
+  if (b.dataset.act === "toggle") { d.visited = !d.visited; if (d.visited && !d.date) d.date = today(); }
+  else if (b.dataset.act === "rate") { const v = +b.dataset.v; d.rating = d.rating === v ? 0 : v; }
+  save(); all();
+});
+$("grid").addEventListener("change", e => {
+  if (e.target.dataset.act !== "date") return;
+  const d = data[e.target.dataset.id] = data[e.target.dataset.id] || {}; d.date = e.target.value; save(); all();
+});
+$("grid").addEventListener("input", e => { // พิมพ์โน้ตแล้วบันทึกเลย ไม่วาดการ์ดใหม่ เพื่อไม่ให้เคอร์เซอร์หลุด
+  if (e.target.dataset.act !== "note") return;
+  const d = data[e.target.dataset.id] = data[e.target.dataset.id] || {}; d.note = e.target.value; save();
+});
+$("q").addEventListener("input", e => { F.q = e.target.value; grid(); });
+$("fRegion").addEventListener("change", e => { F.r = e.target.value; grid(); });
+$("fStatus").addEventListener("click", e => { const b = e.target.closest("button[data-s]"); if (!b) return; F.s = b.dataset.s; setStatusButtons(); grid(); });
+
+$("btnExport").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify({app:"thailand-national-parks-tracker", version:1, exportedAt:new Date().toISOString(), data}, null, 2)], {type:"application/json"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "parks-backup-" + today() + ".json"; a.click(); URL.revokeObjectURL(a.href);
+  toast("ส่งออกไฟล์สำรองแล้ว");
+});
+$("fileImport").addEventListener("change", async e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  try {
+    const j = JSON.parse(await f.text()), src = j && j.data && typeof j.data === "object" ? j.data : null;
+    if (!src) throw new Error("bad");
+    const clean = {};
+    PARKS.forEach(p => { const x = src[p.id]; if (!x || typeof x !== "object") return;
+      clean[p.id] = { visited: x.visited === true, date: /^\d{4}-\d{2}-\d{2}$/.test(x.date) ? x.date : "", rating: Number.isInteger(x.rating) && x.rating >= 0 && x.rating <= 5 ? x.rating : 0, note: typeof x.note === "string" ? x.note.slice(0, 2000) : "" }; });
+    if (!confirm("นำเข้าข้อมูล " + Object.keys(clean).length + " รายการ และแทนที่ข้อมูลปัจจุบันทั้งหมด ต้องการดำเนินการต่อหรือไม่?")) return;
+    data = clean; save(); all(); toast("นำเข้าข้อมูลเรียบร้อย");
+  } catch(err){ toast("ไฟล์ไม่ถูกต้อง ต้องเป็นไฟล์ JSON ที่ส่งออกจากแอปนี้"); }
+});
+
+$("fRegion").innerHTML = '<option value="all">ทุกภูมิภาค</option>' + REGIONS.map(r => `<option value="${r}">ภาค${r}</option>`).join("");
+setStatusButtons(); all();
+</script>
+</body>
+</html>
