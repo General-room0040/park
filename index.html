@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Thailand National Parks Tracker</title>
+<title>สมุดเช็กอินอุทยานแห่งชาติไทย</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@600;800&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -12,46 +12,177 @@
   .topo{background-color:#1f3a2e;background-image:repeating-radial-gradient(circle at 85% 120%,transparent 0 22px,rgba(201,213,176,.10) 22px 23px)}
   .stamp{transform:rotate(-8deg)}
   :focus-visible{outline:2px solid #b8892f;outline-offset:2px}
+  .field{width:100%;border-radius:.75rem;border:1px solid #d6d3d1;background:#fff;padding:.65rem .9rem}
+  .field:focus{border-color:#4f7a3a}
+  .btn{border-radius:.75rem;padding:.65rem 1rem;font-weight:600;font-size:.9rem}
+  .btn-main{background:#1f3a2e;color:#fff}.btn-main:hover{background:#2b4d3d}
+  .btn-line{border:1px solid #4f7a3a;color:#2d5230}.btn-line:hover{background:#eef1e8}
+  .btn-danger{border:1px solid #b4543a;color:#8e3b25}.btn-danger:hover{background:#fbeee9}
+  .chip{white-space:nowrap;border-radius:9999px;padding:.4rem .9rem;font-size:.875rem;border:1px solid #d6d3d1;background:#fff;color:#57534e}
+  .chip[aria-pressed="true"]{background:#1f3a2e;border-color:#1f3a2e;color:#fff}
+  .scroll-x{overflow-x:auto;scrollbar-width:none}.scroll-x::-webkit-scrollbar{display:none}
+  dialog{border:0;border-radius:1.25rem;padding:0;width:min(44rem,calc(100vw - 1.5rem));max-height:calc(100vh - 2rem);color:#1f3a2e}
+  dialog::backdrop{background:rgba(20,36,28,.55)}
+  [hidden]{display:none!important}
   @media (prefers-reduced-motion:no-preference){.bar{transition:width .5s ease}}
 </style>
 </head>
 <body>
+
+<!-- ============ หน้าล็อกอิน / สมัครสมาชิก ============ -->
+<div id="authView" class="topo min-h-screen flex items-center justify-center p-4" hidden>
+  <div class="w-full max-w-md rounded-2xl bg-white shadow-xl overflow-hidden">
+    <div class="px-6 pt-7 pb-4 text-center">
+      <div class="text-4xl" aria-hidden="true">🏞️</div>
+      <h1 class="serif text-2xl font-extrabold mt-2">สมุดเช็กอินอุทยานแห่งชาติไทย</h1>
+      <p class="text-sm text-stone-500 mt-1">เข้าสู่ระบบเพื่อบันทึกที่ที่คุณเคยไป</p>
+    </div>
+    <div class="px-6 flex gap-2" role="tablist">
+      <button id="tabLogin" role="tab" class="chip flex-1" aria-pressed="true">เข้าสู่ระบบ</button>
+      <button id="tabReg" role="tab" class="chip flex-1" aria-pressed="false">สมัครสมาชิก</button>
+    </div>
+
+    <form id="loginForm" class="p-6 grid gap-4" autocomplete="on">
+      <label class="text-sm font-medium">ชื่อผู้ใช้
+        <input id="lUser" class="field mt-1" autocomplete="username" autocapitalize="none" required>
+      </label>
+      <label class="text-sm font-medium">รหัสผ่าน
+        <div class="relative mt-1">
+          <input id="lPass" type="password" class="field pr-16" autocomplete="current-password" required>
+          <button type="button" data-eye="lPass" class="absolute right-2 top-1/2 -translate-y-1/2 text-xs px-2 py-1 rounded-md text-stone-600 hover:bg-stone-100" aria-label="แสดงหรือซ่อนรหัสผ่าน">แสดง</button>
+        </div>
+      </label>
+      <label class="flex items-center gap-2 text-sm text-stone-600"><input id="lRemember" type="checkbox" class="size-4 accent-[#4f7a3a]"> จำการเข้าสู่ระบบในเครื่องนี้</label>
+      <p id="lErr" class="text-sm text-[#8e3b25] min-h-5" role="alert"></p>
+      <button class="btn btn-main" type="submit">เข้าสู่ระบบ</button>
+      <button type="button" id="linkForgot" class="text-sm text-[#2d5230] underline justify-self-center">ลืมรหัสผ่าน?</button>
+    </form>
+
+    <form id="forgotForm" class="p-6 grid gap-4" hidden>
+      <p class="text-sm text-stone-600 rounded-lg bg-[#eef1e8] px-3 py-2">ขอรหัสรีเซ็ต 6 หลักจากแอดมิน แล้วกรอกด้านล่างเพื่อตั้งรหัสผ่านใหม่ (รหัสใช้ได้ครั้งเดียว ภายใน 30 นาที)</p>
+      <label class="text-sm font-medium">ชื่อผู้ใช้<input id="fUser" class="field mt-1" autocapitalize="none" autocomplete="username" required></label>
+      <label class="text-sm font-medium">รหัสรีเซ็ต 6 หลัก<input id="fCode" class="field mt-1 tracking-widest" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required></label>
+      <label class="text-sm font-medium">รหัสผ่านใหม่ <span class="font-normal text-stone-500">(อย่างน้อย 8 ตัว)</span><input id="fPass" type="password" class="field mt-1" minlength="8" autocomplete="new-password" required></label>
+      <p id="fErr" class="text-sm text-[#8e3b25] min-h-5" role="alert"></p>
+      <button class="btn btn-main" type="submit">ตั้งรหัสผ่านใหม่</button>
+      <button type="button" id="linkBack" class="text-sm text-[#2d5230] underline justify-self-center">กลับไปหน้าเข้าสู่ระบบ</button>
+    </form>
+
+    <form id="regForm" class="p-6 grid gap-4" hidden>
+      <p class="text-sm text-stone-600 rounded-lg bg-[#eef1e8] px-3 py-2">สมัครแล้วต้องรอแอดมินอนุมัติก่อนจึงจะเข้าใช้งานได้</p>
+      <label class="text-sm font-medium">ชื่อที่แสดง
+        <input id="rName" class="field mt-1" maxlength="40" required>
+      </label>
+      <label class="text-sm font-medium">ชื่อผู้ใช้ <span class="font-normal text-stone-500">(a-z, 0-9, _ ยาว 3–20 ตัว)</span>
+        <input id="rUser" class="field mt-1" maxlength="20" autocapitalize="none" autocomplete="username" required>
+      </label>
+      <label class="text-sm font-medium">รหัสผ่าน <span class="font-normal text-stone-500">(อย่างน้อย 8 ตัว)</span>
+        <div class="relative mt-1">
+          <input id="rPass" type="password" class="field pr-16" autocomplete="new-password" minlength="8" required>
+          <button type="button" data-eye="rPass" class="absolute right-2 top-1/2 -translate-y-1/2 text-xs px-2 py-1 rounded-md text-stone-600 hover:bg-stone-100" aria-label="แสดงหรือซ่อนรหัสผ่าน">แสดง</button>
+        </div>
+      </label>
+      <label class="text-sm font-medium">ยืนยันรหัสผ่าน
+        <input id="rPass2" type="password" class="field mt-1" autocomplete="new-password" required>
+      </label>
+      <p id="rErr" class="text-sm text-[#8e3b25] min-h-5" role="alert"></p>
+      <button class="btn btn-main" type="submit">ส่งคำขอสมัคร</button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ แอปหลัก ============ -->
+<div id="appView" hidden>
 <header class="topo text-white">
-  <div class="max-w-6xl mx-auto px-4 py-8 md:py-12">
-    <div class="flex flex-wrap items-start justify-between gap-4">
+  <div class="max-w-6xl mx-auto px-4 py-5 md:py-8">
+    <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
-        <h1 class="serif text-2xl md:text-4xl font-extrabold leading-tight">สมุดเช็กอินอุทยานแห่งชาติไทย</h1>
-        <p class="text-lichen text-sm mt-1" style="color:#c9d5b0">Thailand National Parks Tracker · บันทึกทุกที่ที่คุณไปมาแล้ว</p>
+        <h1 class="serif text-xl md:text-3xl font-extrabold leading-tight">สมุดเช็กอินอุทยานแห่งชาติไทย</h1>
+        <p class="text-sm mt-1" style="color:#c9d5b0">บันทึกทุกที่ที่คุณไปมาแล้ว</p>
       </div>
-      <div class="flex gap-2">
-        <button id="btnExport" class="px-3 py-2 rounded-lg text-sm font-medium bg-white/10 hover:bg-white/20 border border-white/25">ส่งออก JSON</button>
-        <label class="px-3 py-2 rounded-lg text-sm font-medium bg-white/10 hover:bg-white/20 border border-white/25 cursor-pointer focus-within:outline">นำเข้า JSON
-          <input id="fileImport" type="file" accept="application/json,.json" class="sr-only">
-        </label>
+      <div class="flex flex-wrap items-center gap-2">
+        <span id="whoami" class="text-sm px-3 py-2 rounded-lg bg-white/10 border border-white/20"></span>
+        <button id="btnAdmin" class="px-3 py-2 rounded-lg text-sm font-semibold border border-[#b8892f] bg-[#b8892f]/20 hover:bg-[#b8892f]/35" hidden>จัดการสมาชิก <span id="pendBadge" class="ml-1 px-1.5 rounded-full bg-[#b8892f] text-white text-xs" hidden></span></button>
+        <button id="btnLogout" class="px-3 py-2 rounded-lg text-sm font-medium bg-white/10 hover:bg-white/20 border border-white/25">ออกจากระบบ</button>
       </div>
     </div>
-    <div class="mt-8 flex items-end gap-4">
+
+    <div class="mt-6 flex items-end gap-4">
       <div class="serif font-extrabold leading-none"><span id="vCount" class="text-6xl md:text-7xl">0</span><span id="tCount" class="text-2xl md:text-3xl text-white/60"> / 0</span></div>
       <div class="pb-1"><div class="text-sm" style="color:#c9d5b0">แห่งที่เคยไป</div><div id="vPct" class="serif text-xl font-semibold">0%</div></div>
     </div>
     <div class="mt-4 h-3 rounded-full bg-white/15 overflow-hidden" role="progressbar" aria-label="ความคืบหน้าโดยรวม" aria-valuemin="0" aria-valuemax="100" id="pbar">
       <div id="pfill" class="bar h-full rounded-full" style="width:0;background:#c9d5b0"></div>
     </div>
-    <div id="regionStats" class="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3"></div>
+    <div id="regionStats" class="mt-5 grid grid-cols-3 lg:grid-cols-6 gap-2 md:gap-3"></div>
   </div>
 </header>
 
-<main class="max-w-6xl mx-auto px-4 py-6">
-  <section class="grid gap-3 md:grid-cols-[1fr_auto_auto] mb-6" aria-label="ค้นหาและกรอง">
-    <input id="q" type="search" placeholder="ค้นหาชื่ออุทยานหรือจังหวัด" class="w-full rounded-xl border border-stone-300 bg-white px-4 py-2.5">
-    <select id="fRegion" class="rounded-xl border border-stone-300 bg-white px-3 py-2.5" aria-label="กรองตามภูมิภาค"></select>
-    <div id="fStatus" class="inline-flex rounded-xl border border-stone-300 bg-white p-1 text-sm" role="group" aria-label="กรองตามสถานะ"></div>
-  </section>
-  <p id="resultInfo" class="text-sm text-stone-600 mb-3"></p>
+<div class="sticky top-0 z-20 bg-[#eef1e8]/95 backdrop-blur border-b border-stone-300/60">
+  <div class="max-w-6xl mx-auto px-4 py-3 grid gap-3">
+    <div class="flex gap-2">
+      <input id="q" type="search" placeholder="ค้นหาชื่ออุทยานหรือจังหวัด" aria-label="ค้นหา" class="field">
+      <select id="fSort" class="field w-auto" aria-label="เรียงลำดับ">
+        <option value="region">เรียงตามภูมิภาค</option>
+        <option value="name">เรียงตามชื่อ</option>
+        <option value="recent">ไปล่าสุดก่อน</option>
+      </select>
+    </div>
+    <div class="flex gap-2 items-center">
+      <div id="fStatus" class="flex gap-2 shrink-0" role="group" aria-label="กรองตามสถานะ"></div>
+      <span class="w-px h-6 bg-stone-300 shrink-0" aria-hidden="true"></span>
+      <div id="fRegion" class="scroll-x flex gap-2" role="group" aria-label="กรองตามภูมิภาค"></div>
+    </div>
+  </div>
+</div>
+
+<main class="max-w-6xl mx-auto px-4 py-5">
+  <div class="flex items-center justify-between mb-3 gap-3">
+    <p id="resultInfo" class="text-sm text-stone-600"></p>
+    <div class="flex gap-2">
+      <button id="btnExport" class="btn btn-line !py-1.5 !font-medium">ส่งออกข้อมูลฉัน</button>
+      <label class="btn btn-line !py-1.5 !font-medium cursor-pointer focus-within:outline">นำเข้า
+        <input id="fileImport" type="file" accept="application/json,.json" class="sr-only">
+      </label>
+    </div>
+  </div>
   <section id="grid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></section>
 </main>
-<footer class="text-center text-xs text-stone-500 py-8">ข้อมูลบันทึกในเบราว์เซอร์ของคุณเท่านั้น · ควรกดส่งออก JSON เก็บสำรองไว้เป็นระยะ</footer>
-<div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg text-sm text-white hidden" style="background:#1f3a2e" role="status"></div>
+<footer class="text-center text-xs text-stone-500 py-8 px-4">ข้อมูลบันทึกในเบราว์เซอร์เครื่องนี้เท่านั้น · ควรกดส่งออกเก็บสำรองไว้เป็นระยะ</footer>
+</div>
+
+<!-- ============ แผงแอดมิน ============ -->
+<dialog id="adminDlg">
+  <div class="flex items-center justify-between px-5 py-4 border-b border-stone-200">
+    <h2 class="serif text-xl font-extrabold">จัดการสมาชิก</h2>
+    <button id="adminClose" class="px-3 py-1.5 rounded-lg hover:bg-stone-100 text-sm" aria-label="ปิด">ปิด ✕</button>
+  </div>
+  <div class="px-5 pt-4 flex gap-2 scroll-x" role="tablist">
+    <button class="chip" data-atab="pending" aria-pressed="true">รออนุมัติ <span id="atPend"></span></button>
+    <button class="chip" data-atab="members" aria-pressed="false">สมาชิกทั้งหมด</button>
+    <button class="chip" data-atab="add" aria-pressed="false">เพิ่มสมาชิก</button>
+    <button class="chip" data-atab="me" aria-pressed="false">รหัสผ่านของฉัน</button>
+  </div>
+  <div class="p-5 overflow-y-auto" style="max-height:calc(100vh - 11rem)">
+    <div id="apPending" class="grid gap-3"></div>
+    <div id="apMembers" class="grid gap-3" hidden></div>
+    <form id="addForm" class="grid gap-3" hidden>
+      <label class="text-sm font-medium">ชื่อที่แสดง<input id="aName" class="field mt-1" maxlength="40" required></label>
+      <label class="text-sm font-medium">ชื่อผู้ใช้ <span class="font-normal text-stone-500">(a-z, 0-9, _ ยาว 3–20 ตัว)</span><input id="aUser" class="field mt-1" maxlength="20" autocapitalize="none" required></label>
+      <label class="text-sm font-medium">รหัสผ่านเริ่มต้น <span class="font-normal text-stone-500">(อย่างน้อย 8 ตัว)</span><input id="aPass" type="text" class="field mt-1" minlength="8" autocomplete="off" required></label>
+      <p id="aErr" class="text-sm text-[#8e3b25] min-h-5" role="alert"></p>
+      <button class="btn btn-main" type="submit">เพิ่มสมาชิก (ใช้งานได้ทันที)</button>
+    </form>
+    <form id="meForm" class="grid gap-3" hidden>
+      <label class="text-sm font-medium">รหัสผ่านปัจจุบัน<input id="mOld" type="password" class="field mt-1" autocomplete="current-password" required></label>
+      <label class="text-sm font-medium">รหัสผ่านใหม่ <span class="font-normal text-stone-500">(อย่างน้อย 8 ตัว)</span><input id="mNew" type="password" class="field mt-1" minlength="8" autocomplete="new-password" required></label>
+      <p id="mErr" class="text-sm text-[#8e3b25] min-h-5" role="alert"></p>
+      <button class="btn btn-main" type="submit">เปลี่ยนรหัสผ่าน</button>
+    </form>
+  </div>
+</dialog>
+
+<div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg text-sm text-white z-50" style="background:#1f3a2e" role="status" hidden></div>
 
 <script>
 const REGIONS = ["เหนือ","ตะวันออกเฉียงเหนือ","กลาง","ตะวันออก","ตะวันตก","ใต้"];
@@ -80,59 +211,156 @@ const PARKS = [
  ["khao-luang","เขาหลวง","นครศรีธรรมราช","ใต้","ยอดเขาสูงที่สุดในภาคใต้ น้ำตกและป่าดิบ"]
 ].map(a => ({id:a[0], n:a[1], p:a[2], r:a[3], d:a[4]}));
 
-const KEY = "tnp-tracker-v1";
-let data = load();
-const F = {q:"", r:"all", s:"all"};
+/* ---------- ตัวช่วยทั่วไป ---------- */
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-
-function load(){ try { const o = JSON.parse(localStorage.getItem(KEY)); return o && typeof o === "object" ? o : {}; } catch(e){ return {}; } }
-function save(){ try { localStorage.setItem(KEY, JSON.stringify(data)); } catch(e){ toast("บันทึกไม่ได้ (พื้นที่เบราว์เซอร์เต็มหรือปิดการเก็บข้อมูล)"); } }
-function toast(m){ const t = $("toast"); t.textContent = m; t.classList.remove("hidden"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.add("hidden"), 2600); }
 const today = () => new Date().toLocaleDateString("sv-SE");
 const fmtDate = (s) => s ? new Date(s + "T00:00:00").toLocaleDateString("th-TH", {day:"numeric", month:"short", year:"numeric"}) : "";
+function toast(m){ const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2800); }
+function jget(k, def){ try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? def : v; } catch(e){ return def; } }
+function jset(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ toast("บันทึกไม่ได้ (พื้นที่เบราว์เซอร์เต็มหรือปิดการเก็บข้อมูล)"); return false; } }
+
+/* ---------- บัญชีผู้ใช้ ---------- */
+const USERS_KEY = "tnp-users-v1", LOCK_KEY = "tnp-lock-v1", SESS_KEY = "tnp-session-v1", LEGACY_KEY = "tnp-tracker-v1";
+const dataKey = (uid) => "tnp-data-v2:" + uid;
+const MAX_FAILS = 5, LOCK_MS = 5 * 60 * 1000, ITER = 100000;
+// แอดมินเริ่มต้น เก็บเป็นค่าแฮชเท่านั้น ไม่ได้เก็บรหัสผ่านตรงๆ
+const ADMIN_SEED = {id:"u-admin", username:"admin", name:"แอดมิน", role:"admin", status:"active", salt:"689d8bba270e1a706c4f60eadad8d1dd", hash:"fbad90601ceddb40c062f15c75ade4793487b97aeb6ffb862cce2149f4996c1d"};
+
+const hex2buf = (h) => Uint8Array.from(h.match(/.{2}/g).map(b => parseInt(b, 16)));
+const buf2hex = (b) => [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join("");
+async function hashPw(pw, saltHex){
+  if (!window.crypto || !crypto.subtle) throw new Error("nocrypto");
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveBits"]);
+  return buf2hex(await crypto.subtle.deriveBits({name:"PBKDF2", hash:"SHA-256", salt:hex2buf(saltHex), iterations:ITER}, key, 256));
+}
+const newSalt = () => buf2hex(crypto.getRandomValues(new Uint8Array(16)));
+const newId = () => "u-" + buf2hex(crypto.getRandomValues(new Uint8Array(6)));
+async function makeUser(username, name, pw, role, status){
+  const salt = newSalt();
+  return {id:newId(), username, name, role, status, salt, hash: await hashPw(pw, salt), createdAt: new Date().toISOString()};
+}
+
+const getUsers = () => jget(USERS_KEY, []);
+const saveUsers = (u) => jset(USERS_KEY, u);
+function ensureAdmin(){
+  const u = getUsers();
+  if (!u.some(x => x.role === "admin")) { u.unshift({...ADMIN_SEED, createdAt:new Date().toISOString()}); saveUsers(u); }
+}
+const validUser = (s) => /^[a-z0-9_]{3,20}$/.test(s);
+
+let me = null;   // ผู้ใช้ที่ล็อกอินอยู่
+let data = {};   // ข้อมูลเช็กอินของผู้ใช้คนนี้
+const F = {q:"", r:"all", s:"all", sort:"region"};
+
+/* ---------- ล็อกกันเดารหัส ---------- */
+function lockInfo(username){ const L = jget(LOCK_KEY, {}); return L[username] || {fails:0, until:0}; }
+function setLock(username, info){ const L = jget(LOCK_KEY, {}); if (info) L[username] = info; else delete L[username]; jset(LOCK_KEY, L); }
+
+async function doLogin(username, pw, remember){
+  username = username.trim().toLowerCase();
+  const li = lockInfo(username);
+  if (li.until > Date.now()) { const m = Math.ceil((li.until - Date.now()) / 60000); return "ลองรหัสผิดหลายครั้งเกินไป กรุณารออีกประมาณ " + m + " นาที"; }
+  const u = getUsers().find(x => x.username === username);
+  let ok = false;
+  if (u) ok = (await hashPw(pw, u.salt)) === u.hash;
+  else await hashPw(pw, ADMIN_SEED.salt); // ใช้เวลาใกล้เคียงกัน ไม่บอกว่ามีชื่อนี้หรือไม่
+  if (!ok) {
+    const fails = (li.until && li.until <= Date.now() ? 0 : li.fails) + 1;
+    if (fails >= MAX_FAILS) { setLock(username, {fails:0, until:Date.now() + LOCK_MS}); return "ใส่รหัสผิดครบ " + MAX_FAILS + " ครั้ง ระบบล็อกชื่อนี้ 5 นาที"; }
+    setLock(username, {fails, until:0});
+    return "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง (เหลืออีก " + (MAX_FAILS - fails) + " ครั้งก่อนถูกล็อก)";
+  }
+  if (u.status === "pending") return "บัญชีนี้ยังรอแอดมินอนุมัติ";
+  if (u.status === "suspended") return "บัญชีนี้ถูกระงับ กรุณาติดต่อแอดมิน";
+  setLock(username, null);
+  const store = remember ? localStorage : sessionStorage;
+  localStorage.removeItem(SESS_KEY); sessionStorage.removeItem(SESS_KEY);
+  try { store.setItem(SESS_KEY, u.id); } catch(e){}
+  enter(u);
+  return "";
+}
+function currentSession(){
+  const id = sessionStorage.getItem(SESS_KEY) || localStorage.getItem(SESS_KEY);
+  const u = id && getUsers().find(x => x.id === id);
+  return u && u.status === "active" ? u : null;
+}
+function logout(){ localStorage.removeItem(SESS_KEY); sessionStorage.removeItem(SESS_KEY); me = null; data = {}; $("adminDlg").open && $("adminDlg").close(); showAuth(); }
+
+/* ---------- สลับหน้า ---------- */
+function showAuth(){
+  $("appView").hidden = true; $("authView").hidden = false;
+  $("lPass").value = ""; $("lErr").textContent = ""; setAuthTab("login");
+  setTimeout(() => $("lUser").focus(), 0);
+}
+function enter(u){
+  me = u;
+  // ย้ายข้อมูลจากเวอร์ชันเก่า (ก่อนมีระบบสมาชิก) ให้แอดมินครั้งแรกครั้งเดียว
+  if (u.role === "admin" && localStorage.getItem(dataKey(u.id)) == null) {
+    const old = jget(LEGACY_KEY, null);
+    if (old && typeof old === "object") jset(dataKey(u.id), old);
+  }
+  data = jget(dataKey(u.id), {});
+  $("authView").hidden = true; $("appView").hidden = false;
+  $("whoami").textContent = u.name + (u.role === "admin" ? " · แอดมิน" : "");
+  $("btnAdmin").hidden = u.role !== "admin";
+  F.q = ""; F.r = "all"; F.s = "all"; $("q").value = "";
+  buildFilters(); all(); updatePending(); window.scrollTo(0, 0);
+}
+function setAuthTab(t){
+  $("loginForm").hidden = t !== "login"; $("regForm").hidden = t !== "reg"; $("forgotForm").hidden = t !== "forgot";
+  $("tabLogin").setAttribute("aria-pressed", t === "login"); $("tabReg").setAttribute("aria-pressed", t === "reg");
+}
+
+/* ---------- ข้อมูลเช็กอิน ---------- */
+const save = () => { jset(dataKey(me.id), data); };
+const isV = (p) => !!(data[p.id] && data[p.id].visited);
 
 function stats(){
-  const done = PARKS.filter(p => data[p.id] && data[p.id].visited).length, total = PARKS.length, pct = Math.round(done / total * 100);
+  const done = PARKS.filter(isV).length, total = PARKS.length, pct = Math.round(done / total * 100);
   $("vCount").textContent = done; $("tCount").textContent = " / " + total; $("vPct").textContent = pct + "%";
   $("pfill").style.width = pct + "%"; $("pbar").setAttribute("aria-valuenow", pct);
   $("regionStats").innerHTML = REGIONS.map(r => {
-    const L = PARKS.filter(p => p.r === r), v = L.filter(p => data[p.id] && data[p.id].visited).length;
-    return `<div class="rounded-xl bg-white/10 border border-white/15 p-3"><div class="text-xs" style="color:#c9d5b0">${RC[r][0]} ${r}</div><div class="serif font-semibold mt-0.5">${v}/${L.length}</div><div class="mt-2 h-1.5 rounded-full bg-white/15 overflow-hidden"><div class="bar h-full" style="width:${L.length ? v / L.length * 100 : 0}%;background:#c9d5b0"></div></div></div>`;
+    const L = PARKS.filter(p => p.r === r), v = L.filter(isV).length;
+    return `<div class="rounded-xl bg-white/10 border border-white/15 p-2.5 md:p-3"><div class="text-xs truncate" style="color:#c9d5b0">${RC[r][0]} ${r}</div><div class="serif font-semibold mt-0.5">${v}/${L.length}</div><div class="mt-2 h-1.5 rounded-full bg-white/15 overflow-hidden"><div class="bar h-full" style="width:${L.length ? v / L.length * 100 : 0}%;background:#c9d5b0"></div></div></div>`;
   }).join("");
 }
 
 function card(p){
-  const d = data[p.id] || {}, v = !!d.visited, rating = d.rating || 0, [emoji, bg] = RC[p.r];
-  const stars = [1,2,3,4,5].map(i => `<button data-act="rate" data-id="${p.id}" data-v="${i}" aria-label="ให้ ${i} ดาว" class="text-2xl leading-none ${i <= rating ? "" : "opacity-30"}" style="color:#b8892f">★</button>`).join("");
-  return `<article class="relative rounded-2xl bg-white border ${v ? "border-[#4f7a3a]" : "border-stone-200"} overflow-hidden flex flex-col">
+  const d = data[p.id] || {}, v = isV(p), rating = d.rating || 0, [emoji, bg] = RC[p.r];
+  const stars = [1,2,3,4,5].map(i => `<button data-act="rate" data-id="${p.id}" data-v="${i}" aria-label="ให้ ${i} ดาว" class="text-3xl leading-none p-0.5 ${i <= rating ? "" : "opacity-30"}" style="color:#b8892f">★</button>`).join("");
+  return `<article class="relative rounded-2xl bg-white border-2 ${v ? "border-[#4f7a3a]" : "border-transparent shadow-sm"} overflow-hidden flex flex-col">
     <div class="h-16 px-4 flex items-center justify-between" style="background:${bg}"><span class="text-3xl" aria-hidden="true">${emoji}</span><span class="text-xs font-medium px-2 py-0.5 rounded-full bg-white/70">ภาค${p.r}</span></div>
     ${v ? `<div class="stamp absolute top-3 right-3 mt-10 text-[11px] font-semibold px-2 py-0.5 rounded border-2" style="color:#6b4f3a;border-color:#6b4f3a;background:#fff9">เคยไปแล้ว${d.date ? " · " + fmtDate(d.date) : ""}</div>` : ""}
     <div class="p-4 flex flex-col gap-3 flex-1">
       <div><h3 class="serif font-semibold text-lg leading-snug">${esc(p.n)}</h3><p class="text-sm text-stone-500">จ.${esc(p.p)}</p></div>
       <p class="text-sm text-stone-700">${esc(p.d)}</p>
-      <button data-act="toggle" data-id="${p.id}" aria-pressed="${v}" class="mt-auto rounded-lg py-2 text-sm font-semibold ${v ? "text-white" : "border border-[#4f7a3a] text-[#2d5230] hover:bg-[#eef1e8]"}" ${v ? 'style="background:#4f7a3a"' : ""}>${v ? "✓ เคยไปแล้ว (กดเพื่อยกเลิก)" : "เช็กอินที่นี่"}</button>
+      <button data-act="toggle" data-id="${p.id}" aria-pressed="${v}" class="mt-auto rounded-xl py-2.5 text-sm font-semibold ${v ? "text-white" : "border border-[#4f7a3a] text-[#2d5230] hover:bg-[#eef1e8]"}" ${v ? 'style="background:#4f7a3a"' : ""}>${v ? "✓ เคยไปแล้ว (กดเพื่อยกเลิก)" : "เช็กอินที่นี่"}</button>
       ${v ? `<div class="border-t border-stone-200 pt-3 grid gap-3">
-        <label class="text-sm">วันที่ไปล่าสุด<input data-act="date" data-id="${p.id}" type="date" value="${esc(d.date || "")}" max="${today()}" class="mt-1 w-full rounded-lg border border-stone-300 px-3 py-1.5"></label>
-        <div><div class="text-sm">ให้คะแนน</div><div class="flex gap-1">${stars}</div></div>
-        <label class="text-sm">บันทึกความทรงจำ<textarea data-act="note" data-id="${p.id}" rows="3" maxlength="2000" placeholder="วันนี้เจออะไรบ้าง…" class="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2">${esc(d.note || "")}</textarea></label>
+        <label class="text-sm">วันที่ไปล่าสุด<input data-act="date" data-id="${p.id}" type="date" value="${esc(d.date || "")}" max="${today()}" class="field mt-1"></label>
+        <div><div class="text-sm">ให้คะแนน</div><div class="flex">${stars}</div></div>
+        <label class="text-sm">บันทึกความทรงจำ<textarea data-act="note" data-id="${p.id}" rows="3" maxlength="2000" placeholder="วันนี้เจออะไรบ้าง…" class="field mt-1">${esc(d.note || "")}</textarea></label>
       </div>` : ""}
     </div></article>`;
 }
 
 function grid(){
   const q = F.q.trim().toLowerCase();
-  const L = PARKS.filter(p => (F.r === "all" || p.r === F.r) &&
-    (F.s === "all" || (F.s === "yes") === !!(data[p.id] && data[p.id].visited)) &&
+  let L = PARKS.filter(p => (F.r === "all" || p.r === F.r) &&
+    (F.s === "all" || (F.s === "yes") === isV(p)) &&
     (!q || p.n.toLowerCase().includes(q) || p.p.toLowerCase().includes(q)));
+  if (F.sort === "name") L = [...L].sort((a, b) => a.n.localeCompare(b.n, "th"));
+  else if (F.sort === "recent") L = [...L].sort((a, b) => ((data[b.id] && data[b.id].date) || "").localeCompare((data[a.id] && data[a.id].date) || "") || (isV(b) - isV(a)));
   $("resultInfo").textContent = "พบ " + L.length + " จาก " + PARKS.length + " แห่ง";
   $("grid").innerHTML = L.length ? L.map(card).join("") : '<p class="col-span-full text-center text-stone-500 py-12">ไม่พบอุทยานที่ตรงกับเงื่อนไข ลองล้างคำค้นหาหรือเปลี่ยนตัวกรอง</p>';
 }
 function all(){ stats(); grid(); }
 
-function setStatusButtons(){
-  $("fStatus").innerHTML = [["all","ทั้งหมด"],["yes","ไปแล้ว"],["no","ยังไม่ได้ไป"]].map(([k,l]) =>
-    `<button data-s="${k}" class="px-3 py-1.5 rounded-lg ${F.s === k ? "text-white" : "text-stone-600"}" ${F.s === k ? 'style="background:#1f3a2e"' : ""} aria-pressed="${F.s === k}">${l}</button>`).join("");
+function buildFilters(){
+  $("fStatus").innerHTML = [["all","ทั้งหมด"],["yes","ไปแล้ว"],["no","ยังไม่ไป"]].map(([k,l]) =>
+    `<button class="chip" data-s="${k}" aria-pressed="${F.s === k}">${l}</button>`).join("");
+  $("fRegion").innerHTML = [["all","ทุกภูมิภาค"], ...REGIONS.map(r => [r, r])].map(([k,l]) =>
+    `<button class="chip" data-r="${k}" aria-pressed="${F.r === k}">${l}</button>`).join("");
 }
 
 $("grid").addEventListener("click", e => {
@@ -151,12 +379,13 @@ $("grid").addEventListener("input", e => { // พิมพ์โน้ตแล�
   const d = data[e.target.dataset.id] = data[e.target.dataset.id] || {}; d.note = e.target.value; save();
 });
 $("q").addEventListener("input", e => { F.q = e.target.value; grid(); });
-$("fRegion").addEventListener("change", e => { F.r = e.target.value; grid(); });
-$("fStatus").addEventListener("click", e => { const b = e.target.closest("button[data-s]"); if (!b) return; F.s = b.dataset.s; setStatusButtons(); grid(); });
+$("fSort").addEventListener("change", e => { F.sort = e.target.value; grid(); });
+$("fStatus").addEventListener("click", e => { const b = e.target.closest("button[data-s]"); if (!b) return; F.s = b.dataset.s; buildFilters(); grid(); });
+$("fRegion").addEventListener("click", e => { const b = e.target.closest("button[data-r]"); if (!b) return; F.r = b.dataset.r; buildFilters(); grid(); });
 
 $("btnExport").addEventListener("click", () => {
   const blob = new Blob([JSON.stringify({app:"thailand-national-parks-tracker", version:1, exportedAt:new Date().toISOString(), data}, null, 2)], {type:"application/json"});
-  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "parks-backup-" + today() + ".json"; a.click(); URL.revokeObjectURL(a.href);
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "parks-backup-" + me.username + "-" + today() + ".json"; a.click(); URL.revokeObjectURL(a.href);
   toast("ส่งออกไฟล์สำรองแล้ว");
 });
 $("fileImport").addEventListener("change", async e => {
@@ -172,8 +401,153 @@ $("fileImport").addEventListener("change", async e => {
   } catch(err){ toast("ไฟล์ไม่ถูกต้อง ต้องเป็นไฟล์ JSON ที่ส่งออกจากแอปนี้"); }
 });
 
-$("fRegion").innerHTML = '<option value="all">ทุกภูมิภาค</option>' + REGIONS.map(r => `<option value="${r}">ภาค${r}</option>`).join("");
-setStatusButtons(); all();
+/* ---------- ฟอร์มล็อกอิน / สมัคร ---------- */
+$("tabLogin").addEventListener("click", () => setAuthTab("login"));
+$("tabReg").addEventListener("click", () => setAuthTab("reg"));
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-eye]"); if (!b) return;
+  const i = $(b.dataset.eye), show = i.type === "password"; i.type = show ? "text" : "password"; b.textContent = show ? "ซ่อน" : "แสดง";
+});
+const CRYPTO_ERR = "เบราว์เซอร์นี้ไม่รองรับการเข้ารหัส กรุณาเปิดผ่านลิงก์ https";
+
+$("loginForm").addEventListener("submit", async e => {
+  e.preventDefault(); const btn = e.submitter; btn.disabled = true; $("lErr").textContent = "";
+  try { $("lErr").textContent = await doLogin($("lUser").value, $("lPass").value, $("lRemember").checked); }
+  catch(err){ $("lErr").textContent = err.message === "nocrypto" ? CRYPTO_ERR : "เกิดข้อผิดพลาด ลองใหม่อีกครั้ง"; }
+  btn.disabled = false; if ($("lErr").textContent) $("lPass").select();
+});
+
+$("regForm").addEventListener("submit", async e => {
+  e.preventDefault(); const btn = e.submitter, err = $("rErr"); err.textContent = "";
+  const username = $("rUser").value.trim().toLowerCase(), name = $("rName").value.trim(), pw = $("rPass").value;
+  if (!validUser(username)) { err.textContent = "ชื่อผู้ใช้ใช้ได้เฉพาะ a-z, 0-9 และ _ ยาว 3–20 ตัว"; return; }
+  if (pw.length < 8) { err.textContent = "รหัสผ่านต้องยาวอย่างน้อย 8 ตัว"; return; }
+  if (pw !== $("rPass2").value) { err.textContent = "รหัสผ่านทั้งสองช่องไม่ตรงกัน"; return; }
+  const users = getUsers();
+  if (users.some(x => x.username === username)) { err.textContent = "ชื่อผู้ใช้นี้ถูกใช้แล้ว ลองชื่ออื่น"; return; }
+  btn.disabled = true;
+  try {
+    users.push(await makeUser(username, name, pw, "member", "pending"));
+    if (!saveUsers(users)) { btn.disabled = false; return; }
+    e.target.reset(); setAuthTab("login"); $("lUser").value = username;
+    $("lErr").textContent = "ส่งคำขอแล้ว รอแอดมินอนุมัติ จากนั้นจึงเข้าสู่ระบบได้";
+  } catch(x){ err.textContent = x.message === "nocrypto" ? CRYPTO_ERR : "เกิดข้อผิดพลาด ลองใหม่อีกครั้ง"; }
+  btn.disabled = false;
+});
+
+$("linkForgot").addEventListener("click", () => { $("fUser").value = $("lUser").value; $("fErr").textContent = ""; setAuthTab("forgot"); $("fUser").focus(); });
+$("linkBack").addEventListener("click", () => setAuthTab("login"));
+$("forgotForm").addEventListener("submit", async e => {
+  e.preventDefault(); const btn = e.submitter, err = $("fErr"); err.textContent = "";
+  const username = $("fUser").value.trim().toLowerCase(), code = $("fCode").value.trim(), np = $("fPass").value;
+  const BAD = "รหัสรีเซ็ตไม่ถูกต้องหรือหมดอายุ ขอรหัสใหม่จากแอดมิน";
+  if (np.length < 8) { err.textContent = "รหัสผ่านใหม่ต้องยาวอย่างน้อย 8 ตัว"; return; }
+  btn.disabled = true;
+  try {
+    const users = getUsers(), u = users.find(x => x.username === username), R = u && u.role !== "admin" && u.reset;
+    if (!R || R.expires < Date.now() || R.fails >= 5) { if (R) { delete u.reset; saveUsers(users); } await hashPw(code, ADMIN_SEED.salt); err.textContent = BAD; }
+    else if ((await hashPw(code, R.salt)) !== R.hash) {
+      R.fails++; if (R.fails >= 5) delete u.reset; saveUsers(users);
+      err.textContent = "รหัสรีเซ็ตไม่ถูกต้อง" + (u.reset ? " (เหลืออีก " + (5 - R.fails) + " ครั้ง)" : " และถูกยกเลิกแล้ว ขอรหัสใหม่จากแอดมิน");
+    } else {
+      u.salt = newSalt(); u.hash = await hashPw(np, u.salt); delete u.reset; saveUsers(users); setLock(username, null);
+      e.target.reset(); setAuthTab("login"); $("lUser").value = username; $("lPass").value = "";
+      $("lErr").textContent = "ตั้งรหัสผ่านใหม่แล้ว เข้าสู่ระบบด้วยรหัสใหม่ได้เลย";
+    }
+  } catch(x){ err.textContent = x.message === "nocrypto" ? CRYPTO_ERR : "เกิดข้อผิดพลาด ลองใหม่อีกครั้ง"; }
+  btn.disabled = false;
+});
+
+$("btnLogout").addEventListener("click", logout);
+
+/* ---------- แผงแอดมิน ---------- */
+const requireAdmin = () => { const u = getUsers().find(x => x.id === (me && me.id)); return u && u.role === "admin" && u.status === "active"; };
+const STATUS_TXT = {active:"ใช้งานอยู่", pending:"รออนุมัติ", suspended:"ถูกระงับ"};
+const STATUS_CLR = {active:"#2d5230", pending:"#8a6618", suspended:"#8e3b25"};
+
+function updatePending(){
+  if (!me || me.role !== "admin") return;
+  const n = getUsers().filter(u => u.status === "pending").length;
+  $("pendBadge").textContent = n; $("pendBadge").hidden = !n;
+  $("atPend").textContent = n ? "(" + n + ")" : "";
+}
+function userRow(u, pendingMode){
+  const self = u.id === me.id, isAdm = u.role === "admin";
+  const btn = (act, label, cls) => `<button class="btn ${cls} !py-1.5 !px-3 !text-sm" data-uact="${act}" data-uid="${u.id}">${label}</button>`;
+  let actions = "";
+  if (pendingMode) actions = btn("approve", "อนุมัติ", "btn-main") + btn("reject", "ปฏิเสธ", "btn-danger");
+  else if (!isAdm) actions = (u.status === "pending" ? btn("approve", "อนุมัติ", "btn-main") : "") +
+    (u.status === "active" ? btn("suspend", "ระงับ", "btn-line") : "") + (u.status === "suspended" ? btn("activate", "เปิดใช้งาน", "btn-line") : "") +
+    btn("reset", "ออกรหัสรีเซ็ต", "btn-line") + btn("delete", "ลบ", "btn-danger");
+  return `<div class="rounded-xl border border-stone-200 p-3 flex flex-wrap items-center justify-between gap-3">
+    <div><div class="font-semibold">${esc(u.name)} ${isAdm ? '<span class="text-xs px-2 py-0.5 rounded-full bg-[#b8892f]/20 text-[#6b4f3a]">แอดมิน</span>' : ""}${self ? ' <span class="text-xs text-stone-500">(คุณ)</span>' : ""}</div>
+    <div class="text-sm text-stone-500">@${esc(u.username)} · <span style="color:${STATUS_CLR[u.status]}">${STATUS_TXT[u.status]}</span></div></div>
+    <div class="flex flex-wrap gap-2">${actions}</div></div>`;
+}
+function renderAdmin(){
+  const users = getUsers(), pend = users.filter(u => u.status === "pending");
+  $("apPending").innerHTML = pend.length ? pend.map(u => userRow(u, true)).join("") : '<p class="text-center text-stone-500 py-10">ไม่มีคำขอสมัครที่รออนุมัติ</p>';
+  $("apMembers").innerHTML = users.map(u => userRow(u, false)).join("");
+  updatePending();
+}
+function setATab(t){
+  document.querySelectorAll("[data-atab]").forEach(b => b.setAttribute("aria-pressed", b.dataset.atab === t));
+  $("apPending").hidden = t !== "pending"; $("apMembers").hidden = t !== "members"; $("addForm").hidden = t !== "add"; $("meForm").hidden = t !== "me";
+}
+$("btnAdmin").addEventListener("click", () => { if (!requireAdmin()) return; renderAdmin(); setATab(getUsers().some(u => u.status === "pending") ? "pending" : "members"); $("adminDlg").showModal(); });
+$("adminClose").addEventListener("click", () => $("adminDlg").close());
+$("adminDlg").addEventListener("close", updatePending);
+document.querySelectorAll("[data-atab]").forEach(b => b.addEventListener("click", () => setATab(b.dataset.atab)));
+
+$("adminDlg").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-uact]"); if (!b || !requireAdmin()) return;
+  const users = getUsers(), u = users.find(x => x.id === b.dataset.uid); if (!u || u.role === "admin") return;
+  const act = b.dataset.uact;
+  if (act === "approve" || act === "activate") { u.status = "active"; toast("เปิดใช้งาน " + u.name + " แล้ว"); }
+  else if (act === "suspend") { u.status = "suspended"; toast("ระงับ " + u.name + " แล้ว"); }
+  else if (act === "reject") { if (!confirm("ปฏิเสธและลบคำขอของ " + u.name + " ?")) return; users.splice(users.indexOf(u), 1); toast("ลบคำขอแล้ว"); }
+  else if (act === "delete") {
+    if (!confirm("ลบสมาชิก " + u.name + " และข้อมูลเช็กอินทั้งหมดของเขา? ย้อนกลับไม่ได้")) return;
+    users.splice(users.indexOf(u), 1); try { localStorage.removeItem(dataKey(u.id)); } catch(x){} toast("ลบสมาชิกแล้ว");
+  }
+  else if (act === "reset") {
+    try {
+      const code = String(crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).padStart(6, "0"), salt = newSalt();
+      u.reset = {salt, hash: await hashPw(code, salt), expires: Date.now() + 30 * 60000, fails: 0};
+      saveUsers(users); renderAdmin();
+      prompt("รหัสรีเซ็ตของ " + u.name + " (ใช้ได้ครั้งเดียว ภายใน 30 นาที)\nคัดลอกแล้วส่งให้สมาชิก:", code);
+    } catch(x){ toast(CRYPTO_ERR); }
+    return;
+  }
+  saveUsers(users); renderAdmin();
+});
+
+$("addForm").addEventListener("submit", async e => {
+  e.preventDefault(); if (!requireAdmin()) return; const err = $("aErr"); err.textContent = "";
+  const username = $("aUser").value.trim().toLowerCase(), name = $("aName").value.trim(), pw = $("aPass").value;
+  if (!validUser(username)) { err.textContent = "ชื่อผู้ใช้ใช้ได้เฉพาะ a-z, 0-9 และ _ ยาว 3–20 ตัว"; return; }
+  if (pw.length < 8) { err.textContent = "รหัสผ่านต้องยาวอย่างน้อย 8 ตัว"; return; }
+  const users = getUsers(); if (users.some(x => x.username === username)) { err.textContent = "ชื่อผู้ใช้นี้ถูกใช้แล้ว"; return; }
+  try { users.push(await makeUser(username, name, pw, "member", "active")); } catch(x){ err.textContent = CRYPTO_ERR; return; }
+  if (!saveUsers(users)) return;
+  e.target.reset(); renderAdmin(); setATab("members"); toast("เพิ่มสมาชิกแล้ว บอกรหัสผ่านเริ่มต้นให้เขาด้วย");
+});
+
+$("meForm").addEventListener("submit", async e => {
+  e.preventDefault(); if (!requireAdmin()) return; const err = $("mErr"); err.textContent = "";
+  const users = getUsers(), u = users.find(x => x.id === me.id), np = $("mNew").value;
+  try {
+    if ((await hashPw($("mOld").value, u.salt)) !== u.hash) { err.textContent = "รหัสผ่านปัจจุบันไม่ถูกต้อง"; return; }
+    if (np.length < 8) { err.textContent = "รหัสผ่านใหม่ต้องยาวอย่างน้อย 8 ตัว"; return; }
+    u.salt = newSalt(); u.hash = await hashPw(np, u.salt);
+  } catch(x){ err.textContent = CRYPTO_ERR; return; }
+  saveUsers(users); e.target.reset(); toast("เปลี่ยนรหัสผ่านแล้ว");
+});
+
+/* ---------- เริ่มต้น ---------- */
+ensureAdmin();
+const s = currentSession();
+if (s) enter(s); else showAuth();
 </script>
 </body>
 </html>
