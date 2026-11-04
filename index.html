@@ -83,7 +83,7 @@
       <label class="flex items-center gap-2 text-sm text-stone-600"><input id="lRemember" type="checkbox" class="size-4 accent-[#4f7a3a]"> จำการเข้าสู่ระบบในเครื่องนี้</label>
       <p id="lErr" class="text-sm text-[#8e3b25] min-h-5" role="alert"></p>
       <button class="btn btn-main" type="submit">เข้าสู่ระบบ</button>
-      <p class="text-xs text-stone-500 text-center">ลืมรหัสผ่าน? ให้ติดต่อแอดมิน</p>
+      <button type="button" id="goForgot" class="text-sm underline text-stone-600 justify-self-center">ลืมรหัสผ่าน?</button>
       <button type="button" id="goSignup" class="btn btn-line">ยังไม่มีบัญชี? สมัครสมาชิก</button>
     </form>
     <form id="signupForm" class="p-6 grid gap-4" autocomplete="off" hidden>
@@ -94,8 +94,18 @@
       <label class="text-sm font-medium">ยืนยันรหัสผ่าน<input id="sPass2" type="password" class="field mt-1" autocomplete="new-password" required></label>
       <p id="sErr" class="text-sm text-[#8e3b25] min-h-5" role="alert"></p>
       <button class="btn btn-main" type="submit">สมัครและเข้าสู่ระบบ</button>
-      <p class="text-xs text-stone-500 text-center">บัญชีและข้อมูลเช็กอินจะเก็บในเบราว์เซอร์เครื่องนี้ ใช้ข้ามเครื่องไม่ได้</p>
+      <p class="text-xs text-stone-500 text-center">สมัครครั้งเดียว ใช้เข้าสู่ระบบได้จากทุกเครื่อง</p>
       <button type="button" id="goLogin" class="btn btn-line">← กลับไปเข้าสู่ระบบ</button>
+    </form>
+    <form id="resetForm" class="p-6 grid gap-4" autocomplete="off" hidden>
+      <p class="text-sm text-stone-600">ลืมรหัสผ่าน? ติดต่อแอดมินเพื่อขอ<b>โค้ด 6 หลัก</b> แล้วกรอกด้านล่างเพื่อตั้งรหัสผ่านใหม่ (โค้ดใช้ได้ 30 นาที ใช้ได้ครั้งเดียว)</p>
+      <label class="text-sm font-medium">ชื่อผู้ใช้<input id="rUser" class="field mt-1" autocapitalize="none" required></label>
+      <label class="text-sm font-medium">โค้ด 6 หลักจากแอดมิน<input id="rCode" class="field mt-1 tracking-[.4em] text-center" inputmode="numeric" maxlength="6" pattern="\d{6}" autocomplete="one-time-code" required></label>
+      <label class="text-sm font-medium">รหัสผ่านใหม่ <span class="font-normal text-stone-500">(อย่างน้อย 8 ตัว)</span><input id="rPass" type="password" class="field mt-1" minlength="8" autocomplete="new-password" required></label>
+      <label class="text-sm font-medium">ยืนยันรหัสผ่านใหม่<input id="rPass2" type="password" class="field mt-1" autocomplete="new-password" required></label>
+      <p id="rErr" class="text-sm text-[#8e3b25] min-h-5" role="alert"></p>
+      <button class="btn btn-main" type="submit">ตั้งรหัสผ่านใหม่และเข้าสู่ระบบ</button>
+      <button type="button" id="goLogin2" class="btn btn-line">← กลับไปเข้าสู่ระบบ</button>
     </form>
   </div>
 </div>
@@ -178,6 +188,13 @@
     <div class="flex gap-2"><button class="btn btn-main" type="submit">โพสต์ประกาศ</button><button class="btn btn-line" type="button" id="newsCancel">ยกเลิก</button></div>
   </form>
   <div id="newsList" class="grid gap-4"></div>
+  <div class="mt-10">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+      <div><h3 class="serif text-xl font-extrabold">📰 ข่าวล่าสุดจากอุทยานทั่วไทย</h3><p id="autoMeta" class="text-xs text-stone-500 mt-0.5">รวบรวมอัตโนมัติจากข่าวออนไลน์ แตะเพื่ออ่านที่เว็บต้นทาง</p></div>
+      <button id="autoRefresh" type="button" class="btn btn-line !py-1.5">↻ รีเฟรช</button>
+    </div>
+    <div id="autoNews" class="grid gap-3"></div>
+  </div>
   <p class="text-xs text-stone-500 mt-4">ประกาศที่แอดมินโพสต์จะเก็บในเบราว์เซอร์เครื่องนี้ ยังไม่แชร์ข้ามเครื่อง</p>
 </section>
 
@@ -206,26 +223,17 @@
     <h2 class="serif text-xl font-extrabold">จัดการสมาชิก</h2>
     <button id="adminClose" class="px-3 py-1.5 rounded-lg hover:bg-stone-100 text-sm" aria-label="ปิด">ปิด ✕</button>
   </div>
-  <div class="px-5 pt-4 flex gap-2 scroll-x" role="tablist">
-    <button class="chip" data-atab="members" aria-pressed="true">สมาชิกทั้งหมด</button>
-    <button class="chip" data-atab="add" aria-pressed="false">เพิ่มสมาชิก</button>
-  </div>
-  <div class="p-5 overflow-y-auto" style="max-height:calc(100dvh - 11rem)">
+  <div class="p-5 overflow-y-auto" style="max-height:calc(100dvh - 7rem)">
+    <p id="apCount" class="text-sm text-stone-500 mb-3"></p>
     <div id="apMembers" class="grid gap-3"></div>
-    <form id="addForm" class="grid gap-3" hidden>
-      <label class="text-sm font-medium">ชื่อที่แสดง<input id="aName" class="field mt-1" maxlength="40" required></label>
-      <label class="text-sm font-medium">ชื่อผู้ใช้ <span class="font-normal text-stone-500">(a-z, 0-9, _ ยาว 3–20 ตัว)</span><input id="aUser" class="field mt-1" maxlength="20" autocapitalize="none" required></label>
-      <label class="text-sm font-medium">รหัสผ่านเริ่มต้น <span class="font-normal text-stone-500">(อย่างน้อย 8 ตัว)</span><input id="aPass" type="text" class="field mt-1" minlength="8" autocomplete="off" required></label>
-      <p id="aErr" class="text-sm text-[#8e3b25] min-h-5" role="alert"></p>
-      <button class="btn btn-main" type="submit">เพิ่มสมาชิก</button>
-    </form>
+    <p class="text-xs text-stone-500 mt-4">สมาชิกสมัครเองที่หน้าเข้าสู่ระบบ แอดมินมีหน้าที่ระงับ เปิดใช้งาน หรือลบ (เตะ) สมาชิกเท่านั้น</p>
   </div>
 </dialog>
 
 <dialog id="rankDlg">
   <div class="topo text-white flex items-center justify-between px-5 py-4"><h2 class="serif text-xl font-extrabold">🏅 อันดับสมาชิก</h2><button id="rankClose" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-sm" aria-label="ปิด">ปิด ✕</button></div>
   <div class="p-5 overflow-y-auto" style="max-height:calc(100dvh - 10rem)"><div id="rankBody" class="grid gap-2"></div>
-    <p class="text-xs text-stone-500 mt-4">จัดอันดับจากจำนวนอุทยานที่เช็กอิน (ถ้าเท่ากัน ดูจำนวนจังหวัด) ของสมาชิกทุกคนที่เช็กอินแล้ว แสดงเฉพาะชื่อกับจำนวน ไม่แสดงบันทึกส่วนตัว ถ้าเพิ่งมีคนเช็กอิน ให้เปิดหน้านี้ใหม่เพื่อดูอันดับล่าสุด</p></div>
+    <p class="text-xs text-stone-500 mt-4">จัดอันดับจากจำนวนอุทยานที่เช็กอิน (ถ้าเท่ากัน ดูจำนวนจังหวัด) ของสมาชิกทุกคนที่เช็กอินแล้ว แสดงเฉพาะชื่อกับจำนวน ไม่แสดงบันทึกส่วนตัว อันดับดึงข้อมูลล่าสุดทุกครั้งที่เปิดหน้านี้ ทุกเครื่องเห็นตรงกัน</p></div>
 </dialog>
 
 <dialog id="profDlg">
@@ -489,7 +497,7 @@ function jget(k, def){ try {
   if (KV && isSync(k)) { if (!(k in KV)) { const r = kvx("GET", "/api/kv/" + encodeURIComponent(k)); KV[k] = r ? JSON.parse(r.responseText) : null; } return KV[k] == null ? def : KV[k]; } const v = JSON.parse(localStorage.getItem(k)); return v == null ? def : v; } catch(e){ return def; } }
 function jset(k, v){
   if (KV && isSync(k)) { KV[k] = v; const bad = () => toast("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ข้อมูลอาจยังไม่ถูกบันทึก");
-    afetch("/api/kv/" + encodeURIComponent(k), {method:"PUT", headers:{"content-type":"application/json"}, body:JSON.stringify(v)}).then(r => { if (!r.ok) bad(); }).catch(bad); return true; }
+    afetch("/api/kv/" + encodeURIComponent(k), {method:"PUT", headers:{"content-type":"application/json"}, body:JSON.stringify(v)}).then(r => r.ok ? r.json().then(j => { if (j && j.error) bad(); }).catch(() => {}) : bad()).catch(bad); return true; }
   try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ toast("บันทึกไม่ได้ (พื้นที่เบราว์เซอร์เต็มหรือปิดการเก็บข้อมูล)"); return false; } }
 
 /* ---------- บัญชีผู้ใช้ ---------- */
@@ -514,6 +522,7 @@ async function makeUser(username, name, pw, role, status){
 }
 
 const getUsers = () => jget(USERS_KEY, []);
+async function syncUsers(){ if (!KV) return; try { const j = await (await afetch("/api/kv")).json(); if (j && j.kv && j.kv["tnp-users-v1"]) KV["tnp-users-v1"] = j.kv["tnp-users-v1"]; } catch(e){} }
 const saveUsers = (u) => jset(USERS_KEY, u);
 function ensureAdmin(){
   const u = getUsers();
@@ -725,8 +734,8 @@ function view(){
   if (home) {
     $("filters").hidden = true;
     $("crumb").innerHTML = `<h2 class="serif text-xl md:text-2xl font-extrabold">เลือกหมวดภูมิภาค</h2><button data-region="all" class="btn btn-line !py-1.5">ดูทั้งหมด ${PARKS.length} แห่ง</button>`;
-    $("view").innerHTML = `<div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">${REGIONS.map(tile).join("")}</div>`;
-    applyCovers(); return;
+    $("view").innerHTML = `<section class="mb-6 rounded-2xl bg-white border border-stone-200 shadow-sm p-4"><div class="flex items-center justify-between gap-3 mb-3"><h3 class="serif text-lg font-extrabold">🏅 อันดับเด่น</h3><button data-rankall class="btn btn-line !py-1.5">ดูอันดับทั้งหมด →</button></div><div id="topRankBody" class="grid gap-2"></div></section><div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">${REGIONS.map(tile).join("")}</div>`;
+    paintTopRank(); refreshRank().then(paintTopRank); applyCovers(); return;
   }
   const L = PARKS.filter(p => (!inRegion || p.r === V.r) && (!inRegion || V.prov === "all" || p.p === V.prov) &&
     (V.s === "all" || (V.s === "wish" ? (isW(p) && !isV(p)) : (V.s === "yes") === isV(p))) && (!q || p.full.toLowerCase().includes(q) || p.p.includes(q)));
@@ -757,7 +766,7 @@ function setTab(t){
   V.tab = t;
   document.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-pressed", b.dataset.tab === t));
   $("tabParks").hidden = t !== "parks"; $("tabNews").hidden = t !== "news"; $("tabPhones").hidden = t !== "phones";
-  if (t === "news") renderNews(); if (t === "phones") renderPhones();
+  if (t === "news") { renderNews(); loadAutoNews(); } if (t === "phones") renderPhones();
   view();
 }
 
@@ -779,6 +788,22 @@ function renderNews(){
     ${adm ? `<button data-ndel="${esc(x.id)}" class="text-sm btn btn-danger !py-1 !px-3">ลบ</button>` : ""}</div>
     <p class="mt-3 text-[15px] leading-relaxed text-stone-700 whitespace-pre-line">${esc(x.body)}</p></article>`).join("") || '<p class="text-stone-500">ยังไม่มีประกาศ</p>';
 }
+
+/* ---------- ข่าวอัตโนมัติ (Apps Script ดึงจากข่าวออนไลน์แล้วเก็บไว้ ที่นี่แค่แสดงหัวข้อ + ลิงก์ไปเว็บต้นทาง) ---------- */
+const AUTO = {items:null, at:0};
+async function loadAutoNews(force){
+  const box = $("autoNews");
+  if (!GAS_URL) { box.innerHTML = '<p class="text-sm text-stone-500">ข่าวอัตโนมัติต้องเชื่อมกับ Google Apps Script (ใส่ GAS_URL)</p>'; return; }
+  if (!force && AUTO.items && Date.now() - AUTO.at < 600000) return paintAuto();
+  box.innerHTML = '<p class="text-sm text-stone-500">กำลังโหลดข่าว…</p>';
+  try { const j = await (await afetch("/api/autonews")).json(); if (!j || !Array.isArray(j.items)) throw 0; AUTO.items = j.items; AUTO.at = Date.now(); paintAuto(); }
+  catch(e){ box.innerHTML = '<p class="text-sm text-stone-500">โหลดข่าวอัตโนมัติไม่ได้ในตอนนี้ (ถ้าเพิ่งอัปเดตโค้ด ต้องทำให้ใช้งานเวอร์ชันใหม่ใน Apps Script) · ดูข่าวทางการได้ที่ portal.dnp.go.th</p>'; }
+}
+function paintAuto(){
+  const L = (AUTO.items || []).filter(x => /^https?:\/\//.test(x.u)).slice(0, 15);
+  $("autoNews").innerHTML = L.map(x => `<a href="${esc(x.u)}" target="_blank" rel="noopener noreferrer" class="block rounded-2xl bg-white border border-stone-200 shadow-sm p-4 hover:border-[#4f7a3a] hover:shadow-md transition"><div class="font-semibold leading-snug">${esc(x.t)}</div><div class="text-xs text-stone-500 mt-1.5">${esc(x.s || "ข่าวออนไลน์")} · ${fmtDate(x.d)} ↗</div></a>`).join("") || '<p class="text-sm text-stone-500">ยังไม่พบข่าวใหม่ในตอนนี้</p>';
+}
+$("autoRefresh").addEventListener("click", () => loadAutoNews(true));
 
 /* ---------- เบอร์โทรสำคัญ (ตรวจกับแหล่งข้อมูลทางการ/สื่อรวบรวมแล้ว) ---------- */
 const PHONES = [
@@ -837,10 +862,10 @@ async function toAvatar(file){
   let bmp;
   try { bmp = await createImageBitmap(file, {imageOrientation:"from-image"}); }
   catch(e){ bmp = await new Promise((ok, no) => { const url = URL.createObjectURL(file), im = new Image(); im.onload = () => { URL.revokeObjectURL(url); ok(im); }; im.onerror = () => { URL.revokeObjectURL(url); no(new Error("decode")); }; im.src = url; }); }
-  const w = bmp.width, h = bmp.height, s = Math.min(w, h), S = 256, c = document.createElement("canvas"); c.width = c.height = S;
+  const w = bmp.width, h = bmp.height, s = Math.min(w, h), S = 112, c = document.createElement("canvas"); c.width = c.height = S;
   const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, S, S); x.drawImage(bmp, (w - s) / 2, (h - s) / 2, s, s, 0, 0, S, S);
   if (bmp.close) bmp.close();
-  return c.toDataURL("image/jpeg", 0.85);
+  return c.toDataURL("image/jpeg", 0.72);
 }
 function setPhoto(url){
   const users = getUsers(), u = users.find(x => x.id === me.id); if (!u) return false;
@@ -874,6 +899,7 @@ function openPark(id){ cur = id; renderPark(); const dlg = $("parkDlg"); if (!dl
 
 /* ---------- เหตุการณ์ ---------- */
 $("view").addEventListener("click", e => {
+  if (e.target.closest("[data-rankall]")) return openRank();
   const w = e.target.closest("[data-act=wish]"); if (w) { toggleWish(w.dataset.id); view(); return; }
   const t = e.target.closest("[data-act=toggle]");
   if (t) { toggleVisit(t.dataset.id); view(); return; }
@@ -888,17 +914,36 @@ $("chips").addEventListener("click", e => { const b = e.target.closest("[data-s]
 $("provs").addEventListener("click", e => { const b = e.target.closest("[data-p]"); if (b) { V.prov = b.dataset.p; view(); } });
 $("q").addEventListener("input", e => { V.q = e.target.value; view(); });
 document.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => { setTab(b.dataset.tab); window.scrollTo(0, 0); }));
-async function openRank(){
-  if (KV) { try { const j = await (await afetch("/api/kv")).json(); if (j.kv["tnp-users-v1"]) KV["tnp-users-v1"] = j.kv["tnp-users-v1"]; RANK = Object.assign(j.rank || {}, {[me.id]: RANK[me.id]}); } catch(e){ toast("โหลดอันดับล่าสุดไม่ได้ แสดงข้อมูลที่มีอยู่"); } }
-  const rows = getUsers().filter(u => u.status !== "suspended" && !u.noRank).map(u => {
+let RU = null, rankAt = 0; // RU = รายชื่อสมาชิกล่าสุดจากเซิร์ฟเวอร์ (ใช้แสดงอันดับเท่านั้น ไม่เขียนทับข้อมูลในเครื่อง)
+async function refreshRank(force){
+  if (!KV) return; if (!force && Date.now() - rankAt < 30000) return; rankAt = Date.now();
+  try { const j = await (await afetch("/api/kv")).json(); if (!j || !j.kv) throw 0;
+    if (j.kv["tnp-users-v1"]) RU = j.kv["tnp-users-v1"];
+    const mine = me && RANK[me.id]; RANK = j.rank || {}; if (me && mine) RANK[me.id] = mine; }
+  catch(e){ rankAt = 0; if (force) toast("โหลดอันดับล่าสุดไม่ได้ แสดงข้อมูลที่มีอยู่"); }
+}
+function rankRows(){
+  const rows = (RU || getUsers()).filter(u => u.status !== "suspended" && !u.noRank).map(u => {
     if (KV) { const r = RANK[u.id] || {}; return {u, n: r.n || 0, pv: r.pv || 0}; }
     const d = u.id === me.id ? data : jget(dataKey(u.id), {}) || {}, vs = PARKS.filter(p => d[p.id] && d[p.id].visited);
     return {u, n: vs.length, pv: new Set(vs.map(p => p.p)).size};
   }).sort((a, b) => b.n - a.n || b.pv - a.pv || a.u.name.localeCompare(b.u.name, "th"));
-  let rk = 0, prev = null;
-  $("rankBody").innerHTML = rows.map((x, i) => { const key = x.n + "/" + x.pv; if (key !== prev) { rk = i + 1; prev = key; }
-    const me_ = x.u.id === me.id, medal = ["🥇","🥈","🥉"][rk - 1] || rk;
-    return `<div class="flex items-center gap-3 rounded-xl border p-3 ${me_ ? "border-[#4f7a3a] bg-[#f3f8ec]" : "border-stone-200"}"><span class="w-8 text-center text-xl font-bold shrink-0">${medal}</span>${avt(x.u)}<div class="min-w-0 flex-1"><div class="font-semibold truncate">${esc(x.u.name)}${me_ ? ' <span class="text-xs text-stone-500">(คุณ)</span>' : ""}</div><div class="text-xs text-stone-500">${x.pv} จังหวัด</div></div><div class="serif text-xl font-extrabold">${x.n}<span class="text-sm font-medium text-stone-500"> / ${PARKS.length}</span></div></div>`; }).join("") || '<p class="text-stone-500">ยังไม่มีสมาชิก</p>';
+  let rk = 0, prev = null; rows.forEach((x, i) => { const key = x.n + "/" + x.pv; if (key !== prev) { rk = i + 1; prev = key; } x.rk = rk; });
+  return rows;
+}
+function rankItem(x){
+  const mine = me && x.u.id === me.id, medal = ["🥇","🥈","🥉"][x.rk - 1] || x.rk;
+  return `<div class="flex items-center gap-3 rounded-xl border p-3 ${mine ? "border-[#4f7a3a] bg-[#f3f8ec]" : "border-stone-200"}"><span class="w-8 text-center text-xl font-bold shrink-0">${medal}</span>${avt(x.u)}<div class="min-w-0 flex-1"><div class="font-semibold truncate">${esc(x.u.name)}${mine ? ' <span class="text-xs text-stone-500">(คุณ)</span>' : ""}</div><div class="text-xs text-stone-500">${x.pv} จังหวัด</div></div><div class="serif text-xl font-extrabold">${x.n}<span class="text-sm font-medium text-stone-500"> / ${PARKS.length}</span></div></div>`;
+}
+function paintTopRank(){
+  const el = $("topRankBody"); if (!el) return;
+  const all = rankRows().filter(x => x.n > 0), top = all.slice(0, 5), mine = all.find(x => x.u.id === me.id);
+  el.innerHTML = top.length ? top.map(rankItem).join("") + (mine && mine.rk > 5 ? `<p class="text-sm text-stone-600 text-center pt-1">คุณอยู่อันดับที่ <b>${mine.rk}</b> · เช็กอินแล้ว ${mine.n} แห่ง</p>` : "")
+    : '<p class="text-sm text-stone-500">ยังไม่มีใครเช็กอิน เป็นคนแรกได้เลย 🌱</p>';
+}
+async function openRank(){
+  await refreshRank(true);
+  $("rankBody").innerHTML = rankRows().map(rankItem).join("") || '<p class="text-stone-500">ยังไม่มีสมาชิก</p>';
   if (me.noRank) $("rankBody").insertAdjacentHTML("afterbegin", '<p class="text-sm text-[#6b4f3a] bg-[#b8892f]/15 rounded-lg px-3 py-2">แอดมินปิดการแสดงชื่อคุณในอันดับ คุณจึงไม่ปรากฏในรายการนี้</p>');
   if (!$("rankDlg").open) $("rankDlg").showModal();
 }
@@ -966,9 +1011,40 @@ $("loginForm").addEventListener("submit", async e => {
 });
 
 $("btnLogout").addEventListener("click", logout);
-const showSignup = (on) => { $("signupForm").hidden = !on; $("loginForm").hidden = on; $("sErr").textContent = ""; $("lErr").textContent = ""; };
-$("goSignup").addEventListener("click", () => showSignup(true));
-$("goLogin").addEventListener("click", () => showSignup(false));
+const showForm = (w) => { ["login","signup","reset"].forEach(k => $(k + "Form").hidden = k !== w); ["lErr","sErr","rErr"].forEach(i => $(i).textContent = ""); };
+const showSignup = (on) => showForm(on ? "signup" : "login");
+$("goSignup").addEventListener("click", () => showForm("signup"));
+$("goLogin").addEventListener("click", () => showForm("login"));
+$("goLogin2").addEventListener("click", () => showForm("login"));
+$("goForgot").addEventListener("click", () => { showForm("reset"); $("rUser").value = $("lUser").value; $("rUser").focus(); });
+$("resetForm").addEventListener("submit", async e => {
+  e.preventDefault(); const btn = e.submitter, err = $("rErr"); err.textContent = "";
+  const username = $("rUser").value.trim().toLowerCase(), code = $("rCode").value.trim(), pw = $("rPass").value;
+  if (!/^\d{6}$/.test(code)) { err.textContent = "โค้ดต้องเป็นตัวเลข 6 หลัก"; return; }
+  if (pw.length < 8) { err.textContent = "รหัสผ่านใหม่ต้องยาวอย่างน้อย 8 ตัว"; return; }
+  if (pw !== $("rPass2").value) { err.textContent = "รหัสผ่านสองช่องไม่ตรงกัน"; return; }
+  const lk = "reset:" + username, li = lockInfo(lk);
+  if (li.until > Date.now()) { err.textContent = "ใส่โค้ดผิดหลายครั้งเกินไป กรุณารออีกประมาณ " + Math.ceil((li.until - Date.now()) / 60000) + " นาที หรือขอโค้ดใหม่จากแอดมิน"; return; }
+  btn.disabled = true;
+  try {
+    await syncUsers();
+    const users = getUsers(), u = users.find(x => x.username === username); let ok = false;
+    if (u && u.resetHash && u.resetExp > Date.now()) ok = (await hashPw(code, u.resetSalt)) === u.resetHash; else await hashPw(code, ADMIN_SEED.salt);
+    if (!ok) {
+      const fails = (li.until && li.until <= Date.now() ? 0 : li.fails) + 1;
+      if (fails >= MAX_FAILS) { setLock(lk, {fails:0, until:Date.now() + LOCK_MS}); err.textContent = "ใส่โค้ดผิดครบ " + MAX_FAILS + " ครั้ง ระบบล็อก 5 นาที"; }
+      else { setLock(lk, {fails, until:0}); err.textContent = "โค้ดไม่ถูกต้องหรือหมดอายุ ขอโค้ดใหม่จากแอดมิน (เหลืออีก " + (MAX_FAILS - fails) + " ครั้ง)"; }
+      return;
+    }
+    if (u.status !== "active") { err.textContent = "บัญชีนี้ถูกระงับ กรุณาติดต่อแอดมิน"; return; }
+    u.salt = newSalt(); u.hash = await hashPw(pw, u.salt); delete u.resetHash; delete u.resetSalt; delete u.resetExp;
+    if (!saveUsers(users)) return;
+    setLock(lk, null); setLock(username, null);
+    err.textContent = await doLogin(username, pw, false);
+    if (!err.textContent) { e.target.reset(); showForm("login"); }
+  } catch(x){ err.textContent = x.message === "nocrypto" ? CRYPTO_ERR : "เกิดข้อผิดพลาด ลองใหม่อีกครั้ง"; }
+  finally { btn.disabled = false; }
+});
 $("signupForm").addEventListener("submit", async e => {
   e.preventDefault(); const btn = e.submitter, err = $("sErr"); err.textContent = "";
   const username = $("sUser").value.trim().toLowerCase(), name = $("sName").value.trim(), pw = $("sPass").value;
@@ -976,8 +1052,8 @@ $("signupForm").addEventListener("submit", async e => {
   if (!validUser(username)) { err.textContent = "ชื่อผู้ใช้ใช้ได้เฉพาะ a-z, 0-9 และ _ ยาว 3–20 ตัว"; return; }
   if (pw.length < 8) { err.textContent = "รหัสผ่านต้องยาวอย่างน้อย 8 ตัว"; return; }
   if (pw !== $("sPass2").value) { err.textContent = "รหัสผ่านสองช่องไม่ตรงกัน"; return; }
-  const users = getUsers(); if (users.some(x => x.username === username)) { err.textContent = "ชื่อผู้ใช้นี้ถูกใช้แล้ว"; return; }
-  btn.disabled = true;
+  btn.disabled = true; await syncUsers();
+  const users = getUsers(); if (users.some(x => x.username === username)) { err.textContent = "ชื่อผู้ใช้นี้ถูกใช้แล้ว"; btn.disabled = false; return; }
   const email = $("sEmail").value.trim(); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = "กรุณาใส่อีเมลจริง เช่น name@example.com"; btn.disabled = false; return; }
   try { const nu = await makeUser(username, name, pw, "member", "active"); nu.email = email; users.push(nu); if (!saveUsers(users)) return;
     if (GAS_URL) afetch("/api/welcome", {method:"POST", body:JSON.stringify({username})}).catch(() => {}); err.textContent = await doLogin(username, pw, false); if (!err.textContent) { e.target.reset(); showSignup(false); } }
@@ -993,7 +1069,7 @@ function userRow(u){
   const btn = (act, label, cls) => `<button class="btn ${cls} !py-1.5 !px-3 !text-sm" data-uact="${act}" data-uid="${u.id}">${label}</button>`;
   const active = u.status === "active";
   const actions = isAdm ? "" :
-    btn("reset", "รีเซ็ตรหัสผ่าน", "btn-line") +
+    btn("code", "ออกโค้ดรีเซ็ต", "btn-line") +
     (active ? btn("suspend", "ระงับ", "btn-line") : btn("activate", "เปิดใช้งาน", "btn-line")) +
     btn("delete", "ลบ", "btn-danger");
   return `<div class="rounded-xl border border-stone-200 p-3 flex flex-wrap items-center justify-between gap-3">
@@ -1002,18 +1078,16 @@ function userRow(u){
     <div class="flex flex-wrap items-center gap-2"><label class="text-sm flex items-center gap-1.5 mr-1 cursor-pointer"><input type="checkbox" data-norank="${u.id}" ${u.noRank ? "checked" : ""} class="size-4 accent-[#4f7a3a]"> ไม่ขึ้นอันดับ</label>${actions}</div></div>`;
 }
 function renderAdmin(){
-  $("apMembers").innerHTML = getUsers().map(userRow).join("");
+  const L = getUsers(); $("apMembers").innerHTML = L.map(userRow).join("");
+  const off = L.filter(u => u.status !== "active").length;
+  $("apCount").textContent = "สมาชิกทั้งหมด " + L.length + " คน" + (off ? " · ถูกระงับ " + off + " คน" : "");
 }
-function setATab(t){
-  document.querySelectorAll("[data-atab]").forEach(b => b.setAttribute("aria-pressed", b.dataset.atab === t));
-  $("apMembers").hidden = t !== "members"; $("addForm").hidden = t !== "add";
-}
-$("btnAdmin").addEventListener("click", () => { if (!requireAdmin()) return; renderAdmin(); setATab("members"); $("adminDlg").showModal(); });
+$("btnAdmin").addEventListener("click", async () => { if (!requireAdmin()) return; await syncUsers(); renderAdmin(); $("adminDlg").showModal(); });
 $("adminClose").addEventListener("click", () => $("adminDlg").close());
-document.querySelectorAll("[data-atab]").forEach(b => b.addEventListener("click", () => setATab(b.dataset.atab)));
 
 $("adminDlg").addEventListener("click", async e => {
   const b = e.target.closest("button[data-uact]"); if (!b || !requireAdmin()) return;
+  await syncUsers();
   const users = getUsers(), u = users.find(x => x.id === b.dataset.uid); if (!u || u.role === "admin") return;
   const act = b.dataset.uact;
   if (act === "activate") { u.status = "active"; toast("เปิดใช้งาน " + u.name + " แล้ว"); }
@@ -1022,15 +1096,13 @@ $("adminDlg").addEventListener("click", async e => {
     if (!confirm("ลบสมาชิก " + u.name + " และข้อมูลเช็กอินทั้งหมดของเขา? ย้อนกลับไม่ได้")) return;
     users.splice(users.indexOf(u), 1); try { localStorage.removeItem(dataKey(u.id)); if (KV) { delete KV[dataKey(u.id)]; afetch("/api/kv/" + encodeURIComponent(dataKey(u.id)), {method:"DELETE"}); } } catch(x){} toast("ลบสมาชิกแล้ว");
   }
-  else if (act === "reset") {
-    const A = "abcdefghjkmnpqrstuvwxyz23456789";
-    const gen = Array.from(crypto.getRandomValues(new Uint8Array(8)), x => A[x % A.length]).join("");
-    const np = prompt("ตั้งรหัสผ่านใหม่ให้ " + u.name + " (อย่างน้อย 8 ตัว)\nใช้รหัสสุ่มนี้ หรือพิมพ์แก้เองได้ แล้วบอกให้เขาทราบ:", gen);
-    if (np === null) return;
-    if (np.length < 8) { toast("รหัสผ่านต้องยาวอย่างน้อย 8 ตัว"); return; }
-    try { u.salt = newSalt(); u.hash = await hashPw(np, u.salt); } catch(x){ toast(CRYPTO_ERR); return; }
-    setLock(u.username, null);
-    toast("ตั้งรหัสผ่านใหม่ให้ " + u.name + " แล้ว");
+  else if (act === "code") {
+    const code = String(crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).padStart(6, "0");
+    try { u.resetSalt = newSalt(); u.resetHash = await hashPw(code, u.resetSalt); u.resetExp = Date.now() + 30 * 60000; } catch(x){ toast(CRYPTO_ERR); return; }
+    setLock("reset:" + u.username, null);
+    if (!saveUsers(users)) return; renderAdmin();
+    alert("โค้ดรีเซ็ตรหัสผ่านของ " + u.name + " (@" + u.username + ")\n\n" + code + "\n\nบอกโค้ดนี้ให้เจ้าของบัญชี ใช้ได้ภายใน 30 นาที ครั้งเดียว\nให้เขากด “ลืมรหัสผ่าน?” ที่หน้าเข้าสู่ระบบ แล้วกรอกโค้ดนี้พร้อมตั้งรหัสใหม่");
+    return;
   }
   saveUsers(users); renderAdmin();
 });
@@ -1042,17 +1114,6 @@ $("adminDlg").addEventListener("change", e => {
   if (saveUsers(users)) toast(c.checked ? "ซ่อน " + u.name + " จากอันดับแล้ว" : "แสดง " + u.name + " ในอันดับแล้ว");
   renderAdmin();
 });
-$("addForm").addEventListener("submit", async e => {
-  e.preventDefault(); if (!requireAdmin()) return; const err = $("aErr"); err.textContent = "";
-  const username = $("aUser").value.trim().toLowerCase(), name = $("aName").value.trim(), pw = $("aPass").value;
-  if (!validUser(username)) { err.textContent = "ชื่อผู้ใช้ใช้ได้เฉพาะ a-z, 0-9 และ _ ยาว 3–20 ตัว"; return; }
-  if (pw.length < 8) { err.textContent = "รหัสผ่านต้องยาวอย่างน้อย 8 ตัว"; return; }
-  const users = getUsers(); if (users.some(x => x.username === username)) { err.textContent = "ชื่อผู้ใช้นี้ถูกใช้แล้ว"; return; }
-  try { users.push(await makeUser(username, name, pw, "member", "active")); } catch(x){ err.textContent = CRYPTO_ERR; return; }
-  if (!saveUsers(users)) return;
-  e.target.reset(); renderAdmin(); setATab("members"); toast("เพิ่มสมาชิกแล้ว บอกรหัสผ่านเริ่มต้นให้เขาด้วย");
-});
-
 $("meForm").addEventListener("submit", async e => {
   e.preventDefault(); const err = $("mErr"); err.textContent = "";
   const users = getUsers(), u = users.find(x => x.id === me.id), np = $("mNew").value;
