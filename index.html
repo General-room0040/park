@@ -234,7 +234,15 @@
 <dialog id="rankDlg">
   <div class="topo text-white flex items-center justify-between px-5 py-4"><h2 class="serif text-xl font-extrabold">🏅 อันดับสมาชิก</h2><button id="rankClose" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-sm" aria-label="ปิด">ปิด ✕</button></div>
   <div class="p-5 overflow-y-auto" style="max-height:calc(100dvh - 10rem)"><div id="rankBody" class="grid gap-2"></div>
-    <p class="text-xs text-stone-500 mt-4">จัดอันดับจากจำนวนอุทยานที่เช็กอิน (ถ้าเท่ากัน ดูจำนวนจังหวัด) ของสมาชิกทุกคนที่เช็กอินแล้ว แสดงเฉพาะชื่อกับตัวย่อนามสกุลและจำนวน ไม่แสดงบันทึกส่วนตัว อันดับดึงข้อมูลล่าสุดทุกครั้งที่เปิดหน้านี้ ทุกเครื่องเห็นตรงกัน</p></div>
+    <p class="text-xs text-stone-500 mt-4">แตะที่ชื่อเพื่อดูรายชื่ออุทยานที่เพื่อนไปแล้ว · จัดอันดับจากจำนวนอุทยานที่เช็กอิน (ถ้าเท่ากัน ดูจำนวนจังหวัด) ของสมาชิกทุกคนที่เช็กอินแล้ว แสดงเฉพาะชื่อกับตัวย่อนามสกุลและจำนวน ไม่แสดงบันทึกส่วนตัว อันดับดึงข้อมูลล่าสุดทุกครั้งที่เปิดหน้านี้ ทุกเครื่องเห็นตรงกัน</p></div>
+</dialog>
+
+<dialog id="friendDlg">
+  <div class="topo text-white flex items-center justify-between gap-3 px-5 py-4"><div class="min-w-0"><h2 id="fHead" class="serif text-xl font-extrabold truncate"></h2><div id="fSub" class="text-sm" style="color:#dfe8c8"></div></div><button id="friendClose" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-sm shrink-0" aria-label="ปิด">ปิด ✕</button></div>
+  <div class="p-5 overflow-y-auto" style="max-height:calc(100dvh - 10rem)">
+    <p class="text-xs text-stone-500 mb-3"><span class="inline-block px-2 py-0.5 rounded-full bg-[#b8892f]/20 text-[#6b4f3a] font-semibold">สีทอง</span> = เพื่อนไปแล้ว แต่คุณยังไม่เคยไป</p>
+    <div id="fBody" class="grid gap-4"></div>
+  </div>
 </dialog>
 
 <dialog id="profDlg">
@@ -625,8 +633,8 @@ function stats(){
   $("pfill").style.width = pct + "%"; $("pbar").setAttribute("aria-valuenow", pct);
   $("sProv").textContent = new Set(vs.map(p => p.p)).size; $("sReg").textContent = new Set(vs.map(p => p.r)).size + "/" + REGIONS.length;
   renderBadges(vs);
-  { const pv = new Set(vs.map(p => p.p)).size, sig = me.id + ":" + done + "/" + pv;
-    if (KV && stats.sig !== sig) { stats.sig = sig; RANK[me.id] = {n:done, pv}; afetch("/api/rank/" + encodeURIComponent(me.id), {method:"PUT", headers:{"content-type":"application/json"}, body:JSON.stringify({n:done, pv})}).catch(() => {}); } }
+  { const pv = new Set(vs.map(p => p.p)).size, v = vs.map(p => +p.id.slice(1)).sort((a, b) => a - b), sig = me.id + ":" + v.join(",");
+    if (KV && stats.sig !== sig) { stats.sig = sig; RANK[me.id] = {n:done, pv, v}; afetch("/api/rank/" + encodeURIComponent(me.id), {method:"PUT", headers:{"content-type":"application/json"}, body:JSON.stringify({n:done, pv, v})}).catch(() => {}); } }
   $("greet").textContent = "สวัสดี คุณ" + me.name + (done ? " · เดินทางมาแล้วทั่วไทย" : " · เริ่มเช็กอินแห่งแรกกันเลย");
 }
 
@@ -915,14 +923,21 @@ function renderPark(){
       <label class="text-sm">วันที่ไปล่าสุด<input data-act="date" type="date" value="${esc(d.date || "")}" max="${today()}" class="field mt-1"></label>
       <div><div class="text-sm">ให้คะแนน</div><div class="flex">${stars}</div></div>
       <label class="text-sm md:col-span-2">บันทึกความทรงจำ<textarea data-act="note" rows="3" maxlength="2000" placeholder="วันนี้เจออะไรบ้าง…" class="field mt-1">${esc(d.note || "")}</textarea></label></div>` : ""}
+    <div id="friendsHere" class="text-sm text-stone-600"></div>
     <div class="flex flex-wrap gap-x-5 gap-y-1 text-sm"><a href="${p.url}" target="_blank" rel="noopener" class="underline text-stone-600">ข้อมูลอย่างเป็นทางการ (กรมอุทยานฯ) ↗</a><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.full + ' ' + p.p)}" target="_blank" rel="noopener" class="underline text-stone-600">🧭 นำทางด้วย Google Maps ↗</a><a href="tel:1362" class="underline text-stone-600">สายด่วนกรมอุทยานฯ 1362</a></div></div>`;
-  observePhotos();
+  observePhotos(); paintFriendsHere();
 }
-function openPark(id){ cur = id; renderPark(); const dlg = $("parkDlg"); if (!dlg.open) dlg.showModal(); }
+function paintFriendsHere(){
+  const el = $("friendsHere"); if (!el || !cur) return;
+  const names = rankRows().filter(x => x.u.id !== me.id && x.ids && x.ids.has(cur)).map(x => shortName(x.u));
+  el.innerHTML = names.length ? "👥 เพื่อนที่เคยไปที่นี่: <b>" + names.map(esc).join(", ") + "</b>" : "👥 ยังไม่มีเพื่อนคนไหนเช็กอินที่นี่";
+}
+function openPark(id){ cur = id; renderPark(); const dlg = $("parkDlg"); if (!dlg.open) dlg.showModal(); refreshRank().then(() => { if (cur === id) paintFriendsHere(); }); }
 
 /* ---------- เหตุการณ์ ---------- */
 $("view").addEventListener("click", e => {
   if (e.target.closest("[data-rankall]")) return openRank();
+  const fr = e.target.closest("[data-friend]"); if (fr) return openFriend(fr.dataset.friend);
   const w = e.target.closest("[data-act=wish]"); if (w) { toggleWish(w.dataset.id); view(); return; }
   const t = e.target.closest("[data-act=toggle]");
   if (t) { toggleVisit(t.dataset.id); view(); return; }
@@ -947,22 +962,31 @@ async function refreshRank(force){
 }
 function rankRows(){
   const rows = (RU || getUsers()).filter(u => u.status !== "suspended" && !u.noRank).map(u => {
-    if (KV) { const r = RANK[u.id] || {}; return {u, n: r.n || 0, pv: r.pv || 0}; }
-    const d = u.id === me.id ? data : jget(dataKey(u.id), {}) || {}, vs = PARKS.filter(p => d[p.id] && d[p.id].visited);
-    return {u, n: vs.length, pv: new Set(vs.map(p => p.p)).size};
+    if (u.id === me.id) { const vs = PARKS.filter(isV); return {u, n: vs.length, pv: new Set(vs.map(p => p.p)).size, ids: new Set(vs.map(p => p.id))}; }
+    if (KV) { const r = RANK[u.id] || {}; return {u, n: r.n || 0, pv: r.pv || 0, ids: Array.isArray(r.v) ? new Set(r.v.map(k => "p" + k)) : null}; }
+    const d = jget(dataKey(u.id), {}) || {}, vs = PARKS.filter(p => d[p.id] && d[p.id].visited);
+    return {u, n: vs.length, pv: new Set(vs.map(p => p.p)).size, ids: new Set(vs.map(p => p.id))};
   }).sort((a, b) => b.n - a.n || b.pv - a.pv || a.u.name.localeCompare(b.u.name, "th"));
   let rk = 0, prev = null; rows.forEach((x, i) => { const key = x.n + "/" + x.pv; if (key !== prev) { rk = i + 1; prev = key; } x.rk = rk; });
   return rows;
 }
 function rankItem(x){
   const mine = me && x.u.id === me.id, medal = ["🥇","🥈","🥉"][x.rk - 1] || x.rk;
-  return `<div class="flex items-center gap-3 rounded-xl border p-3 ${mine ? "border-[#4f7a3a] bg-[#f3f8ec]" : "border-stone-200"}"><span class="w-8 text-center text-xl font-bold shrink-0">${medal}</span>${avt(x.u)}<div class="min-w-0 flex-1"><div class="font-semibold truncate">${esc(shortName(x.u))}${mine ? ' <span class="text-xs text-stone-500">(คุณ)</span>' : ""}</div><div class="text-xs text-stone-500">${x.pv} จังหวัด</div></div><div class="serif text-xl font-extrabold">${x.n}<span class="text-sm font-medium text-stone-500"> / ${PARKS.length}</span></div></div>`;
+  return `<div data-friend="${esc(x.u.id)}" role="button" tabindex="0" class="cursor-pointer hover:bg-stone-50 flex items-center gap-3 rounded-xl border p-3 ${mine ? "border-[#4f7a3a] bg-[#f3f8ec]" : "border-stone-200"}"><span class="w-8 text-center text-xl font-bold shrink-0">${medal}</span>${avt(x.u)}<div class="min-w-0 flex-1"><div class="font-semibold truncate">${esc(shortName(x.u))}${mine ? ' <span class="text-xs text-stone-500">(คุณ)</span>' : ""}</div><div class="text-xs text-stone-500">${x.pv} จังหวัด</div></div><div class="serif text-xl font-extrabold">${x.n}<span class="text-sm font-medium text-stone-500"> / ${PARKS.length}</span></div></div>`;
 }
 function paintTopRank(){
   const el = $("topRankBody"); if (!el) return;
   const all = rankRows().filter(x => x.n > 0), top = all.slice(0, 5), mine = all.find(x => x.u.id === me.id);
   el.innerHTML = top.length ? top.map(rankItem).join("") + (mine && mine.rk > 5 ? `<p class="text-sm text-stone-600 text-center pt-1">คุณอยู่อันดับที่ <b>${mine.rk}</b> · เช็กอินแล้ว ${mine.n} แห่ง</p>` : "")
     : '<p class="text-sm text-stone-500">ยังไม่มีใครเช็กอิน เป็นคนแรกได้เลย 🌱</p>';
+}
+function openFriend(uid){
+  const x = rankRows().find(r => r.u.id === uid); if (!x) return;
+  $("fHead").textContent = shortName(x.u); $("fSub").textContent = "เช็กอินแล้ว " + x.n + " แห่ง · " + x.pv + " จังหวัด";
+  $("fBody").innerHTML = !x.ids ? '<p class="text-sm text-stone-500">รายชื่ออุทยานของเพื่อนคนนี้จะขึ้นเมื่อเขาเปิดแอปครั้งถัดไป</p>'
+    : REGIONS.map(r => { const L = PARKS.filter(p => p.r === r && x.ids.has(p.id)); if (!L.length) return "";
+      return `<div><h3 class="serif font-extrabold mb-2">${RC[r][0]} ภาค${r} <span class="text-sm font-medium text-stone-500">${L.length}/${PARKS.filter(p => p.r === r).length}</span></h3><div class="flex flex-wrap gap-2">${L.map(p => `<span class="text-sm rounded-full px-3 py-1 border ${isV(p) ? "bg-[#f3f8ec] border-[#4f7a3a] text-[#2d5230]" : "bg-[#b8892f]/15 border-[#b8892f]/50 text-[#6b4f3a] font-medium"}">${esc(p.n)}</span>`).join("")}</div></div>`; }).join("") || '<p class="text-sm text-stone-500">ยังไม่ได้เช็กอินอุทยานไหน</p>';
+  $("friendDlg").showModal();
 }
 async function openRank(){
   await refreshRank(true);
@@ -972,6 +996,10 @@ async function openRank(){
 }
 $("btnRank").addEventListener("click", () => { closeMenu(); openRank(); });
 $("rankClose").addEventListener("click", () => $("rankDlg").close());
+$("rankBody").addEventListener("click", e => { const f = e.target.closest("[data-friend]"); if (f) openFriend(f.dataset.friend); });
+$("rankBody").addEventListener("keydown", e => { const f = e.target.closest("[data-friend]"); if (f && e.key === "Enter") openFriend(f.dataset.friend); });
+$("friendClose").addEventListener("click", () => $("friendDlg").close());
+$("friendDlg").addEventListener("click", e => { if (e.target === $("friendDlg")) $("friendDlg").close(); });
 $("rankDlg").addEventListener("click", e => { if (e.target === $("rankDlg")) $("rankDlg").close(); });
 $("btnRandom").addEventListener("click", () => { const L = PARKS.filter(p => !isV(p)); if (!L.length) return toast("🎉 คุณไปครบทุกอุทยานแล้ว"); openPark(L[Math.floor(Math.random() * L.length)].id); });
 $("heroCap").addEventListener("click", e => openPark(e.currentTarget.dataset.id));
