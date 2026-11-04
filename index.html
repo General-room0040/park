@@ -24,6 +24,14 @@
   dialog::backdrop{background:rgba(20,36,28,.55)}
   [hidden]{display:none!important}
   @media (prefers-reduced-motion:no-preference){.bar{transition:width .5s ease}}
+  .layer{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0}
+  @media (prefers-reduced-motion:no-preference){.layer{transition:opacity 1.4s ease}}
+  .navtab{white-space:nowrap;padding:.45rem .95rem;border-radius:9999px;font-size:.9rem;font-weight:500;color:#e7eedb}
+  .navtab:hover{background:rgba(255,255,255,.12)}
+  .navtab[aria-pressed="true"]{background:rgba(255,255,255,.2);color:#fff}
+  #hero.compact .hero-full{display:none!important}
+  #hero.compact .hero-pad{padding-bottom:.75rem!important}
+  html{scroll-behavior:smooth}
 </style>
 </head>
 <body>
@@ -57,52 +65,100 @@
 
 <!-- ============ แอปหลัก ============ -->
 <div id="appView" hidden>
-<header class="topo text-white relative overflow-hidden">
-  <svg class="absolute right-0 bottom-0 w-full md:w-3/5 h-32 pointer-events-none" viewBox="0 0 400 64" preserveAspectRatio="xMaxYMax slice" aria-hidden="true"><path d="M0 64V34L45 12l35 24 45-30 55 40 45-26 70 36 50-30 55 38V64z" fill="#c9d5b0" opacity=".10"/><path d="M0 64V46L60 24l40 22 55-26 60 34 50-20 70 26 65-18V64z" fill="#c9d5b0" opacity=".14"/></svg>
-  <div class="relative max-w-6xl mx-auto px-4 py-5 md:py-8">
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      <div>
-        <h1 class="serif text-xl md:text-3xl font-extrabold leading-tight">สมุดเช็กอินอุทยานแห่งชาติไทย</h1>
-        <p class="text-sm mt-1" style="color:#c9d5b0">เลือกภูมิภาค แล้วบันทึกทุกที่ที่คุณไปมาแล้ว</p>
+<header id="hero" class="relative isolate overflow-hidden text-white topo">
+  <div id="heroA" class="layer" aria-hidden="true"></div><div id="heroB" class="layer" aria-hidden="true"></div>
+  <div class="absolute inset-0" style="background:linear-gradient(180deg,rgba(15,30,22,.80) 0%,rgba(15,30,22,.45) 45%,rgba(15,30,22,.88) 100%)" aria-hidden="true"></div>
+  <div class="relative max-w-6xl mx-auto px-4 pt-3 hero-pad pb-8">
+    <nav class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2" aria-label="เมนูหลัก">
+      <div class="flex items-center gap-2.5">
+        <span class="grid place-items-center size-10 rounded-xl bg-white/15 border border-white/25 text-xl" aria-hidden="true">🏞️</span>
+        <div class="leading-tight"><div class="serif font-extrabold text-base md:text-lg">สมุดเช็กอินอุทยานแห่งชาติไทย</div><div class="text-[11px] tracking-wide" style="color:#c9d5b0">THAILAND NATIONAL PARKS LOG</div></div>
       </div>
-      <div class="flex flex-wrap items-center gap-2">
-        <span id="whoami" class="text-sm px-3 py-2 rounded-lg bg-white/10 border border-white/20"></span>
-        <button id="btnAdmin" class="px-3 py-2 rounded-lg text-sm font-semibold border border-[#b8892f] bg-[#b8892f]/20 hover:bg-[#b8892f]/35" hidden>จัดการสมาชิก</button>
-        <button id="btnLogout" class="px-3 py-2 rounded-lg text-sm font-medium bg-white/10 hover:bg-white/20 border border-white/25">ออกจากระบบ</button>
+      <div class="relative order-2 md:order-3">
+        <button id="menuBtn" class="flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/25" aria-haspopup="true" aria-expanded="false">
+          <span id="uAvatar" class="grid place-items-center size-8 rounded-full text-sm font-bold" style="background:#c9d5b0;color:#1f3a2e">?</span>
+          <span id="uName" class="text-sm font-medium max-w-[9rem] truncate"></span><span class="text-xs" aria-hidden="true">▾</span>
+        </button>
+        <div id="menu" class="absolute right-0 mt-2 w-56 rounded-xl bg-white text-[#1f3a2e] shadow-xl border border-stone-200 p-1.5 z-40" hidden>
+          <button id="btnProfile" class="w-full text-left px-3 py-2 rounded-lg hover:bg-stone-100 text-sm">👤 โปรไฟล์ของฉัน</button>
+          <button id="btnAdmin" class="w-full text-left px-3 py-2 rounded-lg hover:bg-stone-100 text-sm" hidden>🛠️ จัดการสมาชิก</button>
+          <button id="btnLogout" class="w-full text-left px-3 py-2 rounded-lg hover:bg-[#fbeee9] text-sm text-[#8e3b25]">ออกจากระบบ</button>
+        </div>
+      </div>
+      <div class="order-3 md:order-2 w-full md:w-auto flex gap-1 overflow-x-auto scroll-x" role="tablist">
+        <button class="navtab" data-tab="parks" aria-pressed="true">🌲 อุทยานแห่งชาติ</button>
+        <button class="navtab" data-tab="news" aria-pressed="false">📢 ประชาสัมพันธ์</button>
+        <button class="navtab" data-tab="phones" aria-pressed="false">📞 เบอร์สำคัญ</button>
+      </div>
+    </nav>
+
+    <div class="hero-full mt-10 md:mt-14">
+      <p id="greet" class="text-sm md:text-base" style="color:#dfe8c8"></p>
+      <div class="mt-2 flex flex-wrap items-end gap-x-8 gap-y-4">
+        <div class="flex items-end gap-4">
+          <div class="serif font-extrabold leading-none"><span id="vCount" class="text-6xl md:text-8xl">0</span><span id="tCount" class="text-2xl md:text-4xl text-white/60"> / 0</span></div>
+          <div class="pb-1"><div class="text-sm" style="color:#dfe8c8">แห่งที่เคยไป</div><div id="vPct" class="serif text-xl md:text-2xl font-semibold">0%</div></div>
+        </div>
+        <div class="flex gap-3 pb-1">
+          <div class="rounded-xl bg-white/10 border border-white/20 backdrop-blur px-4 py-2"><div id="sProv" class="serif text-xl font-bold">0</div><div class="text-xs" style="color:#dfe8c8">จังหวัดที่เคยไป</div></div>
+          <div class="rounded-xl bg-white/10 border border-white/20 backdrop-blur px-4 py-2"><div id="sReg" class="serif text-xl font-bold">0/6</div><div class="text-xs" style="color:#dfe8c8">ภูมิภาค</div></div>
+        </div>
+      </div>
+      <div class="mt-5 h-2.5 rounded-full bg-white/20 overflow-hidden max-w-2xl" role="progressbar" aria-label="ความคืบหน้าโดยรวม" aria-valuemin="0" aria-valuemax="100" id="pbar">
+        <div id="pfill" class="bar h-full rounded-full" style="width:0;background:#c9d5b0"></div>
       </div>
     </div>
-    <div class="mt-6 flex items-end gap-4">
-      <div class="serif font-extrabold leading-none"><span id="vCount" class="text-6xl md:text-7xl">0</span><span id="tCount" class="text-2xl md:text-3xl text-white/60"> / 0</span></div>
-      <div class="pb-1"><div class="text-sm" style="color:#c9d5b0">แห่งที่เคยไป</div><div id="vPct" class="serif text-xl font-semibold">0%</div></div>
-    </div>
-    <div class="mt-4 h-3 rounded-full bg-white/15 overflow-hidden" role="progressbar" aria-label="ความคืบหน้าโดยรวม" aria-valuemin="0" aria-valuemax="100" id="pbar">
-      <div id="pfill" class="bar h-full rounded-full" style="width:0;background:#c9d5b0"></div>
-    </div>
+    <button id="heroCap" class="hero-full absolute right-4 bottom-2 text-[11px] text-white/80 hover:text-white underline-offset-2 hover:underline" hidden></button>
   </div>
 </header>
 
-<div class="sticky top-0 z-20 bg-[#eef1e8]/95 backdrop-blur border-b border-stone-300/60">
-  <div class="max-w-6xl mx-auto px-4 py-3 grid gap-2">
-    <input id="q" type="search" placeholder="ค้นหาอุทยานหรือจังหวัด เช่น เขาใหญ่ เชียงใหม่" aria-label="ค้นหา" class="field">
-    <div id="chips" class="scroll-x flex gap-2 items-center" hidden></div>
-    <div id="provs" class="scroll-x flex gap-2 items-center" hidden></div>
+<!-- ===== แท็บ: อุทยาน ===== -->
+<div id="tabParks">
+  <div class="sticky top-0 z-20 bg-[#eef1e8]/95 backdrop-blur border-b border-stone-300/60">
+    <div class="max-w-6xl mx-auto px-4 py-3 grid gap-2">
+      <input id="q" type="search" placeholder="ค้นหาอุทยานหรือจังหวัด เช่น เขาใหญ่ เชียงใหม่" aria-label="ค้นหา" class="field">
+      <div id="chips" class="scroll-x flex gap-2 items-center" hidden></div>
+      <div id="provs" class="scroll-x flex gap-2 items-center" hidden></div>
+    </div>
   </div>
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    <div id="crumb" class="flex flex-wrap items-center justify-between gap-3 mb-5"></div>
+    <section id="view"></section>
+    <div class="flex flex-wrap gap-2 justify-center mt-10">
+      <button id="btnExport" class="btn btn-line !py-1.5 !font-medium">ส่งออกข้อมูลฉัน</button>
+      <label class="btn btn-line !py-1.5 !font-medium cursor-pointer focus-within:outline">นำเข้า
+        <input id="fileImport" type="file" accept="application/json,.json" class="sr-only">
+      </label>
+    </div>
+  </main>
 </div>
 
-<main class="max-w-6xl mx-auto px-4 py-6">
-  <div id="crumb" class="flex flex-wrap items-center justify-between gap-3 mb-5"></div>
-  <section id="view"></section>
-  <div class="flex flex-wrap gap-2 justify-center mt-10">
-    <button id="btnExport" class="btn btn-line !py-1.5 !font-medium">ส่งออกข้อมูลฉัน</button>
-    <label class="btn btn-line !py-1.5 !font-medium cursor-pointer focus-within:outline">นำเข้า
-      <input id="fileImport" type="file" accept="application/json,.json" class="sr-only">
-    </label>
+<!-- ===== แท็บ: ประชาสัมพันธ์ ===== -->
+<section id="tabNews" class="max-w-4xl mx-auto px-4 py-8" hidden>
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+    <div><h2 class="serif text-2xl font-extrabold">ประชาสัมพันธ์</h2><p class="text-sm text-stone-500 mt-1">ข่าวสารและคำแนะนำสำหรับผู้ที่จะไปเที่ยวอุทยาน</p></div>
+    <button id="newsAdd" class="btn btn-main" hidden>＋ เพิ่มประกาศ</button>
   </div>
-</main>
+  <form id="newsForm" class="rounded-2xl bg-white border border-stone-200 p-4 grid gap-3 mb-5" hidden>
+    <label class="text-sm font-medium">หัวข้อ<input id="nTitle" class="field mt-1" maxlength="100" required></label>
+    <label class="text-sm font-medium">รายละเอียด<textarea id="nBody" class="field mt-1" rows="4" maxlength="1000" required></textarea></label>
+    <label class="flex items-center gap-2 text-sm"><input id="nPin" type="checkbox" class="size-4 accent-[#4f7a3a]"> ปักหมุดไว้บนสุด</label>
+    <div class="flex gap-2"><button class="btn btn-main" type="submit">โพสต์ประกาศ</button><button class="btn btn-line" type="button" id="newsCancel">ยกเลิก</button></div>
+  </form>
+  <div id="newsList" class="grid gap-4"></div>
+  <p class="text-xs text-stone-500 mt-4">ประกาศที่แอดมินโพสต์จะเก็บในเบราว์เซอร์เครื่องนี้ ยังไม่แชร์ข้ามเครื่อง</p>
+</section>
+
+<!-- ===== แท็บ: เบอร์สำคัญ ===== -->
+<section id="tabPhones" class="max-w-6xl mx-auto px-4 py-8" hidden>
+  <div class="mb-5"><h2 class="serif text-2xl font-extrabold">เบอร์โทรสำคัญ</h2><p class="text-sm text-stone-500 mt-1">แตะเบอร์เพื่อโทรได้ทันทีบนมือถือ · ควรบันทึกไว้ก่อนออกเดินทาง เพราะในอุทยานบางแห่งสัญญาณมือถืออาจไม่ถึง</p></div>
+  <div id="phoneList" class="grid gap-8"></div>
+</section>
+
 <footer class="text-center text-xs text-stone-500 py-8 px-4 grid gap-1">
   <p>รายชื่อจากกรมอุทยานแห่งชาติ สัตว์ป่า และพันธุ์พืช · แบ่งภูมิภาคตามเกณฑ์ราชบัณฑิตยสภา</p>
   <p>รูปภาพจาก Wikipedia / Wikimedia Commons ตามสัญญาอนุญาตของผู้เผยแพร่แต่ละภาพ · อุทยานที่ยังไม่มีรูปจะแสดงภาพประกอบแทน</p>
-  <p>ข้อมูลเช็กอินบันทึกในเบราว์เซอร์เครื่องนี้เท่านั้น · ควรกดส่งออกเก็บสำรองไว้เป็นระยะ</p>
+  <p>ข้อมูลเช็กอินและโปรไฟล์บันทึกในเบราว์เซอร์เครื่องนี้เท่านั้น · ควรกดส่งออกเก็บสำรองไว้เป็นระยะ</p>
 </footer>
 </div>
 
@@ -115,7 +171,6 @@
   <div class="px-5 pt-4 flex gap-2 scroll-x" role="tablist">
     <button class="chip" data-atab="members" aria-pressed="true">สมาชิกทั้งหมด</button>
     <button class="chip" data-atab="add" aria-pressed="false">เพิ่มสมาชิก</button>
-    <button class="chip" data-atab="me" aria-pressed="false">รหัสผ่านของฉัน</button>
   </div>
   <div class="p-5 overflow-y-auto" style="max-height:calc(100vh - 11rem)">
     <div id="apMembers" class="grid gap-3"></div>
@@ -125,6 +180,31 @@
       <label class="text-sm font-medium">รหัสผ่านเริ่มต้น <span class="font-normal text-stone-500">(อย่างน้อย 8 ตัว)</span><input id="aPass" type="text" class="field mt-1" minlength="8" autocomplete="off" required></label>
       <p id="aErr" class="text-sm text-[#8e3b25] min-h-5" role="alert"></p>
       <button class="btn btn-main" type="submit">เพิ่มสมาชิก</button>
+    </form>
+  </div>
+</dialog>
+
+<dialog id="profDlg">
+  <div class="topo text-white flex items-center gap-4 px-5 py-5">
+    <span id="pAvatar" class="grid place-items-center size-14 rounded-full text-2xl font-bold shrink-0" style="background:#c9d5b0;color:#1f3a2e">?</span>
+    <div class="min-w-0 flex-1"><div id="pHead" class="serif text-xl font-extrabold truncate"></div><div id="pSub" class="text-sm" style="color:#dfe8c8"></div></div>
+    <button id="profClose" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-sm shrink-0" aria-label="ปิด">ปิด ✕</button>
+  </div>
+  <div class="px-5 pt-4 flex gap-2" role="tablist">
+    <button class="chip" data-ptab="info" aria-pressed="true">ข้อมูลส่วนตัว</button>
+    <button class="chip" data-ptab="pw" aria-pressed="false">เปลี่ยนรหัสผ่าน</button>
+  </div>
+  <div class="p-5 overflow-y-auto" style="max-height:calc(100vh - 14rem)">
+    <form id="profForm" class="grid gap-3" novalidate>
+      <label class="text-sm font-medium">ชื่อที่แสดง<input id="pName" class="field mt-1" maxlength="40" autocomplete="name"></label>
+      <label class="text-sm font-medium">ที่อยู่<textarea id="pAddr" class="field mt-1" rows="3" maxlength="200" autocomplete="street-address" placeholder="บ้านเลขที่ ถนน ตำบล อำเภอ จังหวัด รหัสไปรษณีย์"></textarea></label>
+      <div class="grid gap-3 sm:grid-cols-2">
+        <label class="text-sm font-medium">เบอร์โทร<input id="pPhone" type="tel" inputmode="tel" class="field mt-1" maxlength="20" autocomplete="tel" placeholder="เช่น 081-234-5678"></label>
+        <label class="text-sm font-medium">อีเมล<input id="pEmail" type="email" class="field mt-1" maxlength="80" autocomplete="email" placeholder="name@example.com"></label>
+      </div>
+      <p class="text-xs text-stone-500">ข้อมูลนี้เก็บในเบราว์เซอร์เครื่องนี้ และแอดมินมองเห็นเบอร์โทรกับอีเมลได้ในหน้าจัดการสมาชิก</p>
+      <p id="pErr" class="text-sm text-[#8e3b25] min-h-5" role="alert"></p>
+      <button class="btn btn-main" type="submit">บันทึกโปรไฟล์</button>
     </form>
     <form id="meForm" class="grid gap-3" hidden>
       <label class="text-sm font-medium">รหัสผ่านปัจจุบัน<input id="mOld" type="password" class="field mt-1" autocomplete="current-password" required></label>
@@ -403,6 +483,8 @@ function logout(){ localStorage.removeItem(SESS_KEY); sessionStorage.removeItem(
 function showAuth(){
   $("appView").hidden = true; $("authView").hidden = false;
   $("lPass").value = ""; $("lErr").textContent = "";
+  const hid = HERO.find(id => IMG[id]); // ใช้รูปอุทยานที่เคยโหลดไว้เป็นพื้นหลัง
+  if (hid) Object.assign($("authView").style, {backgroundImage:"linear-gradient(rgba(20,36,28,.62),rgba(20,36,28,.82)),url('" + IMG[hid] + "')", backgroundSize:"cover", backgroundPosition:"center"});
   setTimeout(() => $("lUser").focus(), 0);
 }
 function enter(u){
@@ -414,8 +496,7 @@ function enter(u){
   }
   migrateData(u.id); data = jget(dataKey(u.id), {});
   $("authView").hidden = true; $("appView").hidden = false;
-  $("whoami").textContent = u.name + (u.role === "admin" ? " · แอดมิน" : "");
-  $("btnAdmin").hidden = u.role !== "admin";
+  renderUser();
   resetUI();
 }
 
@@ -423,22 +504,25 @@ function enter(u){
 const save = () => { jset(dataKey(me.id), data); };
 const isV = (p) => !!(data[p.id] && data[p.id].visited);
 const byId = Object.fromEntries(PARKS.map(p => [p.id, p]));
-const V = {r:null, prov:"all", q:"", s:"all"}; // r: null = หน้าแรก, "all" = ทุกภาค, หรือชื่อภาค
+const V = {tab:"parks", r:null, prov:"all", q:"", s:"all"}; // r: null = หน้าแรก, "all" = ทุกภาค, หรือชื่อภาค
 let cur = null; // อุทยานที่เปิดดูรายละเอียดอยู่
+const initial = (s) => [...String(s || "?").trim()][0] || "?";
 
 function stats(){
-  const done = PARKS.filter(isV).length, total = PARKS.length, pct = Math.round(done / total * 100);
+  const vs = PARKS.filter(isV), done = vs.length, total = PARKS.length, pct = Math.round(done / total * 100);
   $("vCount").textContent = done; $("tCount").textContent = " / " + total; $("vPct").textContent = pct + "%";
   $("pfill").style.width = pct + "%"; $("pbar").setAttribute("aria-valuenow", pct);
+  $("sProv").textContent = new Set(vs.map(p => p.p)).size; $("sReg").textContent = new Set(vs.map(p => p.r)).size + "/" + REGIONS.length;
+  $("greet").textContent = "สวัสดี คุณ" + me.name + (done ? " · เดินทางมาแล้วทั่วไทย" : " · เริ่มเช็กอินแห่งแรกกันเลย");
 }
 
 /* ---------- รูปจริงจาก Wikipedia (ค้นตอนเปิดดู แล้วจำไว้ในเครื่อง) ---------- */
-const IMG_KEY = "tnp-img-v1";
+const IMG_KEY = "tnp-img-v2";
 let IMG = jget(IMG_KEY, {});            // id -> url | "" (ไม่มีรูป)
-const PENDING = new Set(), QUEUE = []; let running = 0;
+const PENDING = new Set(), QUEUE = [], WAIT = {}; let running = 0;
 const norm = (s) => s.replace(/\([^)]*\)/g, "").replace(/[\s–—\-]/g, "");
 async function findPhoto(p){
-  const qs = new URLSearchParams({format:"json", origin:"*", action:"query", generator:"search", gsrsearch:p.full, gsrnamespace:"0", gsrlimit:"6", prop:"pageimages", piprop:"thumbnail", pithumbsize:"720", pilimit:"6"});
+  const qs = new URLSearchParams({format:"json", origin:"*", action:"query", generator:"search", gsrsearch:p.full, gsrnamespace:"0", gsrlimit:"6", prop:"pageimages", piprop:"thumbnail", pithumbsize:"960", pilimit:"6"});
   const r = await fetch("https://th.wikipedia.org/w/api.php?" + qs); if (!r.ok) throw new Error("http");
   const j = await r.json(), pages = Object.values((j.query && j.query.pages) || {}).sort((a, b) => a.index - b.index);
   const want = [norm(p.full), norm("อุทยานแห่งชาติ" + p.n.split(/\s*[–—\-]\s*/)[0])];
@@ -448,34 +532,68 @@ async function findPhoto(p){
 function pump(){
   while (running < 4 && QUEUE.length) {
     const id = QUEUE.shift(); running++;
-    findPhoto(byId[id]).then(u => { IMG[id] = u; try { localStorage.setItem(IMG_KEY, JSON.stringify(IMG)); } catch(e){} if (u) setImg(id, u); })
-      .catch(() => {}).finally(() => { running--; PENDING.delete(id); pump(); });
+    findPhoto(byId[id]).then(u => { IMG[id] = u; try { localStorage.setItem(IMG_KEY, JSON.stringify(IMG)); } catch(e){} })
+      .catch(() => {}).finally(() => { running--; PENDING.delete(id); (WAIT[id] || []).forEach(f => f(IMG[id] || "")); delete WAIT[id]; pump(); });
   }
 }
-function loadPhoto(id){ const u = IMG[id]; if (u) return setImg(id, u); if (u === "" || PENDING.has(id)) return; PENDING.add(id); QUEUE.push(id); pump(); }
-function setImg(id, url){
-  document.querySelectorAll('.ph[data-id="' + id + '"]').forEach(el => {
-    if (el.dataset.img) return; el.dataset.img = "1";
-    const im = new Image(); im.alt = ""; im.decoding = "async"; im.className = "absolute inset-0 w-full h-full object-cover";
-    im.onload = () => el.insertBefore(im, el.querySelector(".ov")); im.onerror = () => { delete el.dataset.img; };
-    im.src = url;
-  });
+function getPhoto(id){
+  if (IMG[id] !== undefined) return Promise.resolve(IMG[id]);
+  return new Promise(res => { (WAIT[id] = WAIT[id] || []).push(res); if (!PENDING.has(id)) { PENDING.add(id); QUEUE.push(id); pump(); } });
 }
+function putImg(el, url){
+  if (el.dataset.img) return; el.dataset.img = "1";
+  const im = new Image(); im.alt = ""; im.decoding = "async"; im.className = "absolute inset-0 w-full h-full object-cover";
+  im.onload = () => el.insertBefore(im, el.querySelector(".ov")); im.onerror = () => { delete el.dataset.img; };
+  im.src = url;
+}
+const loadPhoto = (id) => getPhoto(id).then(u => { if (u) document.querySelectorAll('.ph[data-id="' + id + '"]').forEach(el => putImg(el, u)); });
 const io = "IntersectionObserver" in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { io.unobserve(e.target); loadPhoto(e.target.dataset.id); } }), {rootMargin:"300px"}) : null;
 function observePhotos(){ document.querySelectorAll(".ph[data-id]").forEach(el => { if (el.dataset.img) return; io ? io.observe(el) : loadPhoto(el.dataset.id); }); }
+
+/* ---------- ธีม: รูปอุทยานเป็นพื้นหลังหัวเว็บและปกหมวดภูมิภาค ---------- */
+const HERO = ["p640","p915","p865","p1019","p945","p643","p997","p957","p642","p971"];
+const FEAT = {"เหนือ":["p915","p914","p925","p937"], "ตะวันออกเฉียงเหนือ":["p945","p640","p957","p946","p899"], "กลาง":["p891","p985","p983","p790","p960"],
+  "ตะวันออก":["p971","p990","p986","p961"], "ตะวันตก":["p643","p642","p1011","p1016"], "ใต้":["p865","p1019","p1010","p997","p996"]};
+const heroUrls = []; let heroI = 0, heroLayer = 0, heroStarted = false;
+const reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+function heroShow(i){
+  const h = heroUrls[i]; if (!h) return;
+  const on = $(heroLayer ? "heroB" : "heroA"), off = $(heroLayer ? "heroA" : "heroB"), im = new Image();
+  im.onload = () => { on.style.backgroundImage = "url('" + h.u + "')"; on.style.opacity = 1; off.style.opacity = 0; heroLayer ^= 1;
+    const c = $("heroCap"); c.hidden = false; c.dataset.id = h.id; c.textContent = "📷 " + byId[h.id].full; };
+  im.src = h.u;
+}
+function startHero(){
+  if (heroStarted) return; heroStarted = true;
+  HERO.forEach(id => getPhoto(id).then(u => { if (u) { heroUrls.push({u, id}); if (heroUrls.length === 1) heroShow(0); } }));
+  if (!reduceMotion) setInterval(() => { if (heroUrls.length > 1 && !document.hidden && V.tab === "parks") { heroI = (heroI + 1) % heroUrls.length; heroShow(heroI); } }, 7000);
+}
+const COVER = {};
+async function coverFor(r){
+  if (COVER[r] !== undefined) return COVER[r];
+  const ids = [...new Set([...FEAT[r], ...PARKS.filter(p => p.r === r).map(p => p.id)])].filter(id => byId[id] && byId[id].r === r).slice(0, 6);
+  for (const id of ids) { const u = await getPhoto(id); if (u) return COVER[r] = {u, id}; }
+  return COVER[r] = null;
+}
+function applyCovers(){
+  REGIONS.forEach(async r => { const c = await coverFor(r); if (!c) return;
+    document.querySelectorAll('.tcover[data-r="' + r + '"]').forEach(el => { putImg(el, c.u); const cap = el.querySelector(".ov"); if (cap) cap.textContent = "📷 " + byId[c.id].full; }); });
+}
 
 /* ---------- ส่วนประกอบหน้าจอ ---------- */
 const scene = (r) => `<svg class="absolute inset-0 w-full h-full" viewBox="0 0 400 64" preserveAspectRatio="xMidYMax slice" aria-hidden="true">${SCENE[RSCENE[r]]}</svg>`;
 function photo(p, cls, btn){
   const v = isV(p);
   return `<div class="ph relative overflow-hidden ${cls}" data-id="${p.id}" style="background:${RC[p.r][1]}">${scene(p.r)}
-    <div class="ov absolute inset-x-0 bottom-0 px-3 pt-8 pb-2 text-white text-xs font-medium" style="background:linear-gradient(transparent,rgba(20,36,28,.75))">📍 จ.${esc(p.p)} · ภาค${p.r}</div>
+    <div class="ov absolute inset-x-0 bottom-0 px-3 pt-8 pb-2 text-white text-xs font-medium" style="background:linear-gradient(transparent,rgba(20,36,28,.78))">📍 จ.${esc(p.p)} · ภาค${p.r}</div>
     ${btn ? `<button data-act="toggle" data-id="${p.id}" aria-pressed="${v}" aria-label="${v ? "ยกเลิกเช็กอิน " : "เช็กอินที่ "}${esc(p.full)}" class="absolute top-2 right-2 z-10 size-10 rounded-full border-2 text-lg font-bold shadow ${v ? "text-white border-white" : "bg-white/90 border-white text-stone-400 hover:text-[#4f7a3a]"}" ${v ? 'style="background:#4f7a3a"' : ""}>✓</button>` : ""}</div>`;
 }
 function tile(r){
   const L = PARKS.filter(p => p.r === r), v = L.filter(isV).length, pct = Math.round(v / L.length * 100);
-  return `<button data-region="${r}" class="group text-left rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition border border-stone-200">
-    <div class="relative h-36" style="background:${RC[r][1]}">${scene(r)}<span class="absolute left-4 top-3 text-4xl" aria-hidden="true">${RC[r][0]}</span></div>
+  return `<button data-region="${r}" class="group text-left rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition border border-stone-200">
+    <div class="tcover relative h-44" data-r="${r}" style="background:${RC[r][1]}">${scene(r)}
+      <div class="ov absolute inset-x-0 bottom-0 px-3 pt-10 pb-2 text-white text-[11px]" style="background:linear-gradient(transparent,rgba(20,36,28,.7))"></div>
+      <span class="absolute left-3 top-3 grid place-items-center size-10 rounded-full bg-white/90 text-xl shadow z-10" aria-hidden="true">${RC[r][0]}</span></div>
     <div class="p-4"><div class="flex items-baseline justify-between"><h3 class="serif text-lg font-extrabold">ภาค${r}</h3><span class="text-sm text-stone-500">${L.length} แห่ง</span></div>
       <div class="mt-2 h-2 rounded-full bg-stone-100 overflow-hidden"><div class="bar h-full rounded-full" style="width:${pct}%;background:#4f7a3a"></div></div>
       <div class="mt-1.5 flex justify-between text-xs text-stone-500"><span>ไปแล้ว ${v}/${L.length}</span><span class="font-semibold text-[#2d5230] group-hover:underline">ดูอุทยาน →</span></div></div></button>`;
@@ -490,19 +608,20 @@ function card(p){
 }
 const chip = (attr, key, label, on) => `<button class="chip" ${attr}="${esc(key)}" aria-pressed="${on}">${esc(label)}</button>`;
 
+function setHero(){ $("hero").classList.toggle("compact", !(V.tab === "parks" && V.r === null && !V.q.trim())); }
 function view(){
   const q = V.q.trim().toLowerCase(), home = V.r === null && !q, inRegion = REGIONS.includes(V.r);
-  stats();
+  stats(); setHero();
   if (home) {
     $("chips").hidden = true; $("provs").hidden = true;
     $("crumb").innerHTML = `<h2 class="serif text-xl md:text-2xl font-extrabold">เลือกหมวดภูมิภาค</h2><button data-region="all" class="btn btn-line !py-1.5">ดูทั้งหมด ${PARKS.length} แห่ง</button>`;
-    $("view").innerHTML = `<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">${REGIONS.map(tile).join("")}</div>`;
-    observePhotos(); return;
+    $("view").innerHTML = `<div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">${REGIONS.map(tile).join("")}</div>`;
+    applyCovers(); return;
   }
   const L = PARKS.filter(p => (!inRegion || p.r === V.r) && (!inRegion || V.prov === "all" || p.p === V.prov) &&
     (V.s === "all" || (V.s === "yes") === isV(p)) && (!q || p.full.toLowerCase().includes(q) || p.p.includes(q)));
   const title = q ? "ผลการค้นหา “" + V.q.trim() + "”" : inRegion ? "ภาค" + V.r : "อุทยานแห่งชาติทั้งหมด";
-  $("crumb").innerHTML = `<div class="flex items-center gap-3"><button data-back class="btn btn-line !py-1.5">← หมวดภูมิภาค</button><h2 class="serif text-xl md:text-2xl font-extrabold">${inRegion ? RC[V.r][0] + " " : ""}${esc(title)} <span class="text-base font-medium text-stone-500">${L.length} แห่ง</span></h2></div>`;
+  $("crumb").innerHTML = `<div class="flex flex-wrap items-center gap-3"><button data-back class="btn btn-line !py-1.5">← หมวดภูมิภาค</button><h2 class="serif text-xl md:text-2xl font-extrabold">${inRegion ? RC[V.r][0] + " " : ""}${esc(title)} <span class="text-base font-medium text-stone-500">${L.length} แห่ง</span></h2></div>`;
   $("chips").hidden = false;
   $("chips").innerHTML = [["all","ทั้งหมด"],["yes","ไปแล้ว"],["no","ยังไม่ไป"]].map(([k, l]) => chip("data-s", k, l, V.s === k)).join("");
   if (inRegion && !q) {
@@ -519,10 +638,82 @@ function view(){
   }).join("");
   observePhotos();
 }
-function resetUI(){ V.r = null; V.prov = "all"; V.q = ""; V.s = "all"; $("q").value = ""; cur = null; view(); window.scrollTo(0, 0); }
+function resetUI(){ V.tab = "parks"; V.r = null; V.prov = "all"; V.q = ""; V.s = "all"; $("q").value = ""; cur = null; setTab("parks"); startHero(); window.scrollTo(0, 0); }
 const go = (r) => { V.r = r; V.prov = "all"; view(); window.scrollTo(0, 0); };
-
 function toggleVisit(id){ const d = data[id] = data[id] || {}; d.visited = !d.visited; if (d.visited && !d.date) d.date = today(); save(); }
+
+/* ---------- แท็บ ---------- */
+function setTab(t){
+  V.tab = t;
+  document.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-pressed", b.dataset.tab === t));
+  $("tabParks").hidden = t !== "parks"; $("tabNews").hidden = t !== "news"; $("tabPhones").hidden = t !== "phones";
+  if (t === "news") renderNews(); if (t === "phones") renderPhones();
+  view();
+}
+
+/* ---------- ประชาสัมพันธ์ ---------- */
+const NEWS_KEY = "tnp-news-v1";
+const NEWS_SEED = [
+  {id:"n-welcome", pin:true, title:"ยินดีต้อนรับสู่สมุดเช็กอินอุทยานแห่งชาติไทย", body:"เลือกภูมิภาค แล้วกดปุ่ม ✓ ที่มุมรูปของอุทยานเพื่อเช็กอิน กดที่การ์ดเพื่อบันทึกวันที่ไป ให้คะแนน และเขียนความทรงจำ ข้อมูลของคุณเก็บในเบราว์เซอร์เครื่องนี้ ควรกด “ส่งออกข้อมูลฉัน” เก็บสำรองไว้เป็นระยะ"},
+  {id:"n-book", pin:false, title:"จองที่พักและบริการในอุทยานล่วงหน้า", body:"กรมอุทยานแห่งชาติฯ มีระบบจองบ้านพักออนไลน์ที่ nps.dnp.go.th ช่วงวันหยุดยาวควรจองล่วงหน้า และตรวจสอบเงื่อนไขล่าสุดกับกรมอุทยานฯ ก่อนเดินทาง"},
+  {id:"n-check", pin:false, title:"เช็กสถานะอุทยานก่อนออกเดินทาง", body:"อุทยานบางแห่งอาจปิดชั่วคราวตามฤดูกาลหรือสภาพอากาศ โดยเฉพาะอุทยานทางทะเลและเส้นทางเดินป่า สอบถามสถานะล่าสุดได้ที่สายด่วนกรมอุทยานฯ 1362 (24 ชั่วโมง)"},
+  {id:"n-safe", pin:false, title:"เที่ยวอย่างปลอดภัยและรักษาธรรมชาติ", body:"แจ้งเส้นทางและเวลากลับให้คนใกล้ชิดทราบ บันทึกเบอร์ฉุกเฉินไว้ในเครื่อง ไม่ให้อาหารสัตว์ป่า และนำขยะกลับออกมาทุกครั้ง ดูเบอร์สำคัญได้ที่แท็บ “เบอร์สำคัญ”"}
+];
+function getNews(){ let n = jget(NEWS_KEY, null); if (!n) { n = NEWS_SEED.map(x => ({...x, date: today()})); jset(NEWS_KEY, n); } return n; }
+function renderNews(){
+  const n = getNews().slice().sort((a, b) => (b.pin - a.pin) || (b.date || "").localeCompare(a.date || ""));
+  const adm = me && me.role === "admin"; $("newsAdd").hidden = !adm;
+  $("newsList").innerHTML = n.map(x => `<article class="rounded-2xl bg-white border border-stone-200 shadow-sm p-5">
+    <div class="flex items-start justify-between gap-3"><div>${x.pin ? '<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#b8892f]/20 text-[#6b4f3a]">📌 ปักหมุด</span>' : ""}
+    <h3 class="serif text-lg font-extrabold mt-1">${esc(x.title)}</h3><div class="text-xs text-stone-500 mt-0.5">${fmtDate(x.date)}</div></div>
+    ${adm ? `<button data-ndel="${esc(x.id)}" class="text-xs btn btn-danger !py-1 !px-2.5">ลบ</button>` : ""}</div>
+    <p class="mt-3 text-[15px] leading-relaxed text-stone-700 whitespace-pre-line">${esc(x.body)}</p></article>`).join("") || '<p class="text-stone-500">ยังไม่มีประกาศ</p>';
+}
+
+/* ---------- เบอร์โทรสำคัญ (ตรวจกับแหล่งข้อมูลทางการ/สื่อรวบรวมแล้ว) ---------- */
+const PHONES = [
+  {t:"🚨 เหตุฉุกเฉิน", c:"#fbeee9", L:[["191","แจ้งเหตุด่วนเหตุร้าย (ตำรวจ)",""],["1669","เจ็บป่วยฉุกเฉิน รถพยาบาลทั่วประเทศ",""],["199","แจ้งเหตุไฟไหม้ / ดับเพลิง",""],["1196","แจ้งอุบัติเหตุทางน้ำ","เหมาะกับอุทยานทางทะเล"],["1784","กรมป้องกันและบรรเทาสาธารณภัย","สายด่วนสาธารณภัย"],["192","ศูนย์เตือนภัยพิบัติแห่งชาติ",""]]},
+  {t:"🌲 อุทยานและท่องเที่ยว", c:"#dfe8c8", L:[["1362","สายด่วนกรมอุทยานแห่งชาติ สัตว์ป่า และพันธุ์พืช","ตลอด 24 ชั่วโมง"],["02-561-0777","ศูนย์ราชการสะดวก กรมอุทยานฯ","ต่อ 1240 · วันและเวลาราชการ"],["1155","ตำรวจท่องเที่ยว","ช่วยเหลือนักท่องเที่ยว"],["1672","การท่องเที่ยวแห่งประเทศไทย (ททท.)","ศูนย์บริการข่าวสารท่องเที่ยว"]]},
+  {t:"🚗 การเดินทางและสภาพอากาศ", c:"#cfe2e6", L:[["1193","ตำรวจทางหลวง","แจ้งอุบัติเหตุบนทางหลวง"],["1586","สายด่วนกรมทางหลวง",""],["1197","ศูนย์ข้อมูลจราจร",""],["1182","ศูนย์บริการข่าวอากาศ กรมอุตุนิยมวิทยา",""]]}
+];
+function renderPhones(){
+  const num = (n) => n.replace(/[^\d]/g, "");
+  $("phoneList").innerHTML = PHONES.map(g => `<div><h3 class="serif text-lg font-extrabold mb-3">${g.t}</h3><div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">${g.L.map(([n, l, s]) =>
+    `<a href="tel:${num(n)}" class="flex items-center gap-4 rounded-2xl bg-white border border-stone-200 shadow-sm hover:shadow-md hover:border-[#4f7a3a] transition p-4">
+      <span class="serif text-2xl font-extrabold rounded-xl px-3 py-2 min-w-[4.5rem] text-center" style="background:${g.c}">${esc(n)}</span>
+      <span class="leading-snug"><span class="block font-semibold text-[15px]">${esc(l)}</span>${s ? `<span class="block text-xs text-stone-500 mt-0.5">${esc(s)}</span>` : ""}<span class="block text-xs font-semibold text-[#2d5230] mt-1">📞 แตะเพื่อโทร</span></span></a>`).join("")}</div></div>`).join("") +
+    '<p class="text-xs text-stone-500">เบอร์อาจมีการเปลี่ยนแปลง ควรตรวจสอบกับเว็บไซต์ของหน่วยงานอีกครั้ง · จองที่พักอุทยาน: nps.dnp.go.th</p>';
+}
+
+/* ---------- โปรไฟล์ ---------- */
+const userRec = () => getUsers().find(x => x.id === me.id);
+function renderUser(){
+  $("uName").textContent = me.name; $("uAvatar").textContent = initial(me.name).toUpperCase();
+  $("btnAdmin").hidden = me.role !== "admin";
+}
+function setPTab(t){
+  document.querySelectorAll("[data-ptab]").forEach(b => b.setAttribute("aria-pressed", b.dataset.ptab === t));
+  $("profForm").hidden = t !== "info"; $("meForm").hidden = t !== "pw";
+}
+function openProfile(){
+  const u = userRec() || me, vs = PARKS.filter(isV);
+  $("pAvatar").textContent = initial(u.name).toUpperCase(); $("pHead").textContent = u.name;
+  $("pSub").textContent = "@" + u.username + (u.role === "admin" ? " · แอดมิน" : " · สมาชิก") + " · เช็กอินแล้ว " + vs.length + " แห่ง";
+  $("pName").value = u.name || ""; $("pAddr").value = u.address || ""; $("pPhone").value = u.phone || ""; $("pEmail").value = u.email || "";
+  $("pErr").textContent = ""; $("mErr").textContent = ""; setPTab("info"); $("profDlg").showModal();
+}
+$("profForm").addEventListener("submit", e => {
+  e.preventDefault(); const err = $("pErr"); err.textContent = "";
+  const name = $("pName").value.trim(), addr = $("pAddr").value.trim(), phone = $("pPhone").value.trim(), email = $("pEmail").value.trim();
+  if (!name) { err.textContent = "กรุณากรอกชื่อ"; return; }
+  if (phone && !/^\+?\d{9,12}$/.test(phone.replace(/[\s\-]/g, ""))) { err.textContent = "เบอร์โทรไม่ถูกต้อง ใส่ตัวเลข 9–12 หลัก (เว้นวรรคหรือขีดได้)"; return; }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { err.textContent = "รูปแบบอีเมลไม่ถูกต้อง"; return; }
+  const users = getUsers(), u = users.find(x => x.id === me.id); if (!u) return;
+  Object.assign(u, {name, address:addr, phone, email}); if (!saveUsers(users)) return;
+  Object.assign(me, {name, address:addr, phone, email}); renderUser(); stats(); openProfileHead(u);
+  toast("บันทึกโปรไฟล์แล้ว");
+});
+function openProfileHead(u){ $("pAvatar").textContent = initial(u.name).toUpperCase(); $("pHead").textContent = u.name; }
 
 /* ---------- หน้ารายละเอียดอุทยาน ---------- */
 function renderPark(){
@@ -535,7 +726,7 @@ function renderPark(){
       <label class="text-sm">วันที่ไปล่าสุด<input data-act="date" type="date" value="${esc(d.date || "")}" max="${today()}" class="field mt-1"></label>
       <div><div class="text-sm">ให้คะแนน</div><div class="flex">${stars}</div></div>
       <label class="text-sm md:col-span-2">บันทึกความทรงจำ<textarea data-act="note" rows="3" maxlength="2000" placeholder="วันนี้เจออะไรบ้าง…" class="field mt-1">${esc(d.note || "")}</textarea></label></div>` : ""}
-    <a href="${p.url}" target="_blank" rel="noopener" class="text-sm underline text-stone-600">ดูข้อมูลอย่างเป็นทางการ (กรมอุทยานฯ) ↗</a></div>`;
+    <div class="flex flex-wrap gap-x-5 gap-y-1 text-sm"><a href="${p.url}" target="_blank" rel="noopener" class="underline text-stone-600">ข้อมูลอย่างเป็นทางการ (กรมอุทยานฯ) ↗</a><a href="tel:1362" class="underline text-stone-600">สายด่วนกรมอุทยานฯ 1362</a></div></div>`;
   observePhotos();
 }
 function openPark(id){ cur = id; renderPark(); const dlg = $("parkDlg"); if (!dlg.open) dlg.showModal(); }
@@ -554,6 +745,32 @@ $("crumb").addEventListener("click", e => {
 $("chips").addEventListener("click", e => { const b = e.target.closest("[data-s]"); if (b) { V.s = b.dataset.s; view(); } });
 $("provs").addEventListener("click", e => { const b = e.target.closest("[data-p]"); if (b) { V.prov = b.dataset.p; view(); } });
 $("q").addEventListener("input", e => { V.q = e.target.value; view(); });
+document.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => { setTab(b.dataset.tab); window.scrollTo(0, 0); }));
+$("heroCap").addEventListener("click", e => openPark(e.currentTarget.dataset.id));
+
+const menu = $("menu"), mb = $("menuBtn");
+const closeMenu = () => { menu.hidden = true; mb.setAttribute("aria-expanded", "false"); };
+mb.addEventListener("click", e => { e.stopPropagation(); menu.hidden = !menu.hidden; mb.setAttribute("aria-expanded", String(!menu.hidden)); });
+document.addEventListener("click", e => { if (!menu.hidden && !e.target.closest("#menu")) closeMenu(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeMenu(); });
+$("btnProfile").addEventListener("click", () => { closeMenu(); openProfile(); });
+$("btnAdmin").addEventListener("click", closeMenu);
+$("btnLogout").addEventListener("click", closeMenu);
+document.querySelectorAll("[data-ptab]").forEach(b => b.addEventListener("click", () => setPTab(b.dataset.ptab)));
+$("profClose").addEventListener("click", () => $("profDlg").close());
+$("profDlg").addEventListener("click", e => { if (e.target === $("profDlg")) $("profDlg").close(); });
+
+$("newsAdd").addEventListener("click", () => { $("newsForm").hidden = false; $("nTitle").focus(); });
+$("newsCancel").addEventListener("click", () => { $("newsForm").hidden = true; $("newsForm").reset(); });
+$("newsForm").addEventListener("submit", e => {
+  e.preventDefault(); if (!requireAdmin()) return;
+  const n = getNews(); n.unshift({id:"n-" + Date.now().toString(36), title:$("nTitle").value.trim(), body:$("nBody").value.trim(), pin:$("nPin").checked, date:today()});
+  if (!jset(NEWS_KEY, n)) return; e.target.reset(); e.target.hidden = true; renderNews(); toast("โพสต์ประกาศแล้ว");
+});
+$("newsList").addEventListener("click", e => {
+  const b = e.target.closest("[data-ndel]"); if (!b || !requireAdmin() || !confirm("ลบประกาศนี้?")) return;
+  jset(NEWS_KEY, getNews().filter(x => x.id !== b.dataset.ndel)); renderNews();
+});
 
 const pd = $("parkDlg");
 pd.addEventListener("click", e => {
@@ -615,7 +832,7 @@ function userRow(u){
     btn("delete", "ลบ", "btn-danger");
   return `<div class="rounded-xl border border-stone-200 p-3 flex flex-wrap items-center justify-between gap-3">
     <div><div class="font-semibold">${esc(u.name)} ${isAdm ? '<span class="text-xs px-2 py-0.5 rounded-full bg-[#b8892f]/20 text-[#6b4f3a]">แอดมิน</span>' : ""}${self ? ' <span class="text-xs text-stone-500">(คุณ)</span>' : ""}</div>
-    <div class="text-sm text-stone-500">@${esc(u.username)}${active ? "" : ' · <span style="color:#8e3b25">ถูกระงับ</span>'}</div></div>
+    <div class="text-sm text-stone-500">@${esc(u.username)}${active ? "" : ' · <span style="color:#8e3b25">ถูกระงับ</span>'}</div>${u.phone || u.email ? `<div class="text-xs text-stone-500 mt-0.5">${u.phone ? "📞 " + esc(u.phone) : ""}${u.phone && u.email ? " · " : ""}${u.email ? "✉️ " + esc(u.email) : ""}</div>` : ""}</div>
     <div class="flex flex-wrap gap-2">${actions}</div></div>`;
 }
 function renderAdmin(){
@@ -623,7 +840,7 @@ function renderAdmin(){
 }
 function setATab(t){
   document.querySelectorAll("[data-atab]").forEach(b => b.setAttribute("aria-pressed", b.dataset.atab === t));
-  $("apMembers").hidden = t !== "members"; $("addForm").hidden = t !== "add"; $("meForm").hidden = t !== "me";
+  $("apMembers").hidden = t !== "members"; $("addForm").hidden = t !== "add";
 }
 $("btnAdmin").addEventListener("click", () => { if (!requireAdmin()) return; renderAdmin(); setATab("members"); $("adminDlg").showModal(); });
 $("adminClose").addEventListener("click", () => $("adminDlg").close());
@@ -664,7 +881,7 @@ $("addForm").addEventListener("submit", async e => {
 });
 
 $("meForm").addEventListener("submit", async e => {
-  e.preventDefault(); if (!requireAdmin()) return; const err = $("mErr"); err.textContent = "";
+  e.preventDefault(); const err = $("mErr"); err.textContent = "";
   const users = getUsers(), u = users.find(x => x.id === me.id), np = $("mNew").value;
   try {
     if ((await hashPw($("mOld").value, u.salt)) !== u.hash) { err.textContent = "รหัสผ่านปัจจุบันไม่ถูกต้อง"; return; }
