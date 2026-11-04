@@ -89,7 +89,7 @@
     <form id="signupForm" class="p-6 grid gap-4" autocomplete="off" hidden>
       <label class="text-sm font-medium">ชื่อที่แสดง<input id="sName" class="field mt-1" maxlength="40" required></label>
       <label class="text-sm font-medium">ชื่อผู้ใช้ <span class="font-normal text-stone-500">(a-z, 0-9, _ ยาว 3–20 ตัว)</span><input id="sUser" class="field mt-1" maxlength="20" autocapitalize="none" required></label>
-      <label class="text-sm font-medium">อีเมล <span class="font-normal text-stone-500">(ไม่บังคับ ใช้รับอีเมลต้อนรับ)</span><input id="sEmail" type="email" class="field mt-1" maxlength="80" autocomplete="email"></label>
+      <label class="text-sm font-medium">อีเมล <span class="font-normal text-stone-500">(อีเมลจริง)</span><input id="sEmail" type="email" class="field mt-1" maxlength="80" autocomplete="email" placeholder="name@example.com" required></label>
       <label class="text-sm font-medium">รหัสผ่าน <span class="font-normal text-stone-500">(อย่างน้อย 8 ตัว)</span><input id="sPass" type="password" class="field mt-1" minlength="8" autocomplete="new-password" required></label>
       <label class="text-sm font-medium">ยืนยันรหัสผ่าน<input id="sPass2" type="password" class="field mt-1" autocomplete="new-password" required></label>
       <p id="sErr" class="text-sm text-[#8e3b25] min-h-5" role="alert"></p>
@@ -977,9 +977,9 @@ $("signupForm").addEventListener("submit", async e => {
   if (pw !== $("sPass2").value) { err.textContent = "รหัสผ่านสองช่องไม่ตรงกัน"; return; }
   const users = getUsers(); if (users.some(x => x.username === username)) { err.textContent = "ชื่อผู้ใช้นี้ถูกใช้แล้ว"; return; }
   btn.disabled = true;
-  const email = $("sEmail").value.trim(); if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = "รูปแบบอีเมลไม่ถูกต้อง"; btn.disabled = false; return; }
-  try { const nu = await makeUser(username, name, pw, "member", "active"); if (email) nu.email = email; users.push(nu); if (!saveUsers(users)) return;
-    if (GAS_URL && email) afetch("/api/welcome", {method:"POST", body:JSON.stringify({username})}).catch(() => {}); err.textContent = await doLogin(username, pw, false); if (!err.textContent) { e.target.reset(); showSignup(false); } }
+  const email = $("sEmail").value.trim(); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = "กรุณาใส่อีเมลจริง เช่น name@example.com"; btn.disabled = false; return; }
+  try { const nu = await makeUser(username, name, pw, "member", "active"); nu.email = email; users.push(nu); if (!saveUsers(users)) return;
+    if (GAS_URL) afetch("/api/welcome", {method:"POST", body:JSON.stringify({username})}).catch(() => {}); err.textContent = await doLogin(username, pw, false); if (!err.textContent) { e.target.reset(); showSignup(false); } }
   catch(x){ err.textContent = x.message === "nocrypto" ? CRYPTO_ERR : "เกิดข้อผิดพลาด ลองใหม่อีกครั้ง"; }
   finally { btn.disabled = false; }
 });
