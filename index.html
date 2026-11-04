@@ -44,6 +44,15 @@
     dialog>div:last-child{padding-bottom:calc(1.25rem + env(safe-area-inset-bottom))}
   }
   @media (max-width:767px){body{padding-bottom:calc(3.75rem + env(safe-area-inset-bottom))}}
+  /* ===== ความต่างระหว่าง "ไปแล้ว" กับ "ยังไม่ไป" ===== */
+  .pcard.is-no{background:#f3f2ee;border-color:#d6d3d1!important}
+  .pcard.is-no .ph>img,.pcard.is-no .ph>svg{filter:grayscale(1) contrast(.9) brightness(.92);opacity:.85}
+  .pcard.is-no .pname{color:#78716c}
+  .pcard.is-yes{background:#f3f8ec;box-shadow:0 6px 18px -6px rgba(79,122,58,.45)}
+  .pcard.is-yes .ph{box-shadow:inset 0 -4px 0 #4f7a3a}
+  .vbadge{position:absolute;left:.5rem;top:.5rem;z-index:10;display:inline-flex;align-items:center;gap:.3rem;border-radius:9999px;padding:.3rem .7rem;font-size:.78rem;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+  .vbadge.yes{background:#4f7a3a;color:#fff}
+  .vbadge.no{background:rgba(255,255,255,.9);color:#78716c;border:1px dashed #a8a29e}
 </style>
 </head>
 <body>
@@ -138,12 +147,6 @@
   <main class="max-w-6xl mx-auto px-4 py-6">
     <div id="crumb" class="flex flex-wrap items-center justify-between gap-3 mb-5"></div>
     <section id="view"></section>
-    <div class="flex flex-wrap gap-2 justify-center mt-10">
-      <button id="btnExport" class="btn btn-line !py-1.5 !font-medium">ส่งออกข้อมูลฉัน</button>
-      <label class="btn btn-line !py-1.5 !font-medium cursor-pointer focus-within:outline">นำเข้า
-        <input id="fileImport" type="file" accept="application/json,.json" class="sr-only">
-      </label>
-    </div>
   </main>
 </div>
 
@@ -178,7 +181,7 @@
 <footer class="text-center text-xs text-stone-500 py-8 px-4 grid gap-1">
   <p>รายชื่อจากกรมอุทยานแห่งชาติ สัตว์ป่า และพันธุ์พืช · แบ่งภูมิภาคตามเกณฑ์ราชบัณฑิตยสภา</p>
   <p>รูปภาพจาก Wikipedia / Wikimedia Commons ตามสัญญาอนุญาตของผู้เผยแพร่แต่ละภาพ · อุทยานที่ยังไม่มีรูปจะแสดงภาพประกอบแทน</p>
-  <p>ข้อมูลเช็กอินและโปรไฟล์บันทึกในเบราว์เซอร์เครื่องนี้เท่านั้น · ควรกดส่งออกเก็บสำรองไว้เป็นระยะ</p>
+  <p>ข้อมูลเช็กอินและโปรไฟล์บันทึกอัตโนมัติในเบราว์เซอร์เครื่องนี้ (ไม่แชร์ข้ามเครื่อง)</p>
 </footer>
 </div>
 
@@ -526,7 +529,7 @@ function enter(u){
 }
 
 /* ---------- ข้อมูลเช็กอิน ---------- */
-const save = () => { jset(dataKey(me.id), data); };
+const save = () => { if (jset(dataKey(me.id), data)) { clearTimeout(save.t); save.t = setTimeout(() => toast("✓ บันทึกการแก้ไขแล้ว"), 400); } };
 const isV = (p) => !!(data[p.id] && data[p.id].visited);
 const byId = Object.fromEntries(PARKS.map(p => [p.id, p]));
 const V = {tab:"parks", r:null, prov:"all", q:"", s:"all"}; // r: null = หน้าแรก, "all" = ทุกภาค, หรือชื่อภาค
@@ -542,17 +545,38 @@ function stats(){
 }
 
 /* ---------- รูปจริงจาก Wikipedia (ค้นตอนเปิดดู แล้วจำไว้ในเครื่อง) ---------- */
-const IMG_KEY = "tnp-img-v2";
+const IMG_KEY = "tnp-img-v3"; // ขึ้นเวอร์ชันเพื่อให้ค้นรูปที่เคยหาไม่เจอใหม่
 let IMG = jget(IMG_KEY, {});            // id -> url | "" (ไม่มีรูป)
 const PENDING = new Set(), QUEUE = [], WAIT = {}; let running = 0;
-const norm = (s) => s.replace(/\([^)]*\)/g, "").replace(/[\s–—\-]/g, "");
+const norm = (s) => s.replace(/\([^)]*\)/g, "").replace(/[\s–—\-.,]/g, "");
+const jfetch = async (base, params) => { const r = await fetch(base + "?" + new URLSearchParams({format:"json", origin:"*", ...params})); if (!r.ok) throw new Error("http"); return r.json(); };
+const pagesOf = (j) => Object.values((j.query && j.query.pages) || {}).sort((a, b) => (a.index || 0) - (b.index || 0));
+const okImg = (u) => u && !/\.(svg|tif|tiff|pdf|ogg|webm)(\/|$|\?)/i.test(u) && !/(logo|map|locator|flag|seal|symbol|emblem|ตรา|แผนที่)/i.test(decodeURIComponent(u));
 async function findPhoto(p){
-  const qs = new URLSearchParams({format:"json", origin:"*", action:"query", generator:"search", gsrsearch:p.base, gsrnamespace:"0", gsrlimit:"6", prop:"pageimages", piprop:"thumbnail", pithumbsize:"960", pilimit:"6"});
-  const r = await fetch("https://th.wikipedia.org/w/api.php?" + qs); if (!r.ok) throw new Error("http");
-  const j = await r.json(), pages = Object.values((j.query && j.query.pages) || {}).sort((a, b) => a.index - b.index);
-  const want = [norm(p.base), norm("อุทยานแห่งชาติ" + p.n.split(/\s*[–—\-]\s*/)[0])];
-  const hit = pages.find(x => x.thumbnail && want.includes(norm(x.title)));
-  return hit ? hit.thumbnail.source : "";
+  const short = p.n.split(/\s*[–—\-]\s*/)[0], key = norm(short);
+  const want = [norm(p.base), norm("อุทยานแห่งชาติ" + short)];
+  const W = "https://th.wikipedia.org/w/api.php";
+  const wp = { action:"query", prop:"pageimages", piprop:"thumbnail", pithumbsize:"960", pilimit:"10", redirects:"1" };
+  // 1) เปิดหน้าตามชื่อตรง ๆ
+  for (const t of [p.base, p.n, "อุทยานแห่งชาติ" + short]) {
+    const j = await jfetch(W, {...wp, titles:t});
+    const hit = pagesOf(j).find(x => x.thumbnail && okImg(x.thumbnail.source)); if (hit) return hit.thumbnail.source;
+  }
+  // 2) ค้นหาในวิกิพีเดียไทย แล้วเลือกหน้าที่ชื่อมีชื่ออุทยาน
+  for (const q of [p.base, short + " " + p.p, short]) {
+    const j = await jfetch(W, {...wp, generator:"search", gsrsearch:q, gsrnamespace:"0", gsrlimit:"8"});
+    const pg = pagesOf(j).filter(x => x.thumbnail && okImg(x.thumbnail.source));
+    const hit = pg.find(x => want.includes(norm(x.title))) || pg.find(x => norm(x.title).includes(key));
+    if (hit) return hit.thumbnail.source;
+  }
+  // 3) สำรอง: ค้นหารูปใน Wikimedia Commons
+  const C = "https://commons.wikimedia.org/w/api.php";
+  for (const q of [p.base, short + " " + p.p, short + " national park"]) {
+    const j = await jfetch(C, {action:"query", generator:"search", gsrsearch:q, gsrnamespace:"6", gsrlimit:"8", prop:"imageinfo", iiprop:"url|mime", iiurlwidth:"960"});
+    const hit = pagesOf(j).find(x => { const i = x.imageinfo && x.imageinfo[0]; return i && /^image\/(jpeg|png|webp)$/.test(i.mime) && okImg(i.thumburl || i.url); });
+    if (hit) return hit.imageinfo[0].thumburl || hit.imageinfo[0].url;
+  }
+  return "";
 }
 function pump(){
   while (running < 4 && QUEUE.length) {
@@ -612,6 +636,7 @@ const scene = (r) => `<svg class="absolute inset-0 w-full h-full" viewBox="0 0 4
 function photo(p, cls, btn){
   const v = isV(p);
   return `<div class="ph relative overflow-hidden ${cls}" data-id="${p.id}" style="background:${RC[p.r][1]}">${scene(p.r)}
+    ${btn ? (v ? '<span class="vbadge yes">✓ ไปแล้ว</span>' : '<span class="vbadge no">ยังไม่ได้ไป</span>') : ""}
     <div class="ov absolute inset-x-0 bottom-0 px-3 pt-8 pb-2 text-white text-xs font-medium" style="background:linear-gradient(transparent,rgba(20,36,28,.78))">📍 จ.${esc(p.p)} · ภาค${p.r}</div>
     ${btn ? `<button data-act="toggle" data-id="${p.id}" aria-pressed="${v}" aria-label="${v ? "ยกเลิกเช็กอิน " : "เช็กอินที่ "}${esc(p.full)}" class="absolute top-2 right-2 z-10 size-11 rounded-full border-2 text-lg font-bold shadow ${v ? "text-white border-white" : "bg-white/90 border-white text-stone-400 hover:text-[#4f7a3a]"}" ${v ? 'style="background:#4f7a3a"' : ""}>✓</button>` : ""}</div>`;
 }
@@ -627,11 +652,11 @@ function tile(r){
 }
 function card(p){
   const d = data[p.id] || {}, v = isV(p), rating = d.rating || 0;
-  const sub = v ? "เคยไปแล้ว" + (d.date ? " · " + fmtDate(d.date) : "") + (rating ? " · " + "★".repeat(rating) : "") : "ยังไม่เคยไป";
-  return `<article data-open="${p.id}" class="cursor-pointer rounded-2xl overflow-hidden bg-white border-2 ${v ? "border-[#4f7a3a]" : "border-transparent shadow-sm"} hover:shadow-lg transition">
+  const sub = v ? "เคยไปแล้ว" + (d.date ? " · " + fmtDate(d.date) : "") + (rating ? " · " + "★".repeat(rating) : "") : "ยังไม่เคยไป · แตะ ✓ เพื่อเช็กอิน";
+  return `<article data-open="${p.id}" class="pcard ${v ? "is-yes" : "is-no"} cursor-pointer rounded-2xl overflow-hidden border-2 ${v ? "border-[#4f7a3a]" : "border-transparent shadow-sm"} hover:shadow-lg transition">
     ${photo(p, "h-44", true)}
-    <div class="p-3"><button data-open="${p.id}" class="text-left font-semibold leading-snug">${esc(p.full)}</button>
-      <div class="text-xs mt-1 ${v ? "text-[#2d5230]" : "text-stone-500"}">${esc(sub)}</div></div></article>`;
+    <div class="p-3"><button data-open="${p.id}" class="pname text-left font-semibold leading-snug">${esc(p.full)}</button>
+      <div class="text-xs mt-1 ${v ? "text-[#2d5230] font-semibold" : "text-stone-500"}">${esc(sub)}</div></div></article>`;
 }
 const chip = (attr, key, label, on) => `<button class="chip" ${attr}="${esc(key)}" aria-pressed="${on}">${esc(label)}</button>`;
 
@@ -681,7 +706,7 @@ function setTab(t){
 /* ---------- ประชาสัมพันธ์ ---------- */
 const NEWS_KEY = "tnp-news-v1";
 const NEWS_SEED = [
-  {id:"n-welcome", pin:true, title:"ยินดีต้อนรับสู่สมุดเช็กอินอุทยานแห่งชาติไทย", body:"เลือกภูมิภาค แล้วกดปุ่ม ✓ ที่มุมรูปของอุทยานเพื่อเช็กอิน กดที่การ์ดเพื่อบันทึกวันที่ไป ให้คะแนน และเขียนความทรงจำ ข้อมูลของคุณเก็บในเบราว์เซอร์เครื่องนี้ ควรกด “ส่งออกข้อมูลฉัน” เก็บสำรองไว้เป็นระยะ"},
+  {id:"n-welcome", pin:true, title:"ยินดีต้อนรับสู่สมุดเช็กอินอุทยานแห่งชาติไทย", body:"เลือกภูมิภาค แล้วกดปุ่ม ✓ ที่มุมรูปของอุทยานเพื่อเช็กอิน กดที่การ์ดเพื่อบันทึกวันที่ไป ให้คะแนน และเขียนความทรงจำ ข้อมูลของคุณเก็บในเบราว์เซอร์เครื่องนี้ ระบบจะบันทึกให้อัตโนมัติทุกครั้งที่แก้ไข"},
   {id:"n-book", pin:false, title:"จองที่พักและบริการในอุทยานล่วงหน้า", body:"กรมอุทยานแห่งชาติฯ มีระบบจองบ้านพักออนไลน์ที่ nps.dnp.go.th ช่วงวันหยุดยาวควรจองล่วงหน้า และตรวจสอบเงื่อนไขล่าสุดกับกรมอุทยานฯ ก่อนเดินทาง"},
   {id:"n-check", pin:false, title:"เช็กสถานะอุทยานก่อนออกเดินทาง", body:"อุทยานบางแห่งอาจปิดชั่วคราวตามฤดูกาลหรือสภาพอากาศ โดยเฉพาะอุทยานทางทะเลและเส้นทางเดินป่า สอบถามสถานะล่าสุดได้ที่สายด่วนกรมอุทยานฯ 1362 (24 ชั่วโมง)"},
   {id:"n-safe", pin:false, title:"เที่ยวอย่างปลอดภัยและรักษาธรรมชาติ", body:"แจ้งเส้นทางและเวลากลับให้คนใกล้ชิดทราบ บันทึกเบอร์ฉุกเฉินไว้ในเครื่อง ไม่ให้อาหารสัตว์ป่า และนำขยะกลับออกมาทุกครั้ง ดูเบอร์สำคัญได้ที่แท็บ “เบอร์สำคัญ”"}
@@ -831,7 +856,7 @@ $("newsForm").addEventListener("submit", e => {
 });
 $("newsList").addEventListener("click", e => {
   const b = e.target.closest("[data-ndel]"); if (!b || !requireAdmin() || !confirm("ลบประกาศนี้?")) return;
-  jset(NEWS_KEY, getNews().filter(x => x.id !== b.dataset.ndel)); renderNews();
+  if (jset(NEWS_KEY, getNews().filter(x => x.id !== b.dataset.ndel))) { renderNews(); toast("✓ ลบประกาศแล้ว บันทึกเรียบร้อย"); }
 });
 
 const pd = $("parkDlg");
@@ -846,24 +871,6 @@ pd.addEventListener("click", e => {
 pd.addEventListener("change", e => { if (e.target.dataset.act === "date" && cur) { const d = data[cur] = data[cur] || {}; d.date = e.target.value; save(); } });
 pd.addEventListener("input", e => { if (e.target.dataset.act === "note" && cur) { const d = data[cur] = data[cur] || {}; d.note = e.target.value; save(); } });
 pd.addEventListener("close", () => { cur = null; view(); });
-
-$("btnExport").addEventListener("click", () => {
-  const blob = new Blob([JSON.stringify({app:"thailand-national-parks-tracker", version:1, exportedAt:new Date().toISOString(), data}, null, 2)], {type:"application/json"});
-  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "parks-backup-" + me.username + "-" + today() + ".json"; a.click(); URL.revokeObjectURL(a.href);
-  toast("ส่งออกไฟล์สำรองแล้ว");
-});
-$("fileImport").addEventListener("change", async e => {
-  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
-  try {
-    const j = JSON.parse(await f.text()), src = j && j.data && typeof j.data === "object" ? j.data : null;
-    if (!src) throw new Error("bad");
-    const clean = {};
-    PARKS.forEach(p => { const x = src[p.id] || src[OLD_REV[p.id]]; if (!x || typeof x !== "object") return;
-      clean[p.id] = { visited: x.visited === true, date: /^\d{4}-\d{2}-\d{2}$/.test(x.date) ? x.date : "", rating: Number.isInteger(x.rating) && x.rating >= 0 && x.rating <= 5 ? x.rating : 0, note: typeof x.note === "string" ? x.note.slice(0, 2000) : "" }; });
-    if (!confirm("นำเข้าข้อมูล " + Object.keys(clean).length + " รายการ และแทนที่ข้อมูลปัจจุบันทั้งหมด ต้องการดำเนินการต่อหรือไม่?")) return;
-    data = clean; save(); view(); toast("นำเข้าข้อมูลเรียบร้อย");
-  } catch(err){ toast("ไฟล์ไม่ถูกต้อง ต้องเป็นไฟล์ JSON ที่ส่งออกจากแอปนี้"); }
-});
 
 /* ---------- ฟอร์มล็อกอิน ---------- */
 document.addEventListener("click", e => {
