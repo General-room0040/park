@@ -1392,6 +1392,7 @@ function userRow(u){
   const btn = (act, label, cls) => `<button class="btn ${cls} !py-1.5 !px-3 !text-sm" data-uact="${act}" data-uid="${u.id}">${label}</button>`;
   const active = u.status === "active";
   const actions = isAdm ? "" :
+    btn("rename", "แก้ชื่อ", "btn-line") +
     btn("code", "ออกโค้ดรีเซ็ต", "btn-line") +
     (active ? btn("suspend", "ระงับ", "btn-line") : btn("activate", "เปิดใช้งาน", "btn-line")) +
     btn("delete", "ลบ", "btn-danger");
@@ -1413,7 +1414,15 @@ $("adminDlg").addEventListener("click", async e => {
   await syncUsers();
   const users = getUsers(), u = users.find(x => x.id === b.dataset.uid); if (!u || u.role === "admin") return;
   const act = b.dataset.uact;
-  if (act === "activate") { u.status = "active"; toast("เปิดใช้งาน " + u.name + " แล้ว"); }
+  if (act === "rename") {
+    const cur = u.first != null ? [u.first, u.last || ""] : String(u.name || "").split(/\s+(.*)/);
+    const f = prompt("ชื่อ (แก้ให้ @" + u.username + ")", (cur[0] || "").trim()); if (f === null) return;
+    const l = prompt("นามสกุล (เว้นว่างได้)", (cur[1] || "").trim()); if (l === null) return;
+    const ff = f.trim().slice(0, 40), ll = l.trim().slice(0, 40);
+    if (!ff) { toast("กรุณากรอกชื่อ"); return; }
+    Object.assign(u, {first: ff, last: ll, name: (ff + " " + ll).trim()}); toast("แก้ชื่อเป็น " + u.name + " แล้ว");
+  }
+  else if (act === "activate") { u.status = "active"; toast("เปิดใช้งาน " + u.name + " แล้ว"); }
   else if (act === "suspend") { u.status = "suspended"; toast("ระงับ " + u.name + " แล้ว"); }
   else if (act === "delete") {
     if (!confirm("ลบสมาชิก " + u.name + " และข้อมูลตราประทับทั้งหมดของเขา? ย้อนกลับไม่ได้")) return;
