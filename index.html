@@ -1655,38 +1655,51 @@ const SHARE_BG = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQY
 async function drawShareCard(){
   try { await Promise.all([document.fonts.load('800 56px "Noto Serif Thai"'), document.fonts.load('600 32px "Sarabun"'), document.fonts.load('400 28px "Sarabun"')]); } catch(e){}
   const W = 1080, H = 1920, c = document.createElement("canvas"); c.width = W; c.height = H; const g = c.getContext("2d");
-  const SERIF = '"Noto Serif Thai", serif', SANS = '"Sarabun", sans-serif';
+  const SERIF = '"Noto Serif Thai", serif', SANS = '"Sarabun", sans-serif', GOLD = "#ffd86b", SOFT = "#e6efd0";
   const vs = PARKS.filter(isV), done = vs.length, total = PARKS.length, pct = Math.round(done / total * 100);
   const pv = new Set(vs.map(p => p.p)).size, rg = new Set(vs.map(p => p.r)).size, yr = today().slice(0, 4);
   const thisYear = vs.filter(p => ((data[p.id] || {}).date || "").slice(0, 4) === yr).length;
   const earned = BADGES.filter(b => b[2](vs));
   g.fillStyle = "#2f5f2e"; g.fillRect(0, 0, W, H);
   try { const bg = await loadCors(SHARE_BG); g.drawImage(bg, 0, 0, W, H); } catch(e){}
-  // หัวข้อ: ตราปั๊มที่ + อุทยานล่าสุดที่ได้ตรา (ถ้าไม่มีวันที่ ใช้แห่งล่าสุดในรายการ)
-  const dated = vs.filter(p => (data[p.id] || {}).date).sort((a, b) => data[b.id].date.localeCompare(data[a.id].date));
-  const last = dated[0] || vs[vs.length - 1];
-  g.textAlign = "center"; g.fillStyle = "#fff"; g.font = `800 60px ${SERIF}`; g.fillText("ตราปั๊มที่", W / 2, 470);
-  let pn = last ? last.full : "……………………", pf = 66; do { g.font = `800 ${pf}px ${SERIF}`; pf -= 2; } while (g.measureText(pn).width > 960 && pf > 30);
-  g.fillStyle = "#ffe58a"; g.fillText(pn, W / 2, 560);
-  let nm = "🏞️ " + shortName(me), fs = 44; do { g.font = `600 ${fs}px ${SANS}`; fs -= 2; } while (g.measureText(nm).width > 900 && fs > 22);
-  g.fillStyle = "#fff"; g.fillText(nm, W / 2, 650);
-  // ตัวเลขหลัก
-  g.fillStyle = "#fff"; g.font = `800 210px ${SERIF}`; const ns = String(done), nw = g.measureText(ns).width; g.font = `600 64px ${SERIF}`; const tw = g.measureText(" / " + total).width;
-  const x0 = (W - nw - tw) / 2; g.textAlign = "left"; g.font = `800 210px ${SERIF}`; g.fillText(ns, x0, 900); g.fillStyle = "rgba(255,255,255,.6)"; g.font = `600 64px ${SERIF}`; g.fillText(" / " + total, x0 + nw, 900);
-  g.textAlign = "center"; g.fillStyle = "#e6efd0"; g.font = `600 36px ${SANS}`; g.fillText("ตราประทับอุทยานแห่งชาติที่เก็บได้ · " + pct + "%", W / 2, 965);
+  const glass = (x, y, w, h, r) => { g.fillStyle = "rgba(15,40,20,.38)"; rrect(g, x, y, w, h, r); g.fill(); g.strokeStyle = "rgba(255,255,255,.22)"; g.lineWidth = 2; g.stroke(); };
+  g.textAlign = "center";
+  // หัวข้อ + เส้นประดับ
+  g.fillStyle = "#fff"; g.font = `800 64px ${SERIF}`; g.fillText("ตราปั๊มที่", W / 2, 468);
+  g.strokeStyle = "rgba(255,216,107,.7)"; g.lineWidth = 3;
+  [[W / 2 - 330, W / 2 - 150], [W / 2 + 150, W / 2 + 330]].forEach(([a, b]) => { g.beginPath(); g.moveTo(a, 444); g.lineTo(b, 444); g.stroke(); });
+  g.fillStyle = GOLD; [W / 2 - 340, W / 2 + 340].forEach(x => { g.beginPath(); g.arc(x, 444, 7, 0, 7); g.fill(); });
+  // จำนวนตราปั๊ม (ตัวเลขใหญ่)
+  const ns = String(done); g.font = `800 300px ${SERIF}`; const nw = g.measureText(ns).width; g.font = `700 60px ${SERIF}`; const uw = g.measureText(" แห่ง").width;
+  const x0 = (W - nw - uw) / 2; g.textAlign = "left";
+  g.save(); g.shadowColor = "rgba(0,0,0,.35)"; g.shadowBlur = 24; g.shadowOffsetY = 8;
+  g.fillStyle = GOLD; g.font = `800 300px ${SERIF}`; g.fillText(ns, x0, 745);
+  g.fillStyle = "#fff"; g.font = `700 60px ${SERIF}`; g.fillText(" แห่ง", x0 + nw, 745); g.restore();
+  // แถบความคืบหน้า
+  g.textAlign = "center"; const bx = 160, bw = W - 320;
+  g.fillStyle = "rgba(255,255,255,.2)"; rrect(g, bx, 800, bw, 26, 13); g.fill();
+  if (done) { const gr = g.createLinearGradient(bx, 0, bx + bw, 0); gr.addColorStop(0, "#f5c542"); gr.addColorStop(1, "#ffe9a0"); g.fillStyle = gr; rrect(g, bx, 800, Math.max(26, bw * done / total), 26, 13); g.fill(); }
+  g.fillStyle = SOFT; g.font = `600 34px ${SANS}`; g.fillText("จากอุทยานทั้งหมด " + total + " แห่ง · " + pct + "%", W / 2, 886);
+  // ชื่อสมาชิก
+  let nm = shortName(me), fs = 44; do { g.font = `600 ${fs}px ${SANS}`; fs -= 2; } while (g.measureText("🏞️  " + nm).width > 800 && fs > 22);
+  const pw = g.measureText("🏞️  " + nm).width + 90; glass((W - pw) / 2, 925, pw, 84, 42);
+  g.fillStyle = "#fff"; g.fillText("🏞️  " + nm, W / 2, 980);
   // กล่องสถิติ
-  [[pv, "จังหวัด"], [rg + "/" + REGIONS.length, "ภูมิภาค"], [thisYear, "แห่งในปีนี้"]].forEach(([v, l], i) => { const x = 60 + i * 330;
-    g.fillStyle = "rgba(255,255,255,.12)"; rrect(g, x, 1010, 300, 110, 22); g.fill(); g.strokeStyle = "rgba(255,255,255,.3)"; g.lineWidth = 2; g.stroke();
-    g.fillStyle = "#fff"; g.font = `800 48px ${SERIF}`; g.fillText(String(v), x + 150, 1065); g.fillStyle = "#e6efd0"; g.font = `500 26px ${SANS}`; g.fillText(l, x + 150, 1103); });
+  [[pv, "จังหวัด", "📍"], [rg + "/" + REGIONS.length, "ภูมิภาค", "🧭"], [thisYear, "แห่งในปีนี้", "📅"]].forEach(([v, l, ic], i) => { const x = 60 + i * 330;
+    glass(x, 1050, 300, 140, 26);
+    g.font = "30px sans-serif"; g.fillStyle = "#fff"; g.fillText(ic, x + 150, 1090);
+    g.fillStyle = GOLD; g.font = `800 52px ${SERIF}`; g.fillText(String(v), x + 150, 1146); g.fillStyle = SOFT; g.font = `500 24px ${SANS}`; g.fillText(l, x + 150, 1176); });
   // แถบรายภูมิภาค
-  g.textAlign = "left"; REGIONS.forEach((r, i) => { const y = 1190 + i * 46, ps = PARKS.filter(p => p.r === r), v = ps.filter(isV).length;
-    g.fillStyle = "#fff"; g.font = `500 28px ${SANS}`; g.fillText(RC[r][0] + " ภาค" + r, 60, y + 8);
+  glass(40, 1225, W - 80, 310, 30);
+  g.textAlign = "left"; REGIONS.forEach((r, i) => { const y = 1278 + i * 46, ps = PARKS.filter(p => p.r === r), v = ps.filter(isV).length;
+    g.fillStyle = "#fff"; g.font = `500 28px ${SANS}`; g.fillText(RC[r][0] + " ภาค" + r, 80, y + 8);
     g.fillStyle = "rgba(255,255,255,.18)"; rrect(g, 430, y - 10, 470, 22, 11); g.fill();
-    if (v) { g.fillStyle = "#e6efd0"; rrect(g, 430, y - 10, Math.max(22, 470 * v / ps.length), 22, 11); g.fill(); }
-    g.fillStyle = "#fff"; g.textAlign = "right"; g.fillText(v + "/" + ps.length, 1020, y + 8); g.textAlign = "left"; });
+    if (v) { g.fillStyle = GOLD; rrect(g, 430, y - 10, Math.max(22, 470 * v / ps.length), 22, 11); g.fill(); }
+    g.fillStyle = "#fff"; g.textAlign = "right"; g.fillText(v + "/" + ps.length, 1000, y + 8); g.textAlign = "left"; });
   // เหรียญ
-  g.textAlign = "center"; g.fillStyle = "#e6efd0"; g.font = `600 26px ${SANS}`; g.fillText("เหรียญที่ได้ " + earned.length + "/" + BADGES.length, W / 2, 1520);
-  g.font = "46px sans-serif"; g.fillStyle = "#fff"; const em = earned.slice(0, 12).map(b => b[0]).join("  "); g.fillText(em || "🌱", W / 2, 1576);
+  g.textAlign = "center"; g.fillStyle = SOFT; g.font = `600 26px ${SANS}`; g.fillText("เหรียญที่ได้ " + earned.length + "/" + BADGES.length, W / 2, 1592);
+  g.font = "46px sans-serif"; g.fillStyle = "#fff"; const em = earned.slice(0, 12).map(b => b[0]).join("  "); g.fillText(em || "🌱", W / 2, 1648);
+  g.fillStyle = "rgba(255,255,255,.7)"; g.font = `600 26px ${SANS}`; g.fillText("สมุดสะสมตราประทับอุทยานแห่งชาติไทย", W / 2, 1840);
   return c;
 }
 async function openShare(){
