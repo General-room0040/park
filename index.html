@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1f3a2e">
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><link rel="apple-touch-icon" href="icon.svg">
-<title>สมุดเช็กอินอุทยานแห่งชาติไทย</title>
+<title>สมุดสะสมตราประทับอุทยานแห่งชาติไทย</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@600;800&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -55,7 +55,7 @@
     #menu .mi{font-size:1.75rem}
     #menu.no-admin #btnLogout{grid-column:1/-1;min-height:3.5rem}
   }
-  /* ===== ความต่างระหว่าง "ไปแล้ว" กับ "ยังไม่ไป" ===== */
+  /* ===== ความต่างระหว่าง "ได้ตราแล้ว" กับ "ยังไม่ได้ตรา" ===== */
   .pcard.is-no{background:#f3f2ee;border-color:#d6d3d1!important}
   .pcard.is-no .ph>img,.pcard.is-no .ph>svg{filter:grayscale(1) contrast(.9) brightness(.92);opacity:.85}
   .pcard.is-no .pname{color:#78716c}
@@ -82,8 +82,8 @@
   <div class="relative w-full max-w-md rounded-2xl bg-white/95 backdrop-blur shadow-2xl overflow-hidden">
     <div class="px-6 pt-7 pb-2 text-center">
       <div class="text-4xl" aria-hidden="true">🏞️</div>
-      <h1 class="serif text-2xl font-extrabold mt-2">สมุดเช็กอินอุทยานแห่งชาติไทย</h1>
-      <p class="text-sm text-stone-500 mt-1">เข้าสู่ระบบเพื่อบันทึกที่ที่คุณเคยไป</p>
+      <h1 class="serif text-2xl font-extrabold mt-2">สมุดสะสมตราประทับอุทยานแห่งชาติไทย</h1>
+      <p class="text-sm text-stone-500 mt-1">เข้าสู่ระบบเพื่อติ๊กบันทึกว่าได้ตราประทับอุทยานไหนมาแล้ว</p>
     </div>
 
     <form id="loginForm" class="p-6 grid gap-4" autocomplete="on">
@@ -136,7 +136,7 @@
     <nav class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2" aria-label="เมนูหลัก">
       <div class="flex items-center gap-2.5">
         <span class="grid place-items-center size-10 rounded-xl bg-white/15 border border-white/25 text-xl" aria-hidden="true">🏞️</span>
-        <div class="leading-tight"><div class="serif font-extrabold text-[15px] md:text-lg">สมุดเช็กอินอุทยานฯ ไทย</div><div class="hidden sm:block text-[11px] tracking-wide" style="color:#c9d5b0">THAILAND NATIONAL PARKS LOG</div></div>
+        <div class="leading-tight"><div class="serif font-extrabold text-[15px] md:text-lg">สมุดตราประทับอุทยานฯ ไทย</div><div class="hidden sm:block text-[11px] tracking-wide" style="color:#c9d5b0">THAILAND NATIONAL PARKS LOG</div></div>
       </div>
       <div class="relative order-2 md:order-3 ml-auto">
         <button id="menuBtn" class="flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/25" aria-haspopup="true" aria-expanded="false">
@@ -159,10 +159,10 @@
       <div class="mt-2 flex flex-wrap items-end gap-x-8 gap-y-4">
         <div class="flex items-end gap-4">
           <div class="serif font-extrabold leading-none"><span id="vCount" class="text-6xl md:text-8xl">0</span><span id="tCount" class="text-2xl md:text-4xl text-white/60"> / 0</span></div>
-          <div class="pb-1"><div class="text-sm" style="color:#dfe8c8">แห่งที่เคยไป</div><div id="vPct" class="serif text-xl md:text-2xl font-semibold">0%</div></div>
+          <div class="pb-1"><div class="text-sm" style="color:#dfe8c8">อุทยานที่ได้ตราประทับ</div><div id="vPct" class="serif text-xl md:text-2xl font-semibold">0%</div></div>
         </div>
         <div class="flex gap-3 pb-1">
-          <div class="rounded-xl bg-white/10 border border-white/20 backdrop-blur px-4 py-2"><div id="sProv" class="serif text-xl font-bold">0</div><div class="text-xs" style="color:#dfe8c8">จังหวัดที่เคยไป</div></div>
+          <div class="rounded-xl bg-white/10 border border-white/20 backdrop-blur px-4 py-2"><div id="sProv" class="serif text-xl font-bold">0</div><div class="text-xs" style="color:#dfe8c8">จังหวัดที่ได้ตราประทับ</div></div>
           <div class="rounded-xl bg-white/10 border border-white/20 backdrop-blur px-4 py-2"><div id="sReg" class="serif text-xl font-bold">0/6</div><div class="text-xs" style="color:#dfe8c8">ภูมิภาค</div></div>
         </div>
       </div>
@@ -190,7 +190,7 @@
   </div>
   <div id="homeFeat"></div>
   <section>
-    <div class="flex items-center justify-between gap-3 mb-3"><h2 class="serif text-xl font-extrabold">✨ แนะนำให้ไปต่อ <span class="text-sm font-medium text-stone-500">ที่คุณยังไม่เคยไป</span></h2><button data-shuffle="recs" class="btn btn-line !py-1.5 shrink-0">🎲 สุ่มใหม่</button></div>
+    <div class="flex items-center justify-between gap-3 mb-3"><h2 class="serif text-xl font-extrabold">✨ แนะนำให้ไปต่อ <span class="text-sm font-medium text-stone-500">ที่คุณยังไม่ได้ตราประทับ</span></h2><button data-shuffle="recs" class="btn btn-line !py-1.5 shrink-0">🎲 สุ่มใหม่</button></div>
     <div id="homeRecs" class="grid gap-4 sm:grid-cols-3"></div>
   </section>
   <section>
@@ -203,7 +203,7 @@
 <div id="tabParks">
   <div class="sticky top-0 z-20 bg-[#eef1e8]/95 backdrop-blur border-b border-stone-300/60">
     <div class="max-w-6xl mx-auto px-4 py-3 grid gap-2">
-      <div class="flex gap-2"><input id="q" type="search" placeholder="ค้นหาอุทยานหรือจังหวัด เช่น เขาใหญ่ เชียงใหม่" aria-label="ค้นหา" enterkeyhint="search" class="field min-w-0 flex-1"><button id="btnRandom" type="button" class="btn btn-line shrink-0 !px-3" title="สุ่มอุทยานที่ยังไม่เคยไป">🎲 สุ่ม</button></div>
+      <div class="flex gap-2"><input id="q" type="search" placeholder="ค้นหาอุทยานหรือจังหวัด เช่น เขาใหญ่ เชียงใหม่" aria-label="ค้นหา" enterkeyhint="search" class="field min-w-0 flex-1"><button id="btnRandom" type="button" class="btn btn-line shrink-0 !px-3" title="สุ่มอุทยานที่ยังไม่ได้ตราประทับ">🎲 สุ่ม</button></div>
       <div id="filters" class="scroll-x flex gap-2 items-center" hidden><div id="chips" class="flex gap-2 shrink-0"></div><div id="provs" class="flex gap-2 pl-2 border-l border-stone-300 shrink-0" hidden></div></div>
     </div>
   </div>
@@ -215,7 +215,7 @@
 
 <!-- ===== แท็บ: แผนที่ ===== -->
 <section id="tabMap" class="max-w-6xl mx-auto px-4 py-6 grid gap-4" hidden>
-  <div><h2 class="serif text-2xl font-extrabold">🗺️ แผนที่เช็กอิน</h2><p class="text-sm text-stone-500 mt-1">หมุดเขียว = ไปแล้ว · หมุดขาว = ยังไม่ไป · ขอบทอง = อยากไป · ขอบประ = ตำแหน่งโดยประมาณ (กลางจังหวัด) แตะการ์ดภูมิภาคเพื่อซูมดู</p></div>
+  <div><h2 class="serif text-2xl font-extrabold">🗺️ แผนที่ตราประทับ</h2><p class="text-sm text-stone-500 mt-1">หมุดเขียว = ได้ตราประทับแล้ว · หมุดขาว = ยังไม่ได้ตราประทับ · ขอบทอง = อยากเก็บตรา · ขอบประ = ตำแหน่งโดยประมาณ (กลางจังหวัด) แตะการ์ดภูมิภาคเพื่อซูมดู</p></div>
   <div id="mapRegions" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"></div>
   <div class="scroll-x flex gap-2 items-center"><div id="mapChips" class="flex gap-2 shrink-0"></div></div>
   <div id="mapUncovered" class="text-sm"></div>
@@ -263,7 +263,7 @@
 <footer class="text-center text-xs text-stone-500 py-8 px-4 grid gap-1">
   <p>รายชื่อจากกรมอุทยานแห่งชาติ สัตว์ป่า และพันธุ์พืช · แบ่งภูมิภาคตามเกณฑ์ราชบัณฑิตยสภา</p>
   <p>รูปภาพใช้ภาพหลักจากบทความของอุทยานนั้นใน Wikipedia (ภาพสถานที่เด่นของอุทยาน) ตามสัญญาอนุญาตของผู้เผยแพร่แต่ละภาพ · อุทยานที่ไม่มีบทความหรือไม่มีรูปจะแสดงภาพประกอบแทน ไม่ใช้รูปอื่นมาแทน</p>
-  <p id="syncNote">ข้อมูลเช็กอินและโปรไฟล์บันทึกอัตโนมัติในเบราว์เซอร์เครื่องนี้ (ไม่แชร์ข้ามเครื่อง)</p>
+  <p id="syncNote">ข้อมูลตราประทับและโปรไฟล์บันทึกอัตโนมัติในเบราว์เซอร์เครื่องนี้ (ไม่แชร์ข้ามเครื่อง)</p>
 </footer>
 </div>
 
@@ -285,7 +285,7 @@
   <div class="p-5 overflow-y-auto" style="max-height:calc(100dvh - 10rem)"><div class="flex gap-2 mb-3 scroll-x"><button class="chip" data-rkp="all" aria-pressed="true">ทั้งหมด</button><button class="chip" data-rkp="year" aria-pressed="false">รายปี</button><button class="chip" data-rkp="month" aria-pressed="false">รายเดือน</button></div>
     <div class="rkpick mb-3" hidden></div>
     <div id="rankBody" class="grid gap-2"></div>
-    <p class="text-xs text-stone-500 mt-4">แตะที่ชื่อเพื่อดูรายชื่ออุทยานที่เพื่อนไปแล้ว · จัดอันดับจากจำนวนอุทยานที่เช็กอิน (ถ้าเท่ากัน ดูจำนวนจังหวัด) ของสมาชิกทุกคนที่เช็กอินแล้ว แสดงเฉพาะชื่อกับตัวย่อนามสกุลและจำนวน ไม่แสดงบันทึกส่วนตัว อันดับดึงข้อมูลล่าสุดทุกครั้งที่เปิดหน้านี้ ทุกเครื่องเห็นตรงกัน · รายปี/รายเดือนเลือกช่วงเวลาได้ และนับตามวันที่เช็กอินที่ระบุไว้ในแต่ละอุทยาน (เช็กอินที่ไม่ได้ระบุวันที่จะนับเฉพาะอันดับ “ทั้งหมด”)</p></div>
+    <p class="text-xs text-stone-500 mt-4">แตะที่ชื่อเพื่อดูรายชื่ออุทยานที่เพื่อนได้ตราประทับแล้ว · จัดอันดับจากจำนวนอุทยานที่ได้ตราประทับ (ถ้าเท่ากัน ดูจำนวนจังหวัด) ของสมาชิกทุกคนที่ได้ตราประทับแล้ว แสดงเฉพาะชื่อกับตัวย่อนามสกุลและจำนวน ไม่แสดงบันทึกส่วนตัว อันดับดึงข้อมูลล่าสุดทุกครั้งที่เปิดหน้านี้ ทุกเครื่องเห็นตรงกัน · รายปี/รายเดือนเลือกช่วงเวลาได้ และนับตามวันที่ได้ตราประทับที่ระบุไว้ในแต่ละอุทยาน (ได้ตราประทับที่ไม่ได้ระบุวันที่จะนับเฉพาะอันดับ “ทั้งหมด”)</p></div>
 </dialog>
 
 <dialog id="shareDlg">
@@ -300,7 +300,7 @@
 <dialog id="friendDlg">
   <div class="topo text-white flex items-center justify-between gap-3 px-5 py-4"><div class="min-w-0"><h2 id="fHead" class="serif text-xl font-extrabold truncate"></h2><div id="fSub" class="text-sm" style="color:#dfe8c8"></div></div><button id="friendClose" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-sm shrink-0" aria-label="ปิด">ปิด ✕</button></div>
   <div class="p-5 overflow-y-auto" style="max-height:calc(100dvh - 10rem)">
-    <p class="text-xs text-stone-500 mb-3"><span class="inline-block px-2 py-0.5 rounded-full bg-[#b8892f]/20 text-[#6b4f3a] font-semibold">สีทอง</span> = เพื่อนไปแล้ว แต่คุณยังไม่เคยไป</p>
+    <p class="text-xs text-stone-500 mb-3"><span class="inline-block px-2 py-0.5 rounded-full bg-[#b8892f]/20 text-[#6b4f3a] font-semibold">สีทอง</span> = เพื่อนได้ตราประทับแล้ว แต่คุณยังไม่ได้</p>
     <div id="fBody" class="grid gap-4"></div>
   </div>
 </dialog>
@@ -555,7 +555,7 @@ const PARKS = RAW.map(([p, n, cid]) => {
   const short = n.replace(/\s*\(เตรียมการ\)/, "").trim(), prep = /เตรียมการ/.test(n);
   return {id:"p" + cid, n:short, base:"อุทยานแห่งชาติ" + short, full:"อุทยานแห่งชาติ" + short + (prep ? " (เตรียมการ)" : ""), p, r:PROV_REGION[p], url:"https://portal.dnp.go.th/Content/nationalpark?contentId=" + cid};
 });
-// id เก่า (รุ่นแรก) -> id ใหม่ เพื่อไม่ให้ข้อมูลเช็กอินที่บันทึกไว้หาย
+// id เก่า (รุ่นแรก) -> id ใหม่ เพื่อไม่ให้ข้อมูลตราประทับที่บันทึกไว้หาย
 const OLD_IDS = {"doi-inthanon": "p915", "doi-suthep": "p914", "doi-phu-kha": "p937", "khao-yai": "p640", "phu-kradueng": "p945", "pha-taem": "p957", "phu-ruea": "p946", "nam-tok-sam-lan": "p893", "phu-toei": "p919", "khao-khitchakut": "p961", "samet": "p990", "ko-chang": "p971", "erawan": "p643", "sai-yok": "p1011", "khao-sam-roi-yot": "p1016", "kaeng-krachan": "p642", "khao-sok": "p1019", "similan": "p865", "tarutao-thale-ban": "p1012", "khao-luang": "p938"};
 const OLD_REV = Object.fromEntries(Object.entries(OLD_IDS).map(([o, n]) => [n, o]));
 function migrateData(uid){
@@ -573,7 +573,7 @@ const fmtDate = (s) => s ? new Date(s + "T00:00:00").toLocaleDateString("th-TH",
 function toast(m){ const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2800); }
 function jget(k, def){ try {
   if (KV && isSync(k)) { if (!(k in KV)) { const r = kvx("GET", "/api/kv/" + encodeURIComponent(k)); KV[k] = r ? JSON.parse(r.responseText) : null; } return KV[k] == null ? def : KV[k]; } const v = JSON.parse(localStorage.getItem(k)); return v == null ? def : v; } catch(e){ return def; } }
-/* คิวส่งซ้ำ: เฉพาะข้อมูลเช็กอินของตัวเอง (tnp-data-v2:*) ถ้าส่งขึ้นเซิร์ฟเวอร์ไม่ได้จะเก็บไว้ในเครื่องแล้วส่งใหม่เองเมื่อออนไลน์ */
+/* คิวส่งซ้ำ: เฉพาะข้อมูลตราประทับของตัวเอง (tnp-data-v2:*) ถ้าส่งขึ้นเซิร์ฟเวอร์ไม่ได้จะเก็บไว้ในเครื่องแล้วส่งใหม่เองเมื่อออนไลน์ */
 const OB_KEY = "tnp-outbox-v1", isMine = (k) => /^tnp-data-v2:/.test(k);
 const obGet = () => { try { return JSON.parse(localStorage.getItem(OB_KEY)) || {}; } catch(e){ return {}; } };
 const obSet = (o) => { try { Object.keys(o).length ? localStorage.setItem(OB_KEY, JSON.stringify(o)) : localStorage.removeItem(OB_KEY); } catch(e){} };
@@ -646,7 +646,7 @@ function shortName(u){
 }
 
 let me = null;   // ผู้ใช้ที่ล็อกอินอยู่
-let data = {};   // ข้อมูลเช็กอินของผู้ใช้คนนี้
+let data = {};   // ข้อมูลตราประทับของผู้ใช้คนนี้
 
 /* ---------- ล็อกกันเดารหัส ---------- */
 function lockInfo(username){ const L = jget(LOCK_KEY, {}); return L[username] || {fails:0, until:0}; }
@@ -700,7 +700,7 @@ function enter(u){
   resetUI();
 }
 
-/* ---------- ข้อมูลเช็กอิน ---------- */
+/* ---------- ข้อมูลตราประทับ ---------- */
 const save = () => { if (jset(dataKey(me.id), data)) { clearTimeout(save.t); save.t = setTimeout(() => { if (!Object.keys(obGet()).length) toast("✓ บันทึกการแก้ไขแล้ว"); }, 400); } };
 const isW = (p) => !!(data[p.id] && data[p.id].wish);
 function toggleWish(id){ const d = data[id] = data[id] || {}; d.wish = !d.wish; save(); }
@@ -710,11 +710,11 @@ const visitMonths = () => [...new Set(PARKS.filter(isV).map(p => monthIdx((data[
 function maxStreak(){ let best = 0, run = 0, prev = -9; visitMonths().forEach(i => { run = i === prev + 1 ? run + 1 : 1; prev = i; if (run > best) best = run; }); return best; }
 function maxInYear(){ const c = {}; PARKS.filter(isV).forEach(p => { const i = monthIdx((data[p.id] || {}).date); if (i > 0) { const y = Math.floor(i / 12); c[y] = (c[y] || 0) + 1; } }); return Math.max(0, ...Object.values(c)); }
 // [ไอคอน, ชื่อ, เงื่อนไข, คำใบ้ตอนยังไม่ได้]
-const BADGES = [["🌱","ก้าวแรก",vs=>vs.length>=1,"เช็กอิน 1 แห่ง"],["🥾","ไปแล้ว 10 แห่ง",vs=>vs.length>=10,"เช็กอิน 10 แห่ง"],["⛰️","ไปแล้ว 25 แห่ง",vs=>vs.length>=25,"เช็กอิน 25 แห่ง"],["🏆","ไปแล้ว 50 แห่ง",vs=>vs.length>=50,"เช็กอิน 50 แห่ง"],["👑","ไปแล้ว 100 แห่ง",vs=>vs.length>=100,"เช็กอิน 100 แห่ง"],
-  ["🗺️","10 จังหวัด",vs=>new Set(vs.map(p=>p.p)).size>=10,"เช็กอินครบ 10 จังหวัด"],["🌏","20 จังหวัด",vs=>new Set(vs.map(p=>p.p)).size>=20,"เช็กอินครบ 20 จังหวัด"],["🧭","ครบทุกภูมิภาค",vs=>new Set(vs.map(p=>p.r)).size>=REGIONS.length,"ไปให้ครบทั้ง 6 ภูมิภาค"],
-  ["🏝️","นักสำรวจเกาะ ×5",vs=>vs.filter(p=>/เกาะ/.test(p.n)).length>=5,"เช็กอินอุทยานเกาะ 5 แห่ง"],["🏔️","นักไต่ภู ×10",vs=>vs.filter(p=>/^(ภู|ดอย)/.test(p.n)).length>=10,"เช็กอินอุทยานชื่อภู/ดอย 10 แห่ง"],["🎖️","เก็บครบทั้งภูมิภาค",vs=>REGIONS.some(r=>PARKS.filter(p=>p.r===r).every(isV)),"ครบทุกแห่งในภูมิภาคใดภูมิภาคหนึ่ง"],
+const BADGES = [["🌱","ก้าวแรก",vs=>vs.length>=1,"ได้ตราประทับ 1 แห่ง"],["🥾","ได้ตราแล้ว 10 แห่ง",vs=>vs.length>=10,"ได้ตราประทับ 10 แห่ง"],["⛰️","ได้ตราแล้ว 25 แห่ง",vs=>vs.length>=25,"ได้ตราประทับ 25 แห่ง"],["🏆","ได้ตราแล้ว 50 แห่ง",vs=>vs.length>=50,"ได้ตราประทับ 50 แห่ง"],["👑","ได้ตราแล้ว 100 แห่ง",vs=>vs.length>=100,"ได้ตราประทับ 100 แห่ง"],
+  ["🗺️","10 จังหวัด",vs=>new Set(vs.map(p=>p.p)).size>=10,"ได้ตราประทับครบ 10 จังหวัด"],["🌏","20 จังหวัด",vs=>new Set(vs.map(p=>p.p)).size>=20,"ได้ตราประทับครบ 20 จังหวัด"],["🧭","ครบทุกภูมิภาค",vs=>new Set(vs.map(p=>p.r)).size>=REGIONS.length,"เก็บตราให้ครบทั้ง 6 ภูมิภาค"],
+  ["🏝️","นักสำรวจเกาะ ×5",vs=>vs.filter(p=>/เกาะ/.test(p.n)).length>=5,"ได้ตราประทับอุทยานเกาะ 5 แห่ง"],["🏔️","นักไต่ภู ×10",vs=>vs.filter(p=>/^(ภู|ดอย)/.test(p.n)).length>=10,"ได้ตราประทับอุทยานชื่อภู/ดอย 10 แห่ง"],["🎖️","เก็บครบทั้งภูมิภาค",vs=>REGIONS.some(r=>PARKS.filter(p=>p.r===r).every(isV)),"ครบทุกแห่งในภูมิภาคใดภูมิภาคหนึ่ง"],
   ["🏡","ครบทั้งจังหวัด",vs=>fullProvs(2)>=1,"ครบทุกแห่งในจังหวัดที่มี 2 แห่งขึ้นไป"],["🏘️","ครบ 3 จังหวัด",vs=>fullProvs(2)>=3,"ครบทั้งจังหวัด 3 จังหวัด"],["🌟","ครบจังหวัดใหญ่",vs=>fullProvs(5)>=1,"ครบทุกแห่งในจังหวัดที่มี 5 แห่งขึ้นไป"],
-  ["📅","ติดกัน 3 เดือน",vs=>maxStreak()>=3,"เช็กอินต่อเนื่อง 3 เดือน (ตามวันที่ระบุ)"],["🔥","ติดกัน 6 เดือน",vs=>maxStreak()>=6,"เช็กอินต่อเนื่อง 6 เดือน"],["💎","ติดกัน 12 เดือน",vs=>maxStreak()>=12,"เช็กอินต่อเนื่อง 12 เดือน"],["🎯","10 แห่งในปีเดียว",vs=>maxInYear()>=10,"เช็กอิน 10 แห่งในปีเดียว (ตามวันที่ระบุ)"]];
+  ["📅","ติดกัน 3 เดือน",vs=>maxStreak()>=3,"ได้ตราประทับต่อเนื่อง 3 เดือน (ตามวันที่ระบุ)"],["🔥","ติดกัน 6 เดือน",vs=>maxStreak()>=6,"ได้ตราประทับต่อเนื่อง 6 เดือน"],["💎","ติดกัน 12 เดือน",vs=>maxStreak()>=12,"ได้ตราประทับต่อเนื่อง 12 เดือน"],["🎯","10 แห่งในปีเดียว",vs=>maxInYear()>=10,"ได้ตราประทับ 10 แห่งในปีเดียว (ตามวันที่ระบุ)"]];
 let BADGE_ALL = false;
 function renderBadges(vs){
   const L = BADGES.map(([ic, t, f, h], i) => ({ic, t, h, ok:!!f(vs), i})).sort((a, b) => (b.ok - a.ok) || (a.i - b.i)), got = L.filter(x => x.ok).length;
@@ -739,7 +739,7 @@ function stats(){
     rc = vs.filter(p => (data[p.id] || {}).date).sort((a, b) => data[b.id].date.localeCompare(data[a.id].date)).slice(0, 3).map(p => [+p.id.slice(1), +data[p.id].date.replace(/-/g, "")]),
     body = {n:done, pv, v, w, rc}, sig = me.id + JSON.stringify(body);
     if (KV && stats.sig !== sig) { stats.sig = sig; RANK[me.id] = body; afetch("/api/rank/" + encodeURIComponent(me.id), {method:"PUT", headers:{"content-type":"application/json"}, body:JSON.stringify(body)}).then(r => { if (!r.ok) stats.sig = null; }).catch(() => { stats.sig = null; }); } }
-  $("greet").textContent = "สวัสดี คุณ" + me.name + (done ? " · เดินทางมาแล้วทั่วไทย" : " · เริ่มเช็กอินแห่งแรกกันเลย");
+  $("greet").textContent = "สวัสดี คุณ" + me.name + (done ? " · เก็บตราประทับครบทั่วไทย" : " · เริ่มสะสมตราประทับแห่งแรกกันเลย");
 }
 
 /* ---------- รูปจริงจาก Wikipedia (ค้นตอนเปิดดู แล้วจำไว้ในเครื่อง) ---------- */
@@ -840,10 +840,10 @@ const scene = (r) => `<svg class="absolute inset-0 w-full h-full" viewBox="0 0 4
 function photo(p, cls, btn){
   const v = isV(p);
   return `<div class="ph relative overflow-hidden ${cls}" data-id="${p.id}" style="background:${RC[p.r][1]}">${scene(p.r)}
-    ${btn ? (v ? '<span class="vbadge yes">✓ ไปแล้ว</span>' : '<span class="vbadge no">ยังไม่ได้ไป</span>') : ""}
-    ${btn && !v ? `<button data-act="wish" data-id="${p.id}" aria-pressed="${isW(p)}" aria-label="${isW(p) ? "เอาออกจากรายการอยากไป" : "เพิ่มในรายการอยากไป"}" class="absolute top-14 right-2 z-10 size-9 rounded-full bg-white/90 shadow text-base">${isW(p) ? "❤️" : "🤍"}</button>` : ""}
+    ${btn ? (v ? '<span class="vbadge yes">✓ ได้ตราแล้ว</span>' : '<span class="vbadge no">ยังไม่ได้ตรา</span>') : ""}
+    ${btn && !v ? `<button data-act="wish" data-id="${p.id}" aria-pressed="${isW(p)}" aria-label="${isW(p) ? "เอาออกจากรายการอยากเก็บตรา" : "เพิ่มในรายการอยากเก็บตรา"}" class="absolute top-14 right-2 z-10 size-9 rounded-full bg-white/90 shadow text-base">${isW(p) ? "❤️" : "🤍"}</button>` : ""}
     <div class="ov absolute inset-x-0 bottom-0 px-3 pt-8 pb-2 text-white text-xs font-medium" style="background:linear-gradient(transparent,rgba(20,36,28,.78))">📍 จ.${esc(p.p)} · ภาค${p.r}</div>
-    ${btn ? `<button data-act="toggle" data-id="${p.id}" aria-pressed="${v}" aria-label="${v ? "ยกเลิกเช็กอิน " : "เช็กอินที่ "}${esc(p.full)}" class="absolute top-2 right-2 z-10 size-11 rounded-full border-2 text-lg font-bold shadow ${v ? "text-white border-white" : "bg-white/90 border-white text-stone-400 hover:text-[#4f7a3a]"}" ${v ? 'style="background:#4f7a3a"' : ""}>✓</button>` : ""}</div>`;
+    ${btn ? `<button data-act="toggle" data-id="${p.id}" aria-pressed="${v}" aria-label="${v ? "ยกเลิกตราประทับ " : "ติ๊กว่าได้ตราประทับที่ "}${esc(p.full)}" class="absolute top-2 right-2 z-10 size-11 rounded-full border-2 text-lg font-bold shadow ${v ? "text-white border-white" : "bg-white/90 border-white text-stone-400 hover:text-[#4f7a3a]"}" ${v ? 'style="background:#4f7a3a"' : ""}>✓</button>` : ""}</div>`;
 }
 function tile(r){
   const L = PARKS.filter(p => p.r === r), v = L.filter(isV).length, pct = Math.round(v / L.length * 100);
@@ -853,11 +853,11 @@ function tile(r){
       <span class="absolute left-3 top-3 grid place-items-center size-10 rounded-full bg-white/90 text-xl shadow z-10" aria-hidden="true">${RC[r][0]}</span></div>
     <div class="p-4"><div class="flex items-baseline justify-between"><h3 class="serif text-lg font-extrabold">ภาค${r}</h3><span class="text-sm text-stone-500">${L.length} แห่ง</span></div>
       <div class="mt-2 h-2 rounded-full bg-stone-100 overflow-hidden"><div class="bar h-full rounded-full" style="width:${pct}%;background:#4f7a3a"></div></div>
-      <div class="mt-1.5 flex justify-between text-xs text-stone-500"><span>ไปแล้ว ${v}/${L.length}</span><span class="font-semibold text-[#2d5230] group-hover:underline">ดูอุทยาน →</span></div></div></button>`;
+      <div class="mt-1.5 flex justify-between text-xs text-stone-500"><span>ได้ตราแล้ว ${v}/${L.length}</span><span class="font-semibold text-[#2d5230] group-hover:underline">ดูอุทยาน →</span></div></div></button>`;
 }
 function card(p){
   const d = data[p.id] || {}, v = isV(p), rating = d.rating || 0;
-  const sub = v ? "เคยไปแล้ว" + (d.date ? " · " + fmtDate(d.date) : "") + (rating ? " · " + "★".repeat(rating) : "") : "ยังไม่เคยไป · แตะ ✓ เพื่อเช็กอิน";
+  const sub = v ? "ได้ตราประทับแล้ว" + (d.date ? " · " + fmtDate(d.date) : "") + (rating ? " · " + "★".repeat(rating) : "") : "ยังไม่ได้ตราประทับ · แตะ ✓ เมื่อได้ตราแล้ว";
   return `<article data-open="${p.id}" class="pcard ${v ? "is-yes" : "is-no"} cursor-pointer rounded-2xl overflow-hidden border-2 ${v ? "border-[#4f7a3a]" : "border-transparent shadow-sm"} hover:shadow-lg transition">
     ${photo(p, "h-44", true)}
     <div class="p-3"><button data-open="${p.id}" class="pname text-left font-semibold leading-snug">${esc(p.full)}</button>
@@ -880,7 +880,7 @@ function view(){
   const title = q ? "ผลการค้นหา “" + V.q.trim() + "”" : inRegion ? "ภาค" + V.r : "อุทยานแห่งชาติทั้งหมด";
   $("crumb").innerHTML = `<div class="flex flex-wrap items-center gap-3"><button data-back class="btn btn-line !py-1.5">← หมวดภูมิภาค</button><h2 class="serif text-xl md:text-2xl font-extrabold">${inRegion ? RC[V.r][0] + " " : ""}${esc(title)} <span class="text-base font-medium text-stone-500">${L.length} แห่ง</span></h2></div>`;
   $("filters").hidden = false;
-  $("chips").innerHTML = [["all","ทั้งหมด"],["yes","ไปแล้ว"],["no","ยังไม่ไป"],["wish","❤️ อยากไป"]].map(([k, l]) => chip("data-s", k, l, V.s === k)).join("");
+  $("chips").innerHTML = [["all","ทั้งหมด"],["yes","ได้ตราแล้ว"],["no","ยังไม่ได้ตรา"],["wish","❤️ อยากเก็บตรา"]].map(([k, l]) => chip("data-s", k, l, V.s === k)).join("");
   if (inRegion && !q) {
     const provs = [...new Set(PARKS.filter(p => p.r === V.r).map(p => p.p))].sort((a, b) => a.localeCompare(b, "th"));
     $("provs").hidden = false;
@@ -913,7 +913,7 @@ function setTab(t){
 /* ---------- ประชาสัมพันธ์ ---------- */
 const NEWS_KEY = "tnp-news-v1";
 const NEWS_SEED = [
-  {id:"n-welcome", pin:true, title:"ยินดีต้อนรับสู่สมุดเช็กอินอุทยานแห่งชาติไทย", body:"เลือกภูมิภาค แล้วกดปุ่ม ✓ ที่มุมรูปของอุทยานเพื่อเช็กอิน กดที่การ์ดเพื่อบันทึกวันที่ไป ให้คะแนน และเขียนความทรงจำ ระบบจะบันทึกข้อมูลของคุณให้อัตโนมัติทุกครั้งที่แก้ไข"},
+  {id:"n-welcome", pin:true, title:"ยินดีต้อนรับสู่สมุดสะสมตราประทับอุทยานแห่งชาติไทย", body:"เลือกภูมิภาค แล้วกดปุ่ม ✓ ที่มุมรูปของอุทยานเมื่อคุณได้ตราประทับของอุทยานนั้นมาแล้ว กดที่การ์ดเพื่อบันทึกวันที่ได้ตราประทับ ให้คะแนน และจดบันทึกเพิ่มเติม ระบบจะบันทึกข้อมูลของคุณให้อัตโนมัติทุกครั้งที่แก้ไข"},
   {id:"n-book", pin:false, title:"จองที่พักและบริการในอุทยานล่วงหน้า", body:"กรมอุทยานแห่งชาติฯ มีระบบจองบ้านพักออนไลน์ที่ nps.dnp.go.th ช่วงวันหยุดยาวควรจองล่วงหน้า และตรวจสอบเงื่อนไขล่าสุดกับกรมอุทยานฯ ก่อนเดินทาง"},
   {id:"n-check", pin:false, title:"เช็กสถานะอุทยานก่อนออกเดินทาง", body:"อุทยานบางแห่งอาจปิดชั่วคราวตามฤดูกาลหรือสภาพอากาศ โดยเฉพาะอุทยานทางทะเลและเส้นทางเดินป่า สอบถามสถานะล่าสุดได้ที่สายด่วนกรมอุทยานฯ 1362 (24 ชั่วโมง)"},
   {id:"n-safe", pin:false, title:"เที่ยวอย่างปลอดภัยและรักษาธรรมชาติ", body:"แจ้งเส้นทางและเวลากลับให้คนใกล้ชิดทราบ บันทึกเบอร์ฉุกเฉินไว้ในเครื่อง ไม่ให้อาหารสัตว์ป่า และนำขยะกลับออกมาทุกครั้ง ดูเบอร์สำคัญได้ที่แท็บ “เบอร์สำคัญ”"}
@@ -967,15 +967,15 @@ const relDay = (s) => { const k = Math.round((new Date(today() + "T00:00:00") - 
 function renderHomeGroup(){
   const rows = rankRows();
   const ev = rows.flatMap(x => x.rc.filter(q => byId[q.id] && q.d).map(q => ({x, p:byId[q.id], d:q.d}))).sort((a, b) => b.d.localeCompare(a.d)).slice(0, 6);
-  $("homeFeed").innerHTML = ev.map(e => `<div class="flex items-center gap-3">${avt(e.x.u)}<div class="min-w-0 text-sm leading-snug"><b>${esc(shortName(e.x.u))}</b>${e.x.u.id === me.id ? " (คุณ)" : ""} เช็กอิน <button data-open="${e.p.id}" class="underline font-semibold text-left">${esc(e.p.full)}</button><div class="text-xs text-stone-500">${relDay(e.d)}</div></div></div>`).join("")
-    || '<p class="text-sm text-stone-500">ยังไม่มีความเคลื่อนไหว เช็กอินอุทยานแห่งแรกแล้วชื่อคุณจะขึ้นที่นี่</p>';
+  $("homeFeed").innerHTML = ev.map(e => `<div class="flex items-center gap-3">${avt(e.x.u)}<div class="min-w-0 text-sm leading-snug"><b>${esc(shortName(e.x.u))}</b>${e.x.u.id === me.id ? " (คุณ)" : ""} ได้ตราประทับ <button data-open="${e.p.id}" class="underline font-semibold text-left">${esc(e.p.full)}</button><div class="text-xs text-stone-500">${relDay(e.d)}</div></div></div>`).join("")
+    || '<p class="text-sm text-stone-500">ยังไม่มีความเคลื่อนไหว ติ๊กตราประทับอุทยานแห่งแรกแล้วชื่อคุณจะขึ้นที่นี่</p>';
   const got = new Set(); let missing = 0; rows.forEach(x => { if (!x.ids) missing++; else x.ids.forEach(id => got.add(id)); });
   const total = PARKS.length, pct = Math.round(got.size / total * 100), left = PARKS.filter(p => !got.has(p.id));
   $("homeMission").innerHTML = `<div class="flex items-baseline gap-2"><span class="serif text-3xl font-extrabold">${got.size}</span><span class="text-stone-500">/ ${total} แห่ง · ${pct}%</span></div>
-    <p class="text-sm text-stone-600 mt-0.5">กลุ่มเราไปมาแล้ว (นับทุกคนรวมกัน ไม่นับซ้ำ)</p>
+    <p class="text-sm text-stone-600 mt-0.5">กลุ่มเราสะสมตราประทับแล้ว (นับทุกคนรวมกัน ไม่นับซ้ำ)</p>
     <div class="mt-3 h-2.5 rounded-full bg-stone-100 overflow-hidden"><div class="bar h-full rounded-full" style="width:${pct}%;background:#4f7a3a"></div></div>
     ${missing ? '<p class="text-xs text-stone-500 mt-2">บางคนยังไม่ได้เปิดแอปหลังอัปเดต ตัวเลขอาจต่ำกว่าจริงเล็กน้อย</p>' : ""}
-    ${left.length ? `<button data-mission class="btn btn-line mt-3 !py-1.5">${MISSION.open ? "ซ่อน" : "ดู"}อุทยานที่ยังไม่มีใครไป (${left.length})</button>` : '<p class="mt-3 font-semibold text-[#2d5230]">🎉 กลุ่มเราไปครบทุกอุทยานแล้ว</p>'}
+    ${left.length ? `<button data-mission class="btn btn-line mt-3 !py-1.5">${MISSION.open ? "ซ่อน" : "ดู"}อุทยานที่ยังไม่มีใครได้ตรา (${left.length})</button>` : '<p class="mt-3 font-semibold text-[#2d5230]">🎉 กลุ่มเราได้ตราครบทุกอุทยานแล้ว</p>'}
     ${MISSION.open ? REGIONS.map(r => { const L = left.filter(p => p.r === r); return L.length ? `<div class="mt-3"><div class="text-sm font-semibold">${RC[r][0]} ภาค${r} <span class="font-normal text-stone-500">${L.length}</span></div><div class="flex flex-wrap gap-1.5 mt-1.5">${L.map(p => `<button data-open="${p.id}" class="text-xs rounded-full px-2.5 py-1 border border-stone-300 bg-white hover:border-[#4f7a3a]">${esc(p.n)}</button>`).join("")}</div></div>` : ""; }).join("") : ""}`;
 }
 const pickN = (arr, n) => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a.slice(0, n); };
@@ -989,8 +989,8 @@ function renderHomeFeat(){
       <div class="flex items-center justify-between gap-2"><span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#b8892f]/20 text-[#6b4f3a]">🎲 อุทยานสุ่มวันนี้</span><button data-shuffle="feat" class="btn btn-line !py-1 !px-3 !text-sm">สุ่มใหม่</button></div>
       <h3 class="serif text-xl md:text-2xl font-extrabold leading-snug">${esc(p.full)}</h3>
       <p class="text-sm text-stone-600">📍 จังหวัด${esc(p.p)} · ภาค${esc(p.r)}</p>
-      <p class="text-sm ${v ? "text-[#2d5230] font-semibold" : "text-stone-600"}">${v ? "✓ คุณเช็กอินที่นี่แล้ว" : "ยังไม่เคยไป"}</p>
-      <p class="text-sm text-stone-600">${friends.length ? "👥 เพื่อนที่เคยไป: <b>" + friends.map(esc).join(", ") + "</b>" : "👥 ยังไม่มีเพื่อนคนไหนเช็กอินที่นี่"}</p>
+      <p class="text-sm ${v ? "text-[#2d5230] font-semibold" : "text-stone-600"}">${v ? "✓ คุณได้ตราประทับที่นี่แล้วแล้ว" : "ยังไม่ได้ตราประทับ"}</p>
+      <p class="text-sm text-stone-600">${friends.length ? "👥 เพื่อนที่ได้ตราประทับ: <b>" + friends.map(esc).join(", ") + "</b>" : "👥 ยังไม่มีเพื่อนคนไหนได้ตราประทับที่นี่แล้ว"}</p>
       <div class="flex flex-wrap gap-2 pt-1"><button data-open="${p.id}" class="btn btn-main">ดูรายละเอียด</button>
         <a href="${p.url}" target="_blank" rel="noopener" class="btn btn-line">ข้อมูลทางการ ↗</a>
         <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.full + " " + p.p)}" target="_blank" rel="noopener" class="btn btn-line">🧭 แผนที่ ↗</a></div>
@@ -1001,7 +1001,7 @@ function renderHomeRecs(){
   if (!HOME.recs) HOME.recs = pickN(PARKS.filter(p => !isV(p)), 3).map(p => p.id);
   const L = HOME.recs.map(id => byId[id]).filter(Boolean);
   $("homeRecs").innerHTML = L.map(p => `<button data-open="${p.id}" class="text-left rounded-2xl overflow-hidden bg-white border border-stone-200 shadow-sm hover:shadow-md transition">${photo(p, "h-36", false)}<div class="p-3"><div class="font-semibold leading-snug">${esc(p.full)}</div><div class="text-xs text-stone-500 mt-1">จ.${esc(p.p)} · ภาค${esc(p.r)}</div></div></button>`).join("")
-    || '<p class="text-stone-500 sm:col-span-3">🎉 คุณไปครบทุกอุทยานแล้ว</p>';
+    || '<p class="text-stone-500 sm:col-span-3">🎉 คุณได้ตราประทับครบทุกอุทยานแล้ว</p>';
   observePhotos();
 }
 function renderHome(){
@@ -1046,7 +1046,7 @@ function setPTab(t){
 function openProfile(){
   const u = userRec() || me, vs = PARKS.filter(isV);
   setAv($("pAvatar"), u); $("pHead").textContent = u.name; $("pDel").hidden = !u.photo;
-  $("pSub").textContent = "@" + u.username + (u.role === "admin" ? " · แอดมิน" : " · สมาชิก") + " · เช็กอินแล้ว " + vs.length + " แห่ง";
+  $("pSub").textContent = "@" + u.username + (u.role === "admin" ? " · แอดมิน" : " · สมาชิก") + " · ได้ตราประทับแล้ว " + vs.length + " แห่ง";
   { const sp = u.first && u.last ? [u.first, u.last] : String(u.name || "").trim().split(/\s+/); $("pFirst").value = sp[0] || ""; $("pLast").value = sp.slice(1).join(" "); } $("pAddr").value = u.address || ""; $("pPhone").value = u.phone || ""; $("pEmail").value = u.email || "";
   $("pErr").textContent = ""; $("mErr").textContent = ""; setPTab("info"); $("profDlg").showModal();
 }
@@ -1118,12 +1118,12 @@ function renderPark(){
   const stars = [1,2,3,4,5].map(i => `<button data-act="rate" data-v="${i}" aria-label="ให้ ${i} ดาว" class="text-3xl leading-none p-1.5 ${i <= rating ? "" : "opacity-30"}" style="color:#b8892f">★</button>`).join("");
   $("parkBody").innerHTML = photo(p, "h-52 md:h-72", false) + `<div class="p-5 grid gap-4">
     <div><h2 class="serif text-2xl font-extrabold leading-snug">${esc(p.full)}</h2><p class="text-sm text-stone-500 mt-1">จังหวัด${esc(p.p)} · ภาค${esc(p.r)}</p></div>
-    <button data-act="toggle" aria-pressed="${v}" class="btn ${v ? "btn-main" : "btn-line"}">${v ? "✓ เช็กอินแล้ว (กดเพื่อยกเลิก)" : "เช็กอินที่นี่"}</button>
-    ${v ? "" : `<button data-act="wish" aria-pressed="${isW(p)}" class="btn btn-line">${isW(p) ? "❤️ อยู่ในรายการอยากไป (กดเพื่อเอาออก)" : "🤍 เพิ่มในรายการอยากไป"}</button>`}
+    <button data-act="toggle" aria-pressed="${v}" class="btn ${v ? "btn-main" : "btn-line"}">${v ? "✓ ได้ตราประทับแล้ว (กดเพื่อยกเลิก)" : "ได้ตราประทับที่นี่แล้ว"}</button>
+    ${v ? "" : `<button data-act="wish" aria-pressed="${isW(p)}" class="btn btn-line">${isW(p) ? "❤️ อยู่ในรายการอยากเก็บตรา (กดเพื่อเอาออก)" : "🤍 เพิ่มในรายการอยากเก็บตรา"}</button>`}
     ${v ? `<div class="grid gap-3 md:grid-cols-2">
-      <div class="text-sm" data-datebox>วันที่ไปล่าสุด${dateBox(d.date)}</div>
+      <div class="text-sm" data-datebox>วันที่ได้ตราประทับล่าสุด${dateBox(d.date)}</div>
       <div><div class="text-sm">ให้คะแนน</div><div class="flex">${stars}</div></div>
-      <label class="text-sm md:col-span-2">บันทึกความทรงจำ<textarea data-act="note" rows="3" maxlength="2000" placeholder="วันนี้เจออะไรบ้าง…" class="field mt-1">${esc(d.note || "")}</textarea></label></div>` : ""}
+      <label class="text-sm md:col-span-2">บันทึกเพิ่มเติม<textarea data-act="note" rows="3" maxlength="2000" placeholder="เช่น ประทับที่ศูนย์บริการนักท่องเที่ยว…" class="field mt-1">${esc(d.note || "")}</textarea></label></div>` : ""}
     <div id="friendsHere" class="text-sm text-stone-600"></div>
     ${planInfo(p)}
     <div id="parkAbout"></div>
@@ -1133,7 +1133,7 @@ function renderPark(){
 function paintFriendsHere(){
   const el = $("friendsHere"); if (!el || !cur) return;
   const names = rankRows().filter(x => x.u.id !== me.id && x.ids && x.ids.has(cur)).map(x => shortName(x.u));
-  el.innerHTML = names.length ? "👥 เพื่อนที่เคยไปที่นี่: <b>" + names.map(esc).join(", ") + "</b>" : "👥 ยังไม่มีเพื่อนคนไหนเช็กอินที่นี่";
+  el.innerHTML = names.length ? "👥 เพื่อนที่ได้ตราประทับที่นี่: <b>" + names.map(esc).join(", ") + "</b>" : "👥 ยังไม่มีเพื่อนคนไหนได้ตราประทับที่นี่แล้ว";
 }
 function openPark(id){ cur = id; renderPark(); const dlg = $("parkDlg"); if (!dlg.open) dlg.showModal(); refreshRank().then(() => { if (cur === id) paintFriendsHere(); }); }
 
@@ -1222,20 +1222,20 @@ function rkStep(d){
 function paintTopRank(){
   const el = $("topRankBody"); if (!el) return;
   const all = rankRows(RKP).filter(x => x.n > 0), top = all.slice(0, 5), mine = all.find(x => x.u.id === me.id);
-  el.innerHTML = top.length ? top.map(rankItem).join("") + (mine && mine.rk > 5 ? `<p class="text-sm text-stone-600 text-center pt-1">คุณอยู่อันดับที่ <b>${mine.rk}</b> · เช็กอินแล้ว ${mine.n} แห่ง</p>` : "")
-    : '<p class="text-sm text-stone-500">' + (RKP === "all" ? "ยังไม่มีใครเช็กอิน เป็นคนแรกได้เลย 🌱" : "ยังไม่มีใครเช็กอินในช่วงนี้ เป็นคนแรกเลย 🌱") + "</p>";
+  el.innerHTML = top.length ? top.map(rankItem).join("") + (mine && mine.rk > 5 ? `<p class="text-sm text-stone-600 text-center pt-1">คุณอยู่อันดับที่ <b>${mine.rk}</b> · ได้ตราประทับแล้ว ${mine.n} แห่ง</p>` : "")
+    : '<p class="text-sm text-stone-500">' + (RKP === "all" ? "ยังไม่มีใครได้ตราประทับ เป็นคนแรกได้เลย 🌱" : "ยังไม่มีใครได้ตราประทับในช่วงนี้ เป็นคนแรกเลย 🌱") + "</p>";
 }
 function openFriend(uid){
   const x = rankRows().find(r => r.u.id === uid); if (!x) return;
-  $("fHead").textContent = shortName(x.u); $("fSub").textContent = "เช็กอินแล้ว " + x.n + " แห่ง · " + x.pv + " จังหวัด";
+  $("fHead").textContent = shortName(x.u); $("fSub").textContent = "ได้ตราประทับแล้ว " + x.n + " แห่ง · " + x.pv + " จังหวัด";
   $("fBody").innerHTML = !x.ids ? '<p class="text-sm text-stone-500">รายชื่ออุทยานของเพื่อนคนนี้จะขึ้นเมื่อเขาเปิดแอปครั้งถัดไป</p>'
     : REGIONS.map(r => { const L = PARKS.filter(p => p.r === r && x.ids.has(p.id)); if (!L.length) return "";
-      return `<div><h3 class="serif font-extrabold mb-2">${RC[r][0]} ภาค${r} <span class="text-sm font-medium text-stone-500">${L.length}/${PARKS.filter(p => p.r === r).length}</span></h3><div class="flex flex-wrap gap-2">${L.map(p => `<span class="text-sm rounded-full px-3 py-1 border ${isV(p) ? "bg-[#f3f8ec] border-[#4f7a3a] text-[#2d5230]" : "bg-[#b8892f]/15 border-[#b8892f]/50 text-[#6b4f3a] font-medium"}">${esc(p.n)}</span>`).join("")}</div></div>`; }).join("") || '<p class="text-sm text-stone-500">ยังไม่ได้เช็กอินอุทยานไหน</p>';
+      return `<div><h3 class="serif font-extrabold mb-2">${RC[r][0]} ภาค${r} <span class="text-sm font-medium text-stone-500">${L.length}/${PARKS.filter(p => p.r === r).length}</span></h3><div class="flex flex-wrap gap-2">${L.map(p => `<span class="text-sm rounded-full px-3 py-1 border ${isV(p) ? "bg-[#f3f8ec] border-[#4f7a3a] text-[#2d5230]" : "bg-[#b8892f]/15 border-[#b8892f]/50 text-[#6b4f3a] font-medium"}">${esc(p.n)}</span>`).join("")}</div></div>`; }).join("") || '<p class="text-sm text-stone-500">ยังไม่ได้ติ๊กตราประทับอุทยานไหน</p>';
   $("friendDlg").showModal();
 }
 function paintRankDlg(){
   const rows = rankRows(RKP).filter(x => RKP === "all" || x.n > 0);
-  $("rankBody").innerHTML = rows.map(rankItem).join("") || '<p class="text-stone-500">ยังไม่มีใครเช็กอินในช่วงนี้</p>';
+  $("rankBody").innerHTML = rows.map(rankItem).join("") || '<p class="text-stone-500">ยังไม่มีใครได้ตราประทับในช่วงนี้</p>';
   if (me.noRank) $("rankBody").insertAdjacentHTML("afterbegin", '<p class="text-sm text-[#6b4f3a] bg-[#b8892f]/15 rounded-lg px-3 py-2">แอดมินปิดการแสดงชื่อคุณในอันดับ คุณจึงไม่ปรากฏในรายการนี้</p>');
 }
 async function openRank(){
@@ -1260,7 +1260,7 @@ $("rankBody").addEventListener("keydown", e => { const f = e.target.closest("[da
 $("friendClose").addEventListener("click", () => $("friendDlg").close());
 $("friendDlg").addEventListener("click", e => { if (e.target === $("friendDlg")) $("friendDlg").close(); });
 $("rankDlg").addEventListener("click", e => { if (e.target === $("rankDlg")) $("rankDlg").close(); });
-$("btnRandom").addEventListener("click", () => { const L = PARKS.filter(p => !isV(p)); if (!L.length) return toast("🎉 คุณไปครบทุกอุทยานแล้ว"); openPark(L[Math.floor(Math.random() * L.length)].id); });
+$("btnRandom").addEventListener("click", () => { const L = PARKS.filter(p => !isV(p)); if (!L.length) return toast("🎉 คุณได้ตราประทับครบทุกอุทยานแล้ว"); openPark(L[Math.floor(Math.random() * L.length)].id); });
 $("heroCap").addEventListener("click", e => openPark(e.currentTarget.dataset.id));
 
 const menu = $("menu"), mb = $("menuBtn");
@@ -1416,7 +1416,7 @@ $("adminDlg").addEventListener("click", async e => {
   if (act === "activate") { u.status = "active"; toast("เปิดใช้งาน " + u.name + " แล้ว"); }
   else if (act === "suspend") { u.status = "suspended"; toast("ระงับ " + u.name + " แล้ว"); }
   else if (act === "delete") {
-    if (!confirm("ลบสมาชิก " + u.name + " และข้อมูลเช็กอินทั้งหมดของเขา? ย้อนกลับไม่ได้")) return;
+    if (!confirm("ลบสมาชิก " + u.name + " และข้อมูลตราประทับทั้งหมดของเขา? ย้อนกลับไม่ได้")) return;
     users.splice(users.indexOf(u), 1); try { localStorage.removeItem(dataKey(u.id)); if (KV) { delete KV[dataKey(u.id)]; afetch("/api/kv/" + encodeURIComponent(dataKey(u.id)), {method:"DELETE"}); } } catch(x){} toast("ลบสมาชิกแล้ว");
   }
   else if (act === "code") {
@@ -1451,7 +1451,7 @@ $("meForm").addEventListener("submit", async e => {
 /* ---------- ข้อความซิงก์ให้ตรงกับโหมดที่ใช้อยู่ ---------- */
 function syncNotes(){
   const on = !!KV;
-  $("syncNote").textContent = on ? "ข้อมูลเช็กอินและโปรไฟล์ซิงก์กับเซิร์ฟเวอร์ ล็อกอินบัญชีเดียวกันใช้ได้ทุกเครื่อง · ถ้าเน็ตหลุดระหว่างใช้งาน ระบบเก็บไว้ในเครื่องแล้วส่งให้เองเมื่อกลับมาออนไลน์" : "ข้อมูลเช็กอินและโปรไฟล์บันทึกอัตโนมัติในเบราว์เซอร์เครื่องนี้ (ไม่แชร์ข้ามเครื่อง)";
+  $("syncNote").textContent = on ? "ข้อมูลตราประทับและโปรไฟล์ซิงก์กับเซิร์ฟเวอร์ ล็อกอินบัญชีเดียวกันใช้ได้ทุกเครื่อง · ถ้าเน็ตหลุดระหว่างใช้งาน ระบบเก็บไว้ในเครื่องแล้วส่งให้เองเมื่อกลับมาออนไลน์" : "ข้อมูลตราประทับและโปรไฟล์บันทึกอัตโนมัติในเบราว์เซอร์เครื่องนี้ (ไม่แชร์ข้ามเครื่อง)";
   $("profNote").textContent = on ? "ข้อมูลนี้ซิงก์กับเซิร์ฟเวอร์ และแอดมินมองเห็นเบอร์โทรกับอีเมลได้ในหน้าจัดการสมาชิก" : "ข้อมูลนี้เก็บในเบราว์เซอร์เครื่องนี้ และแอดมินมองเห็นเบอร์โทรกับอีเมลได้ในหน้าจัดการสมาชิก";
   $("newsNote").textContent = on ? "ประกาศที่แอดมินโพสต์ซิงก์ให้สมาชิกทุกคนเห็น" : "ประกาศที่แอดมินโพสต์จะเก็บในเบราว์เซอร์เครื่องนี้ ยังไม่แชร์ข้ามเครื่อง";
 }
@@ -1598,11 +1598,11 @@ function renderMapSummary(){
   $("mapRegions").innerHTML = rows.map(x => `<button type="button" data-mapr="${x.r}" aria-pressed="${MAPS.region === x.r}" class="mapcard">
     <div class="flex items-center justify-between gap-2"><span class="serif font-extrabold">${RC[x.r][0]} ภาค${x.r}</span>${x.r === emptiest ? '<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#b8892f]/20 text-[#6b4f3a]">🔥 ว่างที่สุด</span>' : x.left === 0 ? '<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#4f7a3a]/15 text-[#2d5230]">🎉 ครบแล้ว</span>' : ""}</div>
     <div class="mt-2 h-2 rounded-full bg-stone-100 overflow-hidden"><div class="bar h-full rounded-full" style="width:${x.pct}%;background:#4f7a3a"></div></div>
-    <div class="mt-1.5 flex justify-between text-xs text-stone-600"><span>ไปแล้ว ${x.v}/${x.total} (${x.pct}%)</span><span>ยังว่าง ${x.left} แห่ง</span></div>
-    <div class="text-xs text-stone-500 mt-0.5">จังหวัดที่ยังไม่เคยไป ${x.pl.length} จังหวัด</div></button>`).join("");
-  $("mapChips").innerHTML = [["all","ทั้งหมด"],["yes","ไปแล้ว"],["no","ยังไม่ไป"],["wish","❤️ อยากไป"]].map(([k, l]) => chip("data-mapf", k, l, MAPS.filter === k)).join("") + chip("data-mapr", "all", "ทุกภาค", MAPS.region === "all");
+    <div class="mt-1.5 flex justify-between text-xs text-stone-600"><span>ได้ตราแล้ว ${x.v}/${x.total} (${x.pct}%)</span><span>ยังว่าง ${x.left} แห่ง</span></div>
+    <div class="text-xs text-stone-500 mt-0.5">จังหวัดที่ยังไม่ได้ตราประทับ ${x.pl.length} จังหวัด</div></button>`).join("");
+  $("mapChips").innerHTML = [["all","ทั้งหมด"],["yes","ได้ตราแล้ว"],["no","ยังไม่ได้ตรา"],["wish","❤️ อยากเก็บตรา"]].map(([k, l]) => chip("data-mapf", k, l, MAPS.filter === k)).join("") + chip("data-mapr", "all", "ทุกภาค", MAPS.region === "all");
   const sel = rows.find(x => x.r === MAPS.region);
-  $("mapUncovered").innerHTML = sel ? (sel.pl.length ? `<span class="font-semibold">จังหวัดในภาค${sel.r}ที่ยังไม่มีหมุดเขียว:</span> <span class="text-stone-600">${sel.pl.map(esc).join(" · ")}</span>` : `<span class="font-semibold text-[#2d5230]">✓ เคยไปครบทุกจังหวัดในภาค${sel.r}แล้ว</span>`) : "";
+  $("mapUncovered").innerHTML = sel ? (sel.pl.length ? `<span class="font-semibold">จังหวัดในภาค${sel.r}ที่ยังไม่มีหมุดเขียว:</span> <span class="text-stone-600">${sel.pl.map(esc).join(" · ")}</span>` : `<span class="font-semibold text-[#2d5230]">✓ ได้ตราครบทุกจังหวัดในภาค${sel.r}แล้ว</span>`) : "";
 }
 function drawMarkers(fit){
   if (!MAPS.map || !window.L) return;
@@ -1610,7 +1610,7 @@ function drawMarkers(fit){
   PARKS.filter(p => (MAPS.region === "all" || p.r === MAPS.region) && (MAPS.filter === "all" || (MAPS.filter === "wish" ? (isW(p) && !isV(p)) : (MAPS.filter === "yes") === isV(p)))).forEach(p => {
     const g = parkPos(p); if (!g) return; const v = isV(p), w = isW(p) && !v;
     const m = Lf.circleMarker(g.pos, {radius:g.exact ? 8 : 7, weight:w ? 3 : 2, color:v ? "#2d5230" : w ? "#b8892f" : "#78716c", dashArray:g.exact ? null : "3 2", fillColor:v ? "#4f7a3a" : "#ffffff", fillOpacity:v ? 0.95 : 0.9});
-    m.bindPopup(`<div style="min-width:10rem;font-family:Sarabun,sans-serif"><b>${esc(p.full)}</b><br><span style="color:#57534e">จ.${esc(p.p)} · ภาค${esc(p.r)}</span><br>${v ? "✓ ไปแล้ว" : w ? "❤️ อยากไป" : "ยังไม่เคยไป"}${g.exact ? "" : '<br><i style="color:#78716c;font-size:12px">ตำแหน่งโดยประมาณ (กลางจังหวัด)</i>'}<br><button type="button" data-open="${p.id}" style="margin-top:6px;padding:4px 10px;border-radius:8px;background:#1f3a2e;color:#fff;font-size:13px">ดูรายละเอียด</button></div>`);
+    m.bindPopup(`<div style="min-width:10rem;font-family:Sarabun,sans-serif"><b>${esc(p.full)}</b><br><span style="color:#57534e">จ.${esc(p.p)} · ภาค${esc(p.r)}</span><br>${v ? "✓ ได้ตราแล้ว" : w ? "❤️ อยากเก็บตรา" : "ยังไม่ได้ตราประทับ"}${g.exact ? "" : '<br><i style="color:#78716c;font-size:12px">ตำแหน่งโดยประมาณ (กลางจังหวัด)</i>'}<br><button type="button" data-open="${p.id}" style="margin-top:6px;padding:4px 10px;border-radius:8px;background:#1f3a2e;color:#fff;font-size:13px">ดูรายละเอียด</button></div>`);
     m.addTo(MAPS.layer); pts.push(g.pos);
   });
   if (fit) { if (MAPS.region !== "all" && pts.length) MAPS.map.fitBounds(pts, {padding:[30, 30], maxZoom:9}); else MAPS.map.setView([13.2, 101], 6); }
@@ -1660,14 +1660,14 @@ async function drawShareCard(){
     [["#2d5230", .55, 330], ["#3d6b3f", .8, 400], ["#4f7a3a", 1, 450]].forEach(([col, k, base], j) => { g.fillStyle = col; g.globalAlpha = .55 + j * .15; g.beginPath(); g.moveTo(0, 500);
       for (let x = 0; x <= W; x += 60) g.lineTo(x, base + Math.sin(x / 130 + j * 2) * 40 * k + Math.cos(x / 70 + j) * 25 * k); g.lineTo(W, 500); g.closePath(); g.fill(); }); g.globalAlpha = 1; }
   else { const gr = g.createLinearGradient(0, 0, 0, 520); gr.addColorStop(0, "rgba(15,30,22,.75)"); gr.addColorStop(.55, "rgba(15,30,22,.35)"); gr.addColorStop(1, "#1f3a2e"); g.fillStyle = gr; g.fillRect(0, 0, W, 520); }
-  g.textAlign = "center"; g.fillStyle = "#fff"; g.font = `800 50px ${SERIF}`; g.fillText("สมุดเช็กอินอุทยานแห่งชาติไทย", W / 2, 96);
+  g.textAlign = "center"; g.fillStyle = "#fff"; g.font = `800 50px ${SERIF}`; g.fillText("สมุดสะสมตราประทับอุทยานแห่งชาติไทย", W / 2, 96);
   g.fillStyle = "#c9d5b0"; g.font = `600 24px ${SANS}`; g.fillText("THAILAND NATIONAL PARKS LOG", W / 2, 138);
   let nm = "🏞️ " + shortName(me), fs = 44; do { g.font = `600 ${fs}px ${SANS}`; fs -= 2; } while (g.measureText(nm).width > 900 && fs > 22);
   g.fillStyle = "#fff"; g.fillText(nm, W / 2, 470);
   // ตัวเลขหลัก
   g.fillStyle = "#fff"; g.font = `800 210px ${SERIF}`; const ns = String(done), nw = g.measureText(ns).width; g.font = `600 64px ${SERIF}`; const tw = g.measureText(" / " + total).width;
   const x0 = (W - nw - tw) / 2; g.textAlign = "left"; g.font = `800 210px ${SERIF}`; g.fillText(ns, x0, 690); g.fillStyle = "rgba(255,255,255,.6)"; g.font = `600 64px ${SERIF}`; g.fillText(" / " + total, x0 + nw, 690);
-  g.textAlign = "center"; g.fillStyle = "#dfe8c8"; g.font = `600 36px ${SANS}`; g.fillText("อุทยานแห่งชาติที่เคยไป · " + pct + "%", W / 2, 750);
+  g.textAlign = "center"; g.fillStyle = "#dfe8c8"; g.font = `600 36px ${SANS}`; g.fillText("ตราประทับอุทยานแห่งชาติที่เก็บได้ · " + pct + "%", W / 2, 750);
   // กล่องสถิติ
   [[pv, "จังหวัด"], [rg + "/" + REGIONS.length, "ภูมิภาค"], [thisYear, "แห่งในปีนี้"]].forEach(([v, l], i) => { const x = 60 + i * 330;
     g.fillStyle = "rgba(255,255,255,.12)"; rrect(g, x, 785, 300, 110, 22); g.fill(); g.strokeStyle = "rgba(255,255,255,.25)"; g.lineWidth = 2; g.stroke();
@@ -1689,7 +1689,7 @@ async function openShare(){
   try {
     const c = await drawShareCard(), blob = await new Promise(r => c.toBlob(r, "image/png")); if (!blob) throw new Error("blob");
     SHARE.blob = blob; if (SHARE.url) URL.revokeObjectURL(SHARE.url); SHARE.url = URL.createObjectURL(blob);
-    st.innerHTML = `<img src="${SHARE.url}" alt="การ์ดสรุปการเช็กอินอุทยาน" class="max-w-full rounded-xl shadow" style="max-height:58dvh">`;
+    st.innerHTML = `<img src="${SHARE.url}" alt="การ์ดสรุปตราประทับอุทยาน" class="max-w-full rounded-xl shadow" style="max-height:58dvh">`;
     const f = new File([blob], "tnp-checkin.png", {type:"image/png"}); $("shareSend").hidden = !(navigator.canShare && navigator.canShare({files:[f]}));
   } catch(e){ st.innerHTML = '<p class="text-sm text-[#8e3b25]">สร้างการ์ดไม่สำเร็จ ลองใหม่อีกครั้ง</p>'; }
 }
@@ -1700,7 +1700,7 @@ $("shareDlg").addEventListener("click", e => { if (e.target === $("shareDlg")) $
 $("shareSave").addEventListener("click", () => { if (!SHARE.url) return; const a = document.createElement("a"); a.href = SHARE.url; a.download = "tnp-checkin.png"; document.body.appendChild(a); a.click(); a.remove(); });
 $("shareSend").addEventListener("click", async () => { if (!SHARE.blob) return;
   const vs = PARKS.filter(isV), f = new File([SHARE.blob], "tnp-checkin.png", {type:"image/png"});
-  try { await navigator.share({files:[f], title:"สมุดเช็กอินอุทยานแห่งชาติไทย", text:"ฉันเช็กอินอุทยานแห่งชาติแล้ว " + vs.length + "/" + PARKS.length + " แห่ง"}); } catch(e){ if (e && e.name !== "AbortError") toast("แชร์ไม่สำเร็จ ลองบันทึกรูปแล้วโพสต์เอง"); } });
+  try { await navigator.share({files:[f], title:"สมุดสะสมตราประทับอุทยานแห่งชาติไทย", text:"ฉันสะสมตราประทับอุทยานแห่งชาติแล้ว " + vs.length + "/" + PARKS.length + " แห่ง"}); } catch(e){ if (e && e.name !== "AbortError") toast("แชร์ไม่สำเร็จ ลองบันทึกรูปแล้วโพสต์เอง"); } });
 
 /* ---------- เริ่มต้น ---------- */
 ensureAdmin();
