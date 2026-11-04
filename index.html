@@ -45,6 +45,16 @@
     dialog>div:last-child{padding-bottom:calc(1.25rem + env(safe-area-inset-bottom))}
   }
   @media (max-width:767px){body{padding-bottom:calc(3.75rem + env(safe-area-inset-bottom))}}
+  /* เมนูผู้ใช้: ใช้ position:fixed เพื่อไม่ให้ถูกหัวเว็บ (overflow:hidden) ตัดขอบ */
+  .mbtn{width:100%;display:flex;align-items:center;gap:.5rem;text-align:left;padding:.5rem .75rem;border-radius:.5rem;font-size:.875rem}
+  .mbtn:hover{background:#f5f5f4}#btnLogout:hover{background:#fbeee9}
+  .mi{font-size:1rem;line-height:1}
+  @media (max-width:767px){
+    #menu{position:fixed!important;left:.75rem!important;right:.75rem!important;top:auto!important;bottom:calc(4.5rem + env(safe-area-inset-bottom))!important;width:auto!important;display:grid;grid-template-columns:1fr 1fr;gap:.5rem;padding:.75rem!important;border-radius:1.25rem!important;box-shadow:0 12px 40px rgba(0,0,0,.35)!important}
+    #menu .mbtn{flex-direction:column;justify-content:center;gap:.3rem;min-height:4.75rem;text-align:center;font-size:.85rem;border:1px solid #e7e5e4;border-radius:1rem}
+    #menu .mi{font-size:1.75rem}
+    #menu.no-admin #btnLogout{grid-column:1/-1;min-height:3.5rem}
+  }
   /* ===== ความต่างระหว่าง "ไปแล้ว" กับ "ยังไม่ไป" ===== */
   .pcard.is-no{background:#f3f2ee;border-color:#d6d3d1!important}
   .pcard.is-no .ph>img,.pcard.is-no .ph>svg{filter:grayscale(1) contrast(.9) brightness(.92);opacity:.85}
@@ -122,20 +132,21 @@
         <span class="grid place-items-center size-10 rounded-xl bg-white/15 border border-white/25 text-xl" aria-hidden="true">🏞️</span>
         <div class="leading-tight"><div class="serif font-extrabold text-[15px] md:text-lg">สมุดเช็กอินอุทยานฯ ไทย</div><div class="hidden sm:block text-[11px] tracking-wide" style="color:#c9d5b0">THAILAND NATIONAL PARKS LOG</div></div>
       </div>
-      <div class="relative order-2 md:order-3">
+      <div class="relative order-2 md:order-3 ml-auto">
         <button id="menuBtn" class="flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/25" aria-haspopup="true" aria-expanded="false">
           <span id="uAvatar" class="grid place-items-center size-8 rounded-full text-sm font-bold overflow-hidden" style="background:#c9d5b0;color:#1f3a2e">?</span>
           <span id="uName" class="text-sm font-medium max-w-[9rem] truncate"></span><span class="text-xs" aria-hidden="true">▾</span>
         </button>
-        <div id="menu" class="absolute right-0 mt-2 w-56 rounded-xl bg-white text-[#1f3a2e] shadow-xl border border-stone-200 p-1.5 z-40" hidden>
-          <button id="btnProfile" class="w-full text-left px-3 py-2 rounded-lg hover:bg-stone-100 text-sm">👤 โปรไฟล์ของฉัน</button>
-          <button id="btnRank" class="w-full text-left px-3 py-2 rounded-lg hover:bg-stone-100 text-sm">🏅 อันดับสมาชิก</button>
-          <button id="btnAdmin" class="w-full text-left px-3 py-2 rounded-lg hover:bg-stone-100 text-sm" hidden>🛠️ จัดการสมาชิก</button>
-          <button id="btnLogout" class="w-full text-left px-3 py-2 rounded-lg hover:bg-[#fbeee9] text-sm text-[#8e3b25]">ออกจากระบบ</button>
+        <div id="menu" class="fixed w-56 rounded-xl bg-white text-[#1f3a2e] shadow-xl border border-stone-200 p-1.5 z-[60]" hidden>
+          <button id="btnProfile" class="mbtn"><span class="mi" aria-hidden="true">👤</span><span>โปรไฟล์ของฉัน</span></button>
+          <button id="btnRank" class="mbtn"><span class="mi" aria-hidden="true">🏅</span><span>อันดับสมาชิก</span></button>
+          <button id="btnAdmin" class="mbtn" hidden><span class="mi" aria-hidden="true">🛠️</span><span>จัดการสมาชิก</span></button>
+          <button id="btnLogout" class="mbtn" style="color:#8e3b25"><span class="mi" aria-hidden="true">🚪</span><span>ออกจากระบบ</span></button>
         </div>
       </div>
       <div class="hidden md:flex md:order-2 gap-1 overflow-x-auto scroll-x" role="tablist">
-        <button class="navtab" data-tab="parks" aria-pressed="true">🌲 อุทยานแห่งชาติ</button>
+        <button class="navtab" data-tab="home" aria-pressed="true">🏠 หน้าแรก</button>
+        <button class="navtab" data-tab="parks" aria-pressed="false">🌲 อุทยานแห่งชาติ</button>
         <button class="navtab" data-tab="news" aria-pressed="false">📢 ประชาสัมพันธ์</button>
         <button class="navtab" data-tab="phones" aria-pressed="false">📞 เบอร์สำคัญ</button>
       </div>
@@ -161,6 +172,25 @@
     <button id="heroCap" class="hero-full absolute left-4 right-4 md:left-auto bottom-2 text-right truncate text-[11px] text-white/80 hover:text-white" hidden></button>
   </div>
 </header>
+
+<!-- ===== แท็บ: หน้าแรก ===== -->
+<section id="tabHome" class="max-w-6xl mx-auto px-4 py-6 grid gap-8" hidden>
+  <div id="homeFeat"></div>
+  <section>
+    <div class="flex items-center justify-between gap-3 mb-3"><h2 class="serif text-xl font-extrabold">✨ แนะนำให้ไปต่อ <span class="text-sm font-medium text-stone-500">ที่คุณยังไม่เคยไป</span></h2><button data-shuffle="recs" class="btn btn-line !py-1.5 shrink-0">🎲 สุ่มใหม่</button></div>
+    <div id="homeRecs" class="grid gap-4 sm:grid-cols-3"></div>
+  </section>
+  <div class="grid gap-8 lg:grid-cols-2 items-start">
+    <section>
+      <div class="flex items-center justify-between gap-3 mb-3"><h2 class="serif text-xl font-extrabold">📰 ข่าวล่าสุด</h2><button data-gotab="news" class="btn btn-line !py-1.5 shrink-0">ดูทั้งหมด →</button></div>
+      <div id="homeNews" class="grid gap-3"></div>
+    </section>
+    <section class="rounded-2xl bg-white border border-stone-200 shadow-sm p-4">
+      <div class="flex items-center justify-between gap-3 mb-3"><h2 class="serif text-xl font-extrabold">🏅 อันดับเด่น</h2><button data-rankall class="btn btn-line !py-1.5 shrink-0">ดูทั้งหมด →</button></div>
+      <div id="topRankBody" class="grid gap-2"></div>
+    </section>
+  </div>
+</section>
 
 <!-- ===== แท็บ: อุทยาน ===== -->
 <div id="tabParks">
@@ -205,8 +235,9 @@
   <div id="phoneList" class="grid gap-8"></div>
 </section>
 
-<nav id="bottomNav" class="md:hidden fixed bottom-0 inset-x-0 z-30 grid grid-cols-3 bg-white/95 backdrop-blur border-t border-stone-200" style="padding-bottom:env(safe-area-inset-bottom)" aria-label="เมนูหลัก">
-  <button class="bnav" data-tab="parks" aria-pressed="true"><span class="ic" aria-hidden="true">🌲</span>อุทยาน</button>
+<nav id="bottomNav" class="md:hidden fixed bottom-0 inset-x-0 z-30 grid grid-cols-4 bg-white/95 backdrop-blur border-t border-stone-200" style="padding-bottom:env(safe-area-inset-bottom)" aria-label="เมนูหลัก">
+  <button class="bnav" data-tab="home" aria-pressed="true"><span class="ic" aria-hidden="true">🏠</span>หน้าแรก</button>
+  <button class="bnav" data-tab="parks" aria-pressed="false"><span class="ic" aria-hidden="true">🌲</span>อุทยาน</button>
   <button class="bnav" data-tab="news" aria-pressed="false"><span class="ic" aria-hidden="true">📢</span>ประชาสัมพันธ์</button>
   <button class="bnav" data-tab="phones" aria-pressed="false"><span class="ic" aria-hidden="true">📞</span>เบอร์สำคัญ</button>
 </nav>
@@ -755,15 +786,15 @@ function card(p){
 }
 const chip = (attr, key, label, on) => `<button class="chip" ${attr}="${esc(key)}" aria-pressed="${on}">${esc(label)}</button>`;
 
-function setHero(){ $("hero").classList.toggle("compact", !(V.tab === "parks" && V.r === null && !V.q.trim())); }
+function setHero(){ $("hero").classList.toggle("compact", V.tab !== "home"); }
 function view(){
   const q = V.q.trim().toLowerCase(), home = V.r === null && !q, inRegion = REGIONS.includes(V.r);
   stats(); setHero();
   if (home) {
     $("filters").hidden = true;
     $("crumb").innerHTML = `<h2 class="serif text-xl md:text-2xl font-extrabold">เลือกหมวดภูมิภาค</h2><button data-region="all" class="btn btn-line !py-1.5">ดูทั้งหมด ${PARKS.length} แห่ง</button>`;
-    $("view").innerHTML = `<section class="mb-6 rounded-2xl bg-white border border-stone-200 shadow-sm p-4"><div class="flex items-center justify-between gap-3 mb-3"><h3 class="serif text-lg font-extrabold">🏅 อันดับเด่น</h3><button data-rankall class="btn btn-line !py-1.5">ดูอันดับทั้งหมด →</button></div><div id="topRankBody" class="grid gap-2"></div></section><div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">${REGIONS.map(tile).join("")}</div>`;
-    paintTopRank(); refreshRank().then(paintTopRank); applyCovers(); return;
+    $("view").innerHTML = `<div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">${REGIONS.map(tile).join("")}</div>`;
+    applyCovers(); return;
   }
   const L = PARKS.filter(p => (!inRegion || p.r === V.r) && (!inRegion || V.prov === "all" || p.p === V.prov) &&
     (V.s === "all" || (V.s === "wish" ? (isW(p) && !isV(p)) : (V.s === "yes") === isV(p))) && (!q || p.full.toLowerCase().includes(q) || p.p.includes(q)));
@@ -785,7 +816,7 @@ function view(){
   }).join("");
   observePhotos();
 }
-function resetUI(){ V.tab = "parks"; V.r = null; V.prov = "all"; V.q = ""; V.s = "all"; $("q").value = ""; cur = null; setTab("parks"); startHero(); window.scrollTo(0, 0); }
+function resetUI(){ HOME.feat = HOME.recs = null; V.tab = "home"; V.r = null; V.prov = "all"; V.q = ""; V.s = "all"; $("q").value = ""; cur = null; setTab("home"); startHero(); window.scrollTo(0, 0); }
 const go = (r) => { V.r = r; V.prov = "all"; view(); window.scrollTo(0, 0); };
 function toggleVisit(id){ const d = data[id] = data[id] || {}; d.visited = !d.visited; if (d.visited && !d.date) d.date = today(); save(); }
 
@@ -793,7 +824,8 @@ function toggleVisit(id){ const d = data[id] = data[id] || {}; d.visited = !d.vi
 function setTab(t){
   V.tab = t;
   document.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-pressed", b.dataset.tab === t));
-  $("tabParks").hidden = t !== "parks"; $("tabNews").hidden = t !== "news"; $("tabPhones").hidden = t !== "phones";
+  $("tabHome").hidden = t !== "home"; $("tabParks").hidden = t !== "parks"; $("tabNews").hidden = t !== "news"; $("tabPhones").hidden = t !== "phones";
+  if (t === "home") renderHome();
   if (t === "news") { renderNews(); loadAutoNews(); } if (t === "phones") renderPhones();
   view();
 }
@@ -833,6 +865,63 @@ function paintAuto(){
 }
 $("autoRefresh").addEventListener("click", () => loadAutoNews(true));
 
+/* ---------- หน้าแรก: อุทยานสุ่ม · แนะนำ · ข่าว · อันดับ ---------- */
+async function fetchAuto(){
+  if (!GAS_URL) throw 0;
+  if (AUTO.items && Date.now() - AUTO.at < 600000) return;
+  const j = await (await afetch("/api/autonews")).json(); if (!j || !Array.isArray(j.items)) throw 0;
+  AUTO.items = j.items; AUTO.at = Date.now();
+}
+function paintHomeNews(failed){
+  const el = $("homeNews"); if (!el) return;
+  const mine = getNews().slice().sort((a, b) => (b.pin - a.pin) || (b.date || "").localeCompare(a.date || "")).slice(0, 2);
+  const auto = (AUTO.items || []).filter(x => /^https?:\/\//.test(x.u)).slice(0, 5);
+  el.innerHTML = mine.map(x => `<div class="rounded-xl border border-[#b8892f]/40 bg-[#fbf7ec] p-3"><div class="text-xs font-semibold text-[#6b4f3a]">${x.pin ? "📌" : "📢"} ประกาศ</div><div class="font-semibold leading-snug mt-0.5">${esc(x.title)}</div></div>`).join("")
+    + auto.map(x => `<a href="${esc(x.u)}" target="_blank" rel="noopener noreferrer" class="block rounded-xl bg-white border border-stone-200 p-3 hover:border-[#4f7a3a]"><div class="font-semibold leading-snug">${esc(x.t)}</div><div class="text-xs text-stone-500 mt-1">${esc(x.s || "ข่าวออนไลน์")} · ${fmtDate(x.d)} ↗</div></a>`).join("")
+    + (auto.length ? "" : `<p class="text-sm text-stone-500">${!GAS_URL ? "" : failed ? "โหลดข่าวอัตโนมัติไม่ได้ในตอนนี้" : AUTO.items ? "ยังไม่พบข่าวใหม่ในตอนนี้" : "กำลังโหลดข่าว…"}</p>`);
+}
+async function loadHomeNews(){ paintHomeNews(); let bad = false; try { await fetchAuto(); } catch(e){ bad = true; } paintHomeNews(bad); }
+
+const HOME = {feat:null, recs:null};
+const pickN = (arr, n) => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a.slice(0, n); };
+function renderHomeFeat(){
+  if (!HOME.feat || !byId[HOME.feat]) HOME.feat = PARKS[Math.floor(Math.random() * PARKS.length)].id;
+  const p = byId[HOME.feat], v = isV(p);
+  const friends = rankRows().filter(x => x.u.id !== me.id && x.ids && x.ids.has(p.id)).map(x => shortName(x.u));
+  $("homeFeat").innerHTML = `<article class="rounded-2xl bg-white border border-stone-200 shadow-sm overflow-hidden md:grid md:grid-cols-2">
+    ${photo(p, "h-52 md:h-full md:min-h-[16rem]", false)}
+    <div class="p-5 grid gap-3 content-start">
+      <div class="flex items-center justify-between gap-2"><span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#b8892f]/20 text-[#6b4f3a]">🎲 อุทยานสุ่มวันนี้</span><button data-shuffle="feat" class="btn btn-line !py-1 !px-3 !text-sm">สุ่มใหม่</button></div>
+      <h3 class="serif text-xl md:text-2xl font-extrabold leading-snug">${esc(p.full)}</h3>
+      <p class="text-sm text-stone-600">📍 จังหวัด${esc(p.p)} · ภาค${esc(p.r)}</p>
+      <p class="text-sm ${v ? "text-[#2d5230] font-semibold" : "text-stone-600"}">${v ? "✓ คุณเช็กอินที่นี่แล้ว" : "ยังไม่เคยไป"}</p>
+      <p class="text-sm text-stone-600">${friends.length ? "👥 เพื่อนที่เคยไป: <b>" + friends.map(esc).join(", ") + "</b>" : "👥 ยังไม่มีเพื่อนคนไหนเช็กอินที่นี่"}</p>
+      <div class="flex flex-wrap gap-2 pt-1"><button data-open="${p.id}" class="btn btn-main">ดูรายละเอียด</button>
+        <a href="${p.url}" target="_blank" rel="noopener" class="btn btn-line">ข้อมูลทางการ ↗</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.full + " " + p.p)}" target="_blank" rel="noopener" class="btn btn-line">🧭 แผนที่ ↗</a></div>
+    </div></article>`;
+  observePhotos();
+}
+function renderHomeRecs(){
+  if (!HOME.recs) HOME.recs = pickN(PARKS.filter(p => !isV(p)), 3).map(p => p.id);
+  const L = HOME.recs.map(id => byId[id]).filter(Boolean);
+  $("homeRecs").innerHTML = L.map(p => `<button data-open="${p.id}" class="text-left rounded-2xl overflow-hidden bg-white border border-stone-200 shadow-sm hover:shadow-md transition">${photo(p, "h-36", false)}<div class="p-3"><div class="font-semibold leading-snug">${esc(p.full)}</div><div class="text-xs text-stone-500 mt-1">จ.${esc(p.p)} · ภาค${esc(p.r)}</div></div></button>`).join("")
+    || '<p class="text-stone-500 sm:col-span-3">🎉 คุณไปครบทุกอุทยานแล้ว</p>';
+  observePhotos();
+}
+function renderHome(){
+  renderHomeFeat(); renderHomeRecs(); paintTopRank(); loadHomeNews();
+  refreshRank().then(() => { if (V.tab === "home") { paintTopRank(); renderHomeFeat(); } });
+}
+$("tabHome").addEventListener("click", e => {
+  const sh = e.target.closest("[data-shuffle]");
+  if (sh) { if (sh.dataset.shuffle === "feat") { const old = HOME.feat; do { HOME.feat = PARKS[Math.floor(Math.random() * PARKS.length)].id; } while (HOME.feat === old && PARKS.length > 1); renderHomeFeat(); } else { HOME.recs = null; renderHomeRecs(); } return; }
+  const g = e.target.closest("[data-gotab]"); if (g) { setTab(g.dataset.gotab); window.scrollTo(0, 0); return; }
+  if (e.target.closest("[data-rankall]")) return openRank();
+  const fr = e.target.closest("[data-friend]"); if (fr) return openFriend(fr.dataset.friend);
+  const op = e.target.closest("[data-open]"); if (op) openPark(op.dataset.open);
+});
+
 /* ---------- เบอร์โทรสำคัญ (ตรวจกับแหล่งข้อมูลทางการ/สื่อรวบรวมแล้ว) ---------- */
 const PHONES = [
   {t:"🚨 เหตุฉุกเฉิน", c:"#fbeee9", L:[["191","แจ้งเหตุด่วนเหตุร้าย (ตำรวจ)",""],["1669","เจ็บป่วยฉุกเฉิน รถพยาบาลทั่วประเทศ",""],["199","แจ้งเหตุไฟไหม้ / ดับเพลิง",""],["1196","แจ้งอุบัติเหตุทางน้ำ","เหมาะกับอุทยานทางทะเล"],["1784","กรมป้องกันและบรรเทาสาธารณภัย","สายด่วนสาธารณภัย"],["192","ศูนย์เตือนภัยพิบัติแห่งชาติ",""]]},
@@ -852,7 +941,7 @@ function renderPhones(){
 const userRec = () => getUsers().find(x => x.id === me.id);
 function renderUser(){
   $("uName").textContent = me.name; setAv($("uAvatar"), me);
-  $("btnAdmin").hidden = me.role !== "admin";
+  $("btnAdmin").hidden = me.role !== "admin"; $("menu").classList.toggle("no-admin", me.role !== "admin");
 }
 function setPTab(t){
   document.querySelectorAll("[data-ptab]").forEach(b => b.setAttribute("aria-pressed", b.dataset.ptab === t));
@@ -1006,9 +1095,10 @@ $("heroCap").addEventListener("click", e => openPark(e.currentTarget.dataset.id)
 
 const menu = $("menu"), mb = $("menuBtn");
 const closeMenu = () => { menu.hidden = true; mb.setAttribute("aria-expanded", "false"); };
-mb.addEventListener("click", e => { e.stopPropagation(); menu.hidden = !menu.hidden; mb.setAttribute("aria-expanded", String(!menu.hidden)); });
+mb.addEventListener("click", e => { e.stopPropagation(); menu.hidden = !menu.hidden; if (!menu.hidden) { const r = mb.getBoundingClientRect(); menu.style.top = (r.bottom + 8) + "px"; menu.style.right = Math.max(8, innerWidth - r.right) + "px"; } mb.setAttribute("aria-expanded", String(!menu.hidden)); });
 document.addEventListener("click", e => { if (!menu.hidden && !e.target.closest("#menu")) closeMenu(); });
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeMenu(); });
+window.addEventListener("scroll", () => { if (!menu.hidden && innerWidth >= 768) closeMenu(); }, {passive:true});
 $("btnProfile").addEventListener("click", () => { closeMenu(); openProfile(); });
 $("btnAdmin").addEventListener("click", closeMenu);
 $("btnLogout").addEventListener("click", closeMenu);
@@ -1045,7 +1135,7 @@ pd.addEventListener("click", e => {
 });
 pd.addEventListener("change", e => { if (e.target.dataset.act === "date" && cur) { const d = data[cur] = data[cur] || {}; d.date = e.target.value; save(); } });
 pd.addEventListener("input", e => { if (e.target.dataset.act === "note" && cur) { const d = data[cur] = data[cur] || {}; d.note = e.target.value; save(); } });
-pd.addEventListener("close", () => { cur = null; view(); });
+pd.addEventListener("close", () => { cur = null; view(); if (V.tab === "home") renderHome(); });
 
 /* ---------- ฟอร์มล็อกอิน ---------- */
 document.addEventListener("click", e => {
