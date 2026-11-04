@@ -137,12 +137,7 @@
           <span id="uAvatar" class="grid place-items-center size-8 rounded-full text-sm font-bold overflow-hidden" style="background:#c9d5b0;color:#1f3a2e">?</span>
           <span id="uName" class="text-sm font-medium max-w-[9rem] truncate"></span><span class="text-xs" aria-hidden="true">▾</span>
         </button>
-        <div id="menu" class="fixed w-56 rounded-xl bg-white text-[#1f3a2e] shadow-xl border border-stone-200 p-1.5 z-[60]" hidden>
-          <button id="btnProfile" class="mbtn"><span class="mi" aria-hidden="true">👤</span><span>โปรไฟล์ของฉัน</span></button>
-          <button id="btnRank" class="mbtn"><span class="mi" aria-hidden="true">🏅</span><span>อันดับสมาชิก</span></button>
-          <button id="btnAdmin" class="mbtn" hidden><span class="mi" aria-hidden="true">🛠️</span><span>จัดการสมาชิก</span></button>
-          <button id="btnLogout" class="mbtn" style="color:#8e3b25"><span class="mi" aria-hidden="true">🚪</span><span>ออกจากระบบ</span></button>
-        </div>
+        
       </div>
       <div class="hidden md:flex md:order-2 gap-1 overflow-x-auto scroll-x" role="tablist">
         <button class="navtab" data-tab="home" aria-pressed="true">🏠 หน้าแรก</button>
@@ -175,21 +170,19 @@
 
 <!-- ===== แท็บ: หน้าแรก ===== -->
 <section id="tabHome" class="max-w-6xl mx-auto px-4 py-6 grid gap-8" hidden>
+  <section class="rounded-2xl bg-white border border-stone-200 shadow-sm p-4">
+    <div class="flex items-center justify-between gap-3 mb-3"><h2 class="serif text-xl font-extrabold">🏅 อันดับเด่น</h2><button data-rankall class="btn btn-line !py-1.5 shrink-0">ดูทั้งหมด →</button></div>
+    <div id="topRankBody" class="grid gap-2"></div>
+  </section>
   <div id="homeFeat"></div>
   <section>
     <div class="flex items-center justify-between gap-3 mb-3"><h2 class="serif text-xl font-extrabold">✨ แนะนำให้ไปต่อ <span class="text-sm font-medium text-stone-500">ที่คุณยังไม่เคยไป</span></h2><button data-shuffle="recs" class="btn btn-line !py-1.5 shrink-0">🎲 สุ่มใหม่</button></div>
     <div id="homeRecs" class="grid gap-4 sm:grid-cols-3"></div>
   </section>
-  <div class="grid gap-8 lg:grid-cols-2 items-start">
-    <section>
-      <div class="flex items-center justify-between gap-3 mb-3"><h2 class="serif text-xl font-extrabold">📰 ข่าวล่าสุด</h2><button data-gotab="news" class="btn btn-line !py-1.5 shrink-0">ดูทั้งหมด →</button></div>
-      <div id="homeNews" class="grid gap-3"></div>
-    </section>
-    <section class="rounded-2xl bg-white border border-stone-200 shadow-sm p-4">
-      <div class="flex items-center justify-between gap-3 mb-3"><h2 class="serif text-xl font-extrabold">🏅 อันดับเด่น</h2><button data-rankall class="btn btn-line !py-1.5 shrink-0">ดูทั้งหมด →</button></div>
-      <div id="topRankBody" class="grid gap-2"></div>
-    </section>
-  </div>
+  <section>
+    <div class="flex items-center justify-between gap-3 mb-3"><h2 class="serif text-xl font-extrabold">📰 ข่าวล่าสุด</h2><button data-gotab="news" class="btn btn-line !py-1.5 shrink-0">ดูทั้งหมด →</button></div>
+    <div id="homeNews" class="grid gap-3 md:grid-cols-2"></div>
+  </section>
 </section>
 
 <!-- ===== แท็บ: อุทยาน ===== -->
@@ -315,6 +308,13 @@
 </dialog>
 
 <dialog id="parkDlg" style="overflow:hidden"><button id="parkClose" class="absolute top-3 left-3 z-20 px-4 py-2 rounded-full bg-white/90 text-sm shadow hover:bg-white" aria-label="ปิด">✕ ปิด</button><div id="parkBody" class="overflow-y-auto" style="max-height:calc(100dvh - 2rem)"></div></dialog>
+
+<div id="menu" class="fixed w-56 rounded-xl bg-white text-[#1f3a2e] shadow-xl border border-stone-200 p-1.5 z-[60]" hidden>
+          <button id="btnProfile" class="mbtn"><span class="mi" aria-hidden="true">👤</span><span>โปรไฟล์ของฉัน</span></button>
+          <button id="btnRank" class="mbtn"><span class="mi" aria-hidden="true">🏅</span><span>อันดับสมาชิก</span></button>
+          <button id="btnAdmin" class="mbtn" hidden><span class="mi" aria-hidden="true">🛠️</span><span>จัดการสมาชิก</span></button>
+          <button id="btnLogout" class="mbtn" style="color:#8e3b25"><span class="mi" aria-hidden="true">🚪</span><span>ออกจากระบบ</span></button>
+        </div>
 
 <div id="toast" class="fixed bottom-20 md:bottom-4 left-1/2 -translate-x-1/2 max-w-[90vw] text-center px-4 py-2 rounded-lg text-sm text-white z-50" style="background:#1f3a2e" role="status" hidden></div>
 
