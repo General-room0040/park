@@ -1392,7 +1392,7 @@ function userRow(u){
   const btn = (act, label, cls) => `<button class="btn ${cls} !py-1.5 !px-3 !text-sm" data-uact="${act}" data-uid="${u.id}">${label}</button>`;
   const active = u.status === "active";
   const actions = isAdm ? "" :
-    btn("rename", "แก้ชื่อ", "btn-line") +
+    btn("rename", "แก้ชื่อ-นามสกุล", "btn-line") +
     btn("code", "ออกโค้ดรีเซ็ต", "btn-line") +
     (active ? btn("suspend", "ระงับ", "btn-line") : btn("activate", "เปิดใช้งาน", "btn-line")) +
     btn("delete", "ลบ", "btn-danger");
