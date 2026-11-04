@@ -172,8 +172,14 @@
 <section id="tabHome" class="max-w-6xl mx-auto px-4 py-6 grid gap-8" hidden>
   <section class="rounded-2xl bg-white border border-stone-200 shadow-sm p-4">
     <div class="flex items-center justify-between gap-3 mb-3"><h2 class="serif text-xl font-extrabold">🏅 อันดับเด่น</h2><button data-rankall class="btn btn-line !py-1.5 shrink-0">ดูทั้งหมด →</button></div>
+    <div class="flex gap-2 mb-3 scroll-x"><button class="chip" data-rkp="all" aria-pressed="true">ทั้งหมด</button><button class="chip" data-rkp="year" aria-pressed="false">รายปี</button><button class="chip" data-rkp="month" aria-pressed="false">รายเดือน</button></div>
+    <div class="rkpick mb-3" hidden></div>
     <div id="topRankBody" class="grid gap-2"></div>
   </section>
+  <div class="grid gap-8 lg:grid-cols-2 items-start">
+    <section class="rounded-2xl bg-white border border-stone-200 shadow-sm p-4"><h2 class="serif text-xl font-extrabold mb-3">⚡ ความเคลื่อนไหวล่าสุด</h2><div id="homeFeed" class="grid gap-3"></div></section>
+    <section class="rounded-2xl bg-white border border-stone-200 shadow-sm p-4"><h2 class="serif text-xl font-extrabold mb-3">🎯 ภารกิจกลุ่ม</h2><div id="homeMission"></div></section>
+  </div>
   <div id="homeFeat"></div>
   <section>
     <div class="flex items-center justify-between gap-3 mb-3"><h2 class="serif text-xl font-extrabold">✨ แนะนำให้ไปต่อ <span class="text-sm font-medium text-stone-500">ที่คุณยังไม่เคยไป</span></h2><button data-shuffle="recs" class="btn btn-line !py-1.5 shrink-0">🎲 สุ่มใหม่</button></div>
@@ -237,7 +243,7 @@
 
 <footer class="text-center text-xs text-stone-500 py-8 px-4 grid gap-1">
   <p>รายชื่อจากกรมอุทยานแห่งชาติ สัตว์ป่า และพันธุ์พืช · แบ่งภูมิภาคตามเกณฑ์ราชบัณฑิตยสภา</p>
-  <p>รูปภาพจาก Wikipedia / Wikimedia Commons ตามสัญญาอนุญาตของผู้เผยแพร่แต่ละภาพ · อุทยานที่ยังไม่มีรูปจะแสดงภาพประกอบแทน</p>
+  <p>รูปภาพใช้ภาพหลักจากบทความของอุทยานนั้นใน Wikipedia (ภาพสถานที่เด่นของอุทยาน) ตามสัญญาอนุญาตของผู้เผยแพร่แต่ละภาพ · อุทยานที่ไม่มีบทความหรือไม่มีรูปจะแสดงภาพประกอบแทน ไม่ใช้รูปอื่นมาแทน</p>
   <p>ข้อมูลเช็กอินและโปรไฟล์บันทึกอัตโนมัติในเบราว์เซอร์เครื่องนี้ (ไม่แชร์ข้ามเครื่อง)</p>
 </footer>
 </div>
@@ -257,8 +263,10 @@
 
 <dialog id="rankDlg">
   <div class="topo text-white flex items-center justify-between px-5 py-4"><h2 class="serif text-xl font-extrabold">🏅 อันดับสมาชิก</h2><button id="rankClose" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-sm" aria-label="ปิด">ปิด ✕</button></div>
-  <div class="p-5 overflow-y-auto" style="max-height:calc(100dvh - 10rem)"><div id="rankBody" class="grid gap-2"></div>
-    <p class="text-xs text-stone-500 mt-4">แตะที่ชื่อเพื่อดูรายชื่ออุทยานที่เพื่อนไปแล้ว · จัดอันดับจากจำนวนอุทยานที่เช็กอิน (ถ้าเท่ากัน ดูจำนวนจังหวัด) ของสมาชิกทุกคนที่เช็กอินแล้ว แสดงเฉพาะชื่อกับตัวย่อนามสกุลและจำนวน ไม่แสดงบันทึกส่วนตัว อันดับดึงข้อมูลล่าสุดทุกครั้งที่เปิดหน้านี้ ทุกเครื่องเห็นตรงกัน</p></div>
+  <div class="p-5 overflow-y-auto" style="max-height:calc(100dvh - 10rem)"><div class="flex gap-2 mb-3 scroll-x"><button class="chip" data-rkp="all" aria-pressed="true">ทั้งหมด</button><button class="chip" data-rkp="year" aria-pressed="false">รายปี</button><button class="chip" data-rkp="month" aria-pressed="false">รายเดือน</button></div>
+    <div class="rkpick mb-3" hidden></div>
+    <div id="rankBody" class="grid gap-2"></div>
+    <p class="text-xs text-stone-500 mt-4">แตะที่ชื่อเพื่อดูรายชื่ออุทยานที่เพื่อนไปแล้ว · จัดอันดับจากจำนวนอุทยานที่เช็กอิน (ถ้าเท่ากัน ดูจำนวนจังหวัด) ของสมาชิกทุกคนที่เช็กอินแล้ว แสดงเฉพาะชื่อกับตัวย่อนามสกุลและจำนวน ไม่แสดงบันทึกส่วนตัว อันดับดึงข้อมูลล่าสุดทุกครั้งที่เปิดหน้านี้ ทุกเครื่องเห็นตรงกัน · รายปี/รายเดือนเลือกช่วงเวลาได้ และนับตามวันที่เช็กอินที่ระบุไว้ในแต่ละอุทยาน (เช็กอินที่ไม่ได้ระบุวันที่จะนับเฉพาะอันดับ “ทั้งหมด”)</p></div>
 </dialog>
 
 <dialog id="friendDlg">
@@ -664,42 +672,51 @@ function stats(){
   $("pfill").style.width = pct + "%"; $("pbar").setAttribute("aria-valuenow", pct);
   $("sProv").textContent = new Set(vs.map(p => p.p)).size; $("sReg").textContent = new Set(vs.map(p => p.r)).size + "/" + REGIONS.length;
   renderBadges(vs);
-  { const pv = new Set(vs.map(p => p.p)).size, v = vs.map(p => +p.id.slice(1)).sort((a, b) => a - b), sig = me.id + ":" + v.join(",");
-    if (KV && stats.sig !== sig) { stats.sig = sig; RANK[me.id] = {n:done, pv, v}; afetch("/api/rank/" + encodeURIComponent(me.id), {method:"PUT", headers:{"content-type":"application/json"}, body:JSON.stringify({n:done, pv, v})}).catch(() => {}); } }
+  { const srt = vs.slice().sort((a, b) => +a.id.slice(1) - +b.id.slice(1)), pv = new Set(vs.map(p => p.p)).size,
+    v = srt.map(p => +p.id.slice(1)), w = srt.map(p => monthIdx((data[p.id] || {}).date)),
+    rc = vs.filter(p => (data[p.id] || {}).date).sort((a, b) => data[b.id].date.localeCompare(data[a.id].date)).slice(0, 3).map(p => [+p.id.slice(1), +data[p.id].date.replace(/-/g, "")]),
+    body = {n:done, pv, v, w, rc}, sig = me.id + JSON.stringify(body);
+    if (KV && stats.sig !== sig) { stats.sig = sig; RANK[me.id] = body; afetch("/api/rank/" + encodeURIComponent(me.id), {method:"PUT", headers:{"content-type":"application/json"}, body:JSON.stringify(body)}).catch(() => {}); } }
   $("greet").textContent = "สวัสดี คุณ" + me.name + (done ? " · เดินทางมาแล้วทั่วไทย" : " · เริ่มเช็กอินแห่งแรกกันเลย");
 }
 
 /* ---------- รูปจริงจาก Wikipedia (ค้นตอนเปิดดู แล้วจำไว้ในเครื่อง) ---------- */
-const IMG_KEY = "tnp-img-v3"; // ขึ้นเวอร์ชันเพื่อให้ค้นรูปที่เคยหาไม่เจอใหม่
+const IMG_KEY = "tnp-img-v4"; // ขึ้นเวอร์ชันเพื่อทิ้งรูปเก่าที่อาจไม่ตรงอุทยาน แล้วค้นใหม่แบบเข้มงวด
+try { localStorage.removeItem("tnp-img-v3"); } catch(e){}
 let IMG = jget(IMG_KEY, {});            // id -> url | "" (ไม่มีรูป)
 const PENDING = new Set(), QUEUE = [], WAIT = {}; let running = 0;
 const norm = (s) => s.replace(/\([^)]*\)/g, "").replace(/[\s–—\-.,]/g, "");
 const jfetch = async (base, params) => { const r = await fetch(base + "?" + new URLSearchParams({format:"json", origin:"*", ...params})); if (!r.ok) throw new Error("http"); return r.json(); };
 const pagesOf = (j) => Object.values((j.query && j.query.pages) || {}).sort((a, b) => (a.index || 0) - (b.index || 0));
-const okImg = (u) => u && !/\.(svg|tif|tiff|pdf|ogg|webm)(\/|$|\?)/i.test(u) && !/(logo|map|locator|flag|seal|symbol|emblem|ตรา|แผนที่)/i.test(decodeURIComponent(u));
+const safeDec = (u) => { try { return decodeURIComponent(u); } catch(e){ return u; } };
+const okImg = (u) => u && !/\.(svg|tif|tiff|pdf|ogg|webm)(\/|$|\?)/i.test(u) && !/(logo|map|locator|flag|seal|symbol|emblem|chart|diagram|signboard|poster|portrait|ตรา|แผนที่|ป้าย|แผนผัง|โลโก้)/i.test(safeDec(u));
+/* ใช้ "ภาพหลักของบทความอุทยานนั้น" ใน Wikipedia เท่านั้น (ซึ่งเป็นภาพสถานที่เด่นของอุทยาน)
+   หน้าที่ชื่อไม่ตรงกับอุทยานจะไม่ถูกใช้ และไม่ค้นรูปกว้างๆ จาก Commons แล้ว ถ้าไม่พบจะแสดงภาพประกอบแทน */
+const WIKI_TH = "https://th.wikipedia.org/w/api.php", WIKI_EN = "https://en.wikipedia.org/w/api.php";
+async function enPhoto(title){
+  const j = await jfetch(WIKI_EN, {action:"query", prop:"pageimages", piprop:"thumbnail", pithumbsize:"960", redirects:"1", titles:title});
+  const hit = pagesOf(j).find(x => x.thumbnail && okImg(x.thumbnail.source)); return hit ? hit.thumbnail.source : "";
+}
 async function findPhoto(p){
-  const short = p.n.split(/\s*[–—\-]\s*/)[0], key = norm(short);
+  const short = p.n.split(/\s*[–—\-]\s*/)[0], key = norm(short), pre = norm("อุทยานแห่งชาติ");
   const want = [norm(p.base), norm("อุทยานแห่งชาติ" + short)];
-  const W = "https://th.wikipedia.org/w/api.php";
-  const wp = { action:"query", prop:"pageimages", piprop:"thumbnail", pithumbsize:"960", pilimit:"10", redirects:"1" };
-  // 1) เปิดหน้าตามชื่อตรง ๆ
-  for (const t of [p.base, p.n, "อุทยานแห่งชาติ" + short]) {
-    const j = await jfetch(W, {...wp, titles:t});
-    const hit = pagesOf(j).find(x => x.thumbnail && okImg(x.thumbnail.source)); if (hit) return hit.thumbnail.source;
-  }
-  // 2) ค้นหาในวิกิพีเดียไทย แล้วเลือกหน้าที่ชื่อมีชื่ออุทยาน
-  for (const q of [p.base, short + " " + p.p, short]) {
-    const j = await jfetch(W, {...wp, generator:"search", gsrsearch:q, gsrnamespace:"0", gsrlimit:"8"});
-    const pg = pagesOf(j).filter(x => x.thumbnail && okImg(x.thumbnail.source));
-    const hit = pg.find(x => want.includes(norm(x.title))) || pg.find(x => norm(x.title).includes(key));
-    if (hit) return hit.thumbnail.source;
-  }
-  // 3) สำรอง: ค้นหารูปใน Wikimedia Commons
-  const C = "https://commons.wikimedia.org/w/api.php";
-  for (const q of [p.base, short + " " + p.p, short + " national park"]) {
-    const j = await jfetch(C, {action:"query", generator:"search", gsrsearch:q, gsrnamespace:"6", gsrlimit:"8", prop:"imageinfo", iiprop:"url|mime", iiurlwidth:"960"});
-    const hit = pagesOf(j).find(x => { const i = x.imageinfo && x.imageinfo[0]; return i && /^image\/(jpeg|png|webp)$/.test(i.mime) && okImg(i.thumburl || i.url); });
-    if (hit) return hit.imageinfo[0].thumburl || hit.imageinfo[0].url;
+  const isPark = (t) => { const n = norm(t); return want.includes(n) || (n.startsWith(pre) && n.includes(key)); }; // ชื่อหน้าต้องเป็นอุทยานนี้จริง
+  const wp = { action:"query", prop:"pageimages|langlinks", piprop:"thumbnail", pithumbsize:"960", pilimit:"10", lllang:"en", lllimit:"10", redirects:"1" };
+  const pick = async (pages) => {
+    for (const x of pages.filter(x => isPark(x.title))) {
+      if (x.thumbnail && okImg(x.thumbnail.source)) return x.thumbnail.source;
+      const l = x.langlinks && x.langlinks[0], en = l && (l["*"] || l.title); // ไม่มีรูปในหน้าไทย ลองหน้าอังกฤษของอุทยานเดียวกัน
+      if (en) { const u = await enPhoto(en); if (u) return u; }
+    }
+    return "";
+  };
+  // 1) เปิดหน้าตามชื่ออุทยานตรงๆ
+  let u = await pick(pagesOf(await jfetch(WIKI_TH, {...wp, titles:[p.base, "อุทยานแห่งชาติ" + short].filter((t, i, a) => a.indexOf(t) === i).join("|")})));
+  if (u) return u;
+  // 2) ค้นในวิกิพีเดียไทย แต่รับเฉพาะหน้าที่ชื่อเป็นอุทยานนี้
+  for (const q of [p.base, "อุทยานแห่งชาติ" + short + " " + p.p]) {
+    u = await pick(pagesOf(await jfetch(WIKI_TH, {...wp, generator:"search", gsrsearch:q, gsrnamespace:"0", gsrlimit:"8"})));
+    if (u) return u;
   }
   return "";
 }
@@ -882,7 +899,22 @@ function paintHomeNews(failed){
 }
 async function loadHomeNews(){ paintHomeNews(); let bad = false; try { await fetchAuto(); } catch(e){ bad = true; } paintHomeNews(bad); }
 
-const HOME = {feat:null, recs:null};
+const HOME = {feat:null, recs:null}, MISSION = {open:false};
+const relDay = (s) => { const k = Math.round((new Date(today() + "T00:00:00") - new Date(s + "T00:00:00")) / 864e5); return k <= 0 ? "วันนี้" : k === 1 ? "เมื่อวาน" : k <= 14 ? k + " วันที่แล้ว" : fmtDate(s); };
+function renderHomeGroup(){
+  const rows = rankRows();
+  const ev = rows.flatMap(x => x.rc.filter(q => byId[q.id] && q.d).map(q => ({x, p:byId[q.id], d:q.d}))).sort((a, b) => b.d.localeCompare(a.d)).slice(0, 6);
+  $("homeFeed").innerHTML = ev.map(e => `<div class="flex items-center gap-3">${avt(e.x.u)}<div class="min-w-0 text-sm leading-snug"><b>${esc(shortName(e.x.u))}</b>${e.x.u.id === me.id ? " (คุณ)" : ""} เช็กอิน <button data-open="${e.p.id}" class="underline font-semibold text-left">${esc(e.p.full)}</button><div class="text-xs text-stone-500">${relDay(e.d)}</div></div></div>`).join("")
+    || '<p class="text-sm text-stone-500">ยังไม่มีความเคลื่อนไหว เช็กอินอุทยานแห่งแรกแล้วชื่อคุณจะขึ้นที่นี่</p>';
+  const got = new Set(); let missing = 0; rows.forEach(x => { if (!x.ids) missing++; else x.ids.forEach(id => got.add(id)); });
+  const total = PARKS.length, pct = Math.round(got.size / total * 100), left = PARKS.filter(p => !got.has(p.id));
+  $("homeMission").innerHTML = `<div class="flex items-baseline gap-2"><span class="serif text-3xl font-extrabold">${got.size}</span><span class="text-stone-500">/ ${total} แห่ง · ${pct}%</span></div>
+    <p class="text-sm text-stone-600 mt-0.5">กลุ่มเราไปมาแล้ว (นับทุกคนรวมกัน ไม่นับซ้ำ)</p>
+    <div class="mt-3 h-2.5 rounded-full bg-stone-100 overflow-hidden"><div class="bar h-full rounded-full" style="width:${pct}%;background:#4f7a3a"></div></div>
+    ${missing ? '<p class="text-xs text-stone-500 mt-2">บางคนยังไม่ได้เปิดแอปหลังอัปเดต ตัวเลขอาจต่ำกว่าจริงเล็กน้อย</p>' : ""}
+    ${left.length ? `<button data-mission class="btn btn-line mt-3 !py-1.5">${MISSION.open ? "ซ่อน" : "ดู"}อุทยานที่ยังไม่มีใครไป (${left.length})</button>` : '<p class="mt-3 font-semibold text-[#2d5230]">🎉 กลุ่มเราไปครบทุกอุทยานแล้ว</p>'}
+    ${MISSION.open ? REGIONS.map(r => { const L = left.filter(p => p.r === r); return L.length ? `<div class="mt-3"><div class="text-sm font-semibold">${RC[r][0]} ภาค${r} <span class="font-normal text-stone-500">${L.length}</span></div><div class="flex flex-wrap gap-1.5 mt-1.5">${L.map(p => `<button data-open="${p.id}" class="text-xs rounded-full px-2.5 py-1 border border-stone-300 bg-white hover:border-[#4f7a3a]">${esc(p.n)}</button>`).join("")}</div></div>` : ""; }).join("") : ""}`;
+}
 const pickN = (arr, n) => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a.slice(0, n); };
 function renderHomeFeat(){
   if (!HOME.feat || !byId[HOME.feat]) HOME.feat = PARKS[Math.floor(Math.random() * PARKS.length)].id;
@@ -910,12 +942,13 @@ function renderHomeRecs(){
   observePhotos();
 }
 function renderHome(){
-  renderHomeFeat(); renderHomeRecs(); paintTopRank(); loadHomeNews();
-  refreshRank().then(() => { if (V.tab === "home") { paintTopRank(); renderHomeFeat(); } });
+  syncRkChips(); renderHomeFeat(); renderHomeRecs(); paintTopRank(); renderHomeGroup(); loadHomeNews();
+  refreshRank().then(() => { if (V.tab === "home") { paintTopRank(); renderHomeFeat(); renderHomeGroup(); } });
 }
 $("tabHome").addEventListener("click", e => {
   const sh = e.target.closest("[data-shuffle]");
   if (sh) { if (sh.dataset.shuffle === "feat") { const old = HOME.feat; do { HOME.feat = PARKS[Math.floor(Math.random() * PARKS.length)].id; } while (HOME.feat === old && PARKS.length > 1); renderHomeFeat(); } else { HOME.recs = null; renderHomeRecs(); } return; }
+  if (e.target.closest("[data-mission]")) { MISSION.open = !MISSION.open; renderHomeGroup(); return; }
   const g = e.target.closest("[data-gotab]"); if (g) { setTab(g.dataset.gotab); window.scrollTo(0, 0); return; }
   if (e.target.closest("[data-rankall]")) return openRank();
   const fr = e.target.closest("[data-friend]"); if (fr) return openFriend(fr.dataset.friend);
@@ -1001,6 +1034,22 @@ async function onPhoto(e){
 }
 
 /* ---------- หน้ารายละเอียดอุทยาน ---------- */
+/* ---------- เลือกวันที่แบบเร็ว (วัน/เดือน/ปี + ปุ่มลัด) สำหรับบันทึกย้อนหลัง ---------- */
+let LASTD = "";
+const lastUsedDate = () => LASTD || Object.values(data).map(x => x && x.date).filter(Boolean).sort().pop() || "";
+const daysIn = (y, m) => new Date(y, m, 0).getDate();
+const addDays = (n) => { const t = new Date(today() + "T00:00:00"); t.setDate(t.getDate() - n); return t.toLocaleDateString("sv-SE"); };
+function dateBox(v){
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || ""), Y = m ? +m[1] : 0, M = m ? +m[2] : 0, D = m ? +m[3] : 0, ny = +today().slice(0, 4);
+  const opt = (val, lab, on) => `<option value="${val}"${on ? " selected" : ""}>${lab}</option>`;
+  const dd = opt("", "วัน", !D) + Array.from({length: Y && M ? daysIn(Y, M) : 31}, (_, i) => opt(i + 1, i + 1, i + 1 === D)).join("");
+  const mm = opt("", "เดือน", !M) + TH_M.map((n, i) => opt(i + 1, n, i + 1 === M)).join("");
+  const yy = opt("", "ปี พ.ศ.", !Y) + Array.from({length: ny - 1999}, (_, i) => ny - i).map(y => opt(y, y + 543, y === Y)).join("");
+  const last = lastUsedDate(), q = (k, l) => `<button type="button" data-act="dquick" data-v="${k}" class="chip !py-1">${l}</button>`;
+  return `<div class="grid grid-cols-[4.5rem_1fr_6rem] gap-2 mt-1"><select data-act="dpart" data-k="d" class="field" aria-label="วัน">${dd}</select><select data-act="dpart" data-k="m" class="field" aria-label="เดือน">${mm}</select><select data-act="dpart" data-k="y" class="field" aria-label="ปี พ.ศ.">${yy}</select></div>
+    <div class="flex flex-wrap gap-1.5 mt-2">${q("0", "วันนี้")}${q("1", "เมื่อวาน")}${q("7", "7 วันก่อน")}${last ? q("last", "วันเดียวกับล่าสุด · " + esc(fmtDate(last))) : ""}</div>`;
+}
+function applyDate(id, val){ const d = data[id] = data[id] || {}; d.date = val; LASTD = val; save(); }
 function renderPark(){
   const p = byId[cur], d = data[p.id] || {}, v = isV(p), rating = d.rating || 0;
   const stars = [1,2,3,4,5].map(i => `<button data-act="rate" data-v="${i}" aria-label="ให้ ${i} ดาว" class="text-3xl leading-none p-1.5 ${i <= rating ? "" : "opacity-30"}" style="color:#b8892f">★</button>`).join("");
@@ -1009,7 +1058,7 @@ function renderPark(){
     <button data-act="toggle" aria-pressed="${v}" class="btn ${v ? "btn-main" : "btn-line"}">${v ? "✓ เช็กอินแล้ว (กดเพื่อยกเลิก)" : "เช็กอินที่นี่"}</button>
     ${v ? "" : `<button data-act="wish" aria-pressed="${isW(p)}" class="btn btn-line">${isW(p) ? "❤️ อยู่ในรายการอยากไป (กดเพื่อเอาออก)" : "🤍 เพิ่มในรายการอยากไป"}</button>`}
     ${v ? `<div class="grid gap-3 md:grid-cols-2">
-      <label class="text-sm">วันที่ไปล่าสุด<input data-act="date" type="date" value="${esc(d.date || "")}" max="${today()}" class="field mt-1"></label>
+      <div class="text-sm" data-datebox>วันที่ไปล่าสุด${dateBox(d.date)}</div>
       <div><div class="text-sm">ให้คะแนน</div><div class="flex">${stars}</div></div>
       <label class="text-sm md:col-span-2">บันทึกความทรงจำ<textarea data-act="note" rows="3" maxlength="2000" placeholder="วันนี้เจออะไรบ้าง…" class="field mt-1">${esc(d.note || "")}</textarea></label></div>` : ""}
     <div id="friendsHere" class="text-sm text-stone-600"></div>
@@ -1041,6 +1090,9 @@ $("chips").addEventListener("click", e => { const b = e.target.closest("[data-s]
 $("provs").addEventListener("click", e => { const b = e.target.closest("[data-p]"); if (b) { V.prov = b.dataset.p; view(); } });
 $("q").addEventListener("input", e => { V.q = e.target.value; view(); });
 document.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => { setTab(b.dataset.tab); window.scrollTo(0, 0); }));
+let RKP = "all"; // ช่วงของอันดับ: all | year | month
+let RKY = +today().slice(0, 4), RKM = +today().slice(5, 7); // ปี (ค.ศ.) และเดือน (1-12) ที่เลือกดู
+const TH_M = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
 let RU = null, rankAt = 0; // RU = รายชื่อสมาชิกล่าสุดจากเซิร์ฟเวอร์ (ใช้แสดงอันดับเท่านั้น ไม่เขียนทับข้อมูลในเครื่อง)
 async function refreshRank(force){
   if (!KV) return; if (!force && Date.now() - rankAt < 30000) return; rankAt = Date.now();
@@ -1049,25 +1101,64 @@ async function refreshRank(force){
     const mine = me && RANK[me.id]; RANK = j.rank || {}; if (me && mine) RANK[me.id] = mine; }
   catch(e){ rankAt = 0; if (force) toast("โหลดอันดับล่าสุดไม่ได้ แสดงข้อมูลที่มีอยู่"); }
 }
-function rankRows(){
+function monthIdx(s){ const m = /^(\d{4})-(\d{2})/.exec(s || ""); return m ? (+m[1] - 2000) * 12 + (+m[2] - 1) : 0; }
+const ymdStr = (n) => String(n).replace(/^(\d{4})(\d{2})(\d{2})$/, "$1-$2-$3");
+function rankRows(period){
+  period = period || "all";
+  const fromLocal = (u, d) => { const vs = PARKS.filter(p => d[p.id] && d[p.id].visited);
+    return {u, n: vs.length, pv: new Set(vs.map(p => p.p)).size, ids: new Set(vs.map(p => p.id)),
+      pairs: vs.map(p => ({id:p.id, i: monthIdx(d[p.id].date)})),
+      rc: vs.filter(p => d[p.id].date).sort((a, b) => d[b.id].date.localeCompare(d[a.id].date)).slice(0, 3).map(p => ({id:p.id, d:d[p.id].date}))}; };
   const rows = (RU || getUsers()).filter(u => u.status !== "suspended" && !u.noRank).map(u => {
-    if (u.id === me.id) { const vs = PARKS.filter(isV); return {u, n: vs.length, pv: new Set(vs.map(p => p.p)).size, ids: new Set(vs.map(p => p.id))}; }
-    if (KV) { const r = RANK[u.id] || {}; return {u, n: r.n || 0, pv: r.pv || 0, ids: Array.isArray(r.v) ? new Set(r.v.map(k => "p" + k)) : null}; }
-    const d = jget(dataKey(u.id), {}) || {}, vs = PARKS.filter(p => d[p.id] && d[p.id].visited);
-    return {u, n: vs.length, pv: new Set(vs.map(p => p.p)).size, ids: new Set(vs.map(p => p.id))};
-  }).sort((a, b) => b.n - a.n || b.pv - a.pv || a.u.name.localeCompare(b.u.name, "th"));
+    if (u.id === me.id) return fromLocal(u, data);
+    if (KV) { const r = RANK[u.id] || {}, ok = Array.isArray(r.v);
+      return {u, n: r.n || 0, pv: r.pv || 0, ids: ok ? new Set(r.v.map(k => "p" + k)) : null,
+        pairs: ok ? r.v.map((k, j) => ({id:"p" + k, i: (r.w && r.w[j]) | 0})) : null,
+        rc: Array.isArray(r.rc) ? r.rc.map(q => ({id:"p" + q[0], d: ymdStr(q[1])})) : []}; }
+    return fromLocal(u, jget(dataKey(u.id), {}) || {});
+  });
+  if (period !== "all") { const cur = (RKY - 2000) * 12 + (RKM - 1), yr = RKY - 2000; // ใช้ปี/เดือนที่ผู้ใช้เลือก
+    rows.forEach(x => { const L = (x.pairs || []).filter(q => q.i > 0 && (period === "month" ? q.i === cur : Math.floor(q.i / 12) === yr));
+      x.n = L.length; x.pv = new Set(L.map(q => byId[q.id] && byId[q.id].p)).size; }); }
+  rows.sort((a, b) => b.n - a.n || b.pv - a.pv || a.u.name.localeCompare(b.u.name, "th"));
   let rk = 0, prev = null; rows.forEach((x, i) => { const key = x.n + "/" + x.pv; if (key !== prev) { rk = i + 1; prev = key; } x.rk = rk; });
   return rows;
 }
 function rankItem(x){
   const mine = me && x.u.id === me.id, medal = ["🥇","🥈","🥉"][x.rk - 1] || x.rk;
-  return `<div data-friend="${esc(x.u.id)}" role="button" tabindex="0" class="cursor-pointer hover:bg-stone-50 flex items-center gap-3 rounded-xl border p-3 ${mine ? "border-[#4f7a3a] bg-[#f3f8ec]" : "border-stone-200"}"><span class="w-8 text-center text-xl font-bold shrink-0">${medal}</span>${avt(x.u)}<div class="min-w-0 flex-1"><div class="font-semibold truncate">${esc(shortName(x.u))}${mine ? ' <span class="text-xs text-stone-500">(คุณ)</span>' : ""}</div><div class="text-xs text-stone-500">${x.pv} จังหวัด</div></div><div class="serif text-xl font-extrabold">${x.n}<span class="text-sm font-medium text-stone-500"> / ${PARKS.length}</span></div></div>`;
+  return `<div data-friend="${esc(x.u.id)}" role="button" tabindex="0" class="cursor-pointer hover:bg-stone-50 flex items-center gap-3 rounded-xl border p-3 ${mine ? "border-[#4f7a3a] bg-[#f3f8ec]" : "border-stone-200"}"><span class="w-8 text-center text-xl font-bold shrink-0">${medal}</span>${avt(x.u)}<div class="min-w-0 flex-1"><div class="font-semibold truncate">${esc(shortName(x.u))}${mine ? ' <span class="text-xs text-stone-500">(คุณ)</span>' : ""}</div><div class="text-xs text-stone-500">${x.pv} จังหวัด</div></div><div class="serif text-xl font-extrabold">${x.n}<span class="text-sm font-medium text-stone-500">${RKP === "all" ? " / " + PARKS.length : " แห่ง"}</span></div></div>`;
+}
+function rkYears(){ const s = new Set([+today().slice(0, 4), RKY]);
+  rankRows("all").forEach(x => (x.pairs || []).forEach(q => { if (q.i > 0) s.add(2000 + Math.floor(q.i / 12)); }));
+  return [...s].sort((a, b) => b - a); }
+function paintRkPick(){
+  let h = "";
+  if (RKP !== "all") {
+    const yo = rkYears().map(y => `<option value="${y}"${y === RKY ? " selected" : ""}>${y + 543}</option>`).join(""),
+      mo = TH_M.map((n, i) => `<option value="${i + 1}"${i + 1 === RKM ? " selected" : ""}>${n}</option>`).join(""),
+      lab = RKP === "month" ? "เดือน" + TH_M[RKM - 1] + " พ.ศ. " + (RKY + 543) : "ปี พ.ศ. " + (RKY + 543);
+    h = `<div class="flex flex-wrap items-center gap-2"><button type="button" class="chip" data-rkstep="-1" aria-label="ย้อนไป${RKP === "month" ? "เดือน" : "ปี"}ก่อนหน้า">◀</button>`
+      + (RKP === "month" ? `<select data-rkm class="field !w-auto !py-1.5" aria-label="เลือกเดือน">${mo}</select>` : "")
+      + `<select data-rky class="field !w-auto !py-1.5" aria-label="เลือกปี พ.ศ.">${yo}</select><button type="button" class="chip" data-rkstep="1" aria-label="ไป${RKP === "month" ? "เดือน" : "ปี"}ถัดไป">▶</button><button type="button" class="chip" data-rknow>ปัจจุบัน</button></div>`
+      + `<p class="text-sm font-semibold text-[#2d5230] mt-2">🏅 อันดับ${lab}</p>`;
+  }
+  document.querySelectorAll(".rkpick").forEach(el => { el.innerHTML = h; el.hidden = !h; });
+}
+function syncRkChips(){ document.querySelectorAll("[data-rkp]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.rkp === RKP))); paintRkPick(); }
+function rkRefresh(){ syncRkChips(); paintTopRank(); if ($("rankDlg").open) paintRankDlg(); }
+function rkStep(d){
+  const nowY = +today().slice(0, 4), nowM = +today().slice(5, 7);
+  let y = RKY, m = RKM;
+  if (RKP === "month") { m += d; if (m < 1) { m = 12; y--; } else if (m > 12) { m = 1; y++; } } else y += d;
+  if (y > nowY || (RKP === "month" && y === nowY && m > nowM)) return toast("ยังไม่ถึงช่วงเวลานั้น");
+  if (y < 2000) return;
+  RKY = y; RKM = m; rkRefresh();
 }
 function paintTopRank(){
   const el = $("topRankBody"); if (!el) return;
-  const all = rankRows().filter(x => x.n > 0), top = all.slice(0, 5), mine = all.find(x => x.u.id === me.id);
+  const all = rankRows(RKP).filter(x => x.n > 0), top = all.slice(0, 5), mine = all.find(x => x.u.id === me.id);
   el.innerHTML = top.length ? top.map(rankItem).join("") + (mine && mine.rk > 5 ? `<p class="text-sm text-stone-600 text-center pt-1">คุณอยู่อันดับที่ <b>${mine.rk}</b> · เช็กอินแล้ว ${mine.n} แห่ง</p>` : "")
-    : '<p class="text-sm text-stone-500">ยังไม่มีใครเช็กอิน เป็นคนแรกได้เลย 🌱</p>';
+    : '<p class="text-sm text-stone-500">' + (RKP === "all" ? "ยังไม่มีใครเช็กอิน เป็นคนแรกได้เลย 🌱" : "ยังไม่มีใครเช็กอินในช่วงนี้ เป็นคนแรกเลย 🌱") + "</p>";
 }
 function openFriend(uid){
   const x = rankRows().find(r => r.u.id === uid); if (!x) return;
@@ -1077,12 +1168,26 @@ function openFriend(uid){
       return `<div><h3 class="serif font-extrabold mb-2">${RC[r][0]} ภาค${r} <span class="text-sm font-medium text-stone-500">${L.length}/${PARKS.filter(p => p.r === r).length}</span></h3><div class="flex flex-wrap gap-2">${L.map(p => `<span class="text-sm rounded-full px-3 py-1 border ${isV(p) ? "bg-[#f3f8ec] border-[#4f7a3a] text-[#2d5230]" : "bg-[#b8892f]/15 border-[#b8892f]/50 text-[#6b4f3a] font-medium"}">${esc(p.n)}</span>`).join("")}</div></div>`; }).join("") || '<p class="text-sm text-stone-500">ยังไม่ได้เช็กอินอุทยานไหน</p>';
   $("friendDlg").showModal();
 }
-async function openRank(){
-  await refreshRank(true);
-  $("rankBody").innerHTML = rankRows().map(rankItem).join("") || '<p class="text-stone-500">ยังไม่มีสมาชิก</p>';
+function paintRankDlg(){
+  const rows = rankRows(RKP).filter(x => RKP === "all" || x.n > 0);
+  $("rankBody").innerHTML = rows.map(rankItem).join("") || '<p class="text-stone-500">ยังไม่มีใครเช็กอินในช่วงนี้</p>';
   if (me.noRank) $("rankBody").insertAdjacentHTML("afterbegin", '<p class="text-sm text-[#6b4f3a] bg-[#b8892f]/15 rounded-lg px-3 py-2">แอดมินปิดการแสดงชื่อคุณในอันดับ คุณจึงไม่ปรากฏในรายการนี้</p>');
+}
+async function openRank(){
+  await refreshRank(true); syncRkChips(); paintRankDlg();
   if (!$("rankDlg").open) $("rankDlg").showModal();
 }
+document.addEventListener("click", e => {
+  const st = e.target.closest("[data-rkstep]"); if (st) return rkStep(+st.dataset.rkstep);
+  if (e.target.closest("[data-rknow]")) { RKY = +today().slice(0, 4); RKM = +today().slice(5, 7); return rkRefresh(); }
+  const c = e.target.closest("[data-rkp]"); if (!c) return;
+  RKP = c.dataset.rkp; rkRefresh();
+});
+document.addEventListener("change", e => {
+  const y = e.target.closest("select[data-rky]"), m = e.target.closest("select[data-rkm]");
+  if (y) RKY = +y.value; else if (m) RKM = +m.value; else return;
+  rkRefresh();
+});
 $("btnRank").addEventListener("click", () => { closeMenu(); openRank(); });
 $("rankClose").addEventListener("click", () => $("rankDlg").close());
 $("rankBody").addEventListener("click", e => { const f = e.target.closest("[data-friend]"); if (f) openFriend(f.dataset.friend); });
@@ -1129,11 +1234,22 @@ pd.addEventListener("click", e => {
   const b = e.target.closest("[data-act]"); if (!b || !cur) return;
   if (b.dataset.act === "wish") toggleWish(cur);
   else if (b.dataset.act === "toggle") toggleVisit(cur);
+  else if (b.dataset.act === "dquick") { const k = b.dataset.v, v = k === "last" ? lastUsedDate() : addDays(+k); if (!v) return; applyDate(cur, v); }
   else if (b.dataset.act === "rate") { const d = data[cur] = data[cur] || {}, v = +b.dataset.v; d.rating = d.rating === v ? 0 : v; save(); }
   else return;
   renderPark();
 });
-pd.addEventListener("change", e => { if (e.target.dataset.act === "date" && cur) { const d = data[cur] = data[cur] || {}; d.date = e.target.value; save(); } });
+pd.addEventListener("change", e => {
+  if (e.target.dataset.act === "dpart" && cur) {
+    const box = e.target.closest("[data-datebox]"), g = (k) => box.querySelector('[data-k="' + k + '"]');
+    const y = +g("y").value, m = +g("m").value; let dd = +g("d").value;
+    if (y && m) { const n = daysIn(y, m), ds = g("d"); // ปรับจำนวนวันตามเดือน เช่น กุมภาพันธ์ ไม่มี 31
+      if (ds.options.length - 1 !== n) { ds.innerHTML = '<option value="">วัน</option>' + Array.from({length: n}, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join(""); dd = Math.min(dd, n); ds.value = dd || ""; } }
+    if (y && m && dd) { let v = y + "-" + String(m).padStart(2, "0") + "-" + String(dd).padStart(2, "0");
+      if (v > today()) { v = today(); toast("เลือกวันที่ในอนาคตไม่ได้ ปรับเป็นวันนี้ให้แล้ว"); applyDate(cur, v); renderPark(); return; }
+      applyDate(cur, v); }
+    return;
+  } if (e.target.dataset.act === "date" && cur) { const d = data[cur] = data[cur] || {}; d.date = e.target.value; save(); } });
 pd.addEventListener("input", e => { if (e.target.dataset.act === "note" && cur) { const d = data[cur] = data[cur] || {}; d.note = e.target.value; save(); } });
 pd.addEventListener("close", () => { cur = null; view(); if (V.tab === "home") renderHome(); });
 
