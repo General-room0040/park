@@ -274,7 +274,7 @@
 /* ซิงก์ข้อมูลกับเซิร์ฟเวอร์กลาง (ถ้าเปิดผ่าน server.js) ถ้าไม่มีเซิร์ฟเวอร์จะเก็บในเครื่องเหมือนเดิม */
 var KV = null, RANK = {};
 const isSync = (k) => /^(tnp-users-v1|tnp-news-v1|tnp-data-v2:[\w-]+)$/.test(k);
-const GAS_URL = ""; // วาง URL ของ Web App จาก Apps Script (ลงท้าย /exec) ตรงนี้ ถ้าเว้นว่างจะใช้ server.js หรือเก็บในเครื่อง
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzjjUuV96cD3KETfbHqdwMPyKn9-FR80ntyykVr-ZboSAdIkIQLNUhwfvDiLed7BEISmw/exec"; // วาง URL ของ Web App จาก Apps Script (ลงท้าย /exec) ตรงนี้ ถ้าเว้นว่างจะใช้ server.js หรือเก็บในเครื่อง
 const aurl = (u) => GAS_URL ? GAS_URL + "?p=" + encodeURIComponent(u) : u;
 function afetch(u, o){ o = o || {}; if (!GAS_URL) return fetch(u, o); if (!o.method || o.method === "GET") return fetch(aurl(u));
   return fetch(GAS_URL, {method:"POST", headers:{"content-type":"text/plain"}, body:JSON.stringify({m:o.method, p:u, b:o.body ? JSON.parse(o.body) : null})}); }
