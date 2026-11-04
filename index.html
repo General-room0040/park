@@ -83,7 +83,19 @@
       <label class="flex items-center gap-2 text-sm text-stone-600"><input id="lRemember" type="checkbox" class="size-4 accent-[#4f7a3a]"> จำการเข้าสู่ระบบในเครื่องนี้</label>
       <p id="lErr" class="text-sm text-[#8e3b25] min-h-5" role="alert"></p>
       <button class="btn btn-main" type="submit">เข้าสู่ระบบ</button>
-      <p class="text-xs text-stone-500 text-center">ไม่มีบัญชีหรือลืมรหัสผ่าน? ให้ติดต่อแอดมิน</p>
+      <p class="text-xs text-stone-500 text-center">ลืมรหัสผ่าน? ให้ติดต่อแอดมิน</p>
+      <button type="button" id="goSignup" class="btn btn-line">ยังไม่มีบัญชี? สมัครสมาชิก</button>
+    </form>
+    <form id="signupForm" class="p-6 grid gap-4" autocomplete="off" hidden>
+      <label class="text-sm font-medium">ชื่อที่แสดง<input id="sName" class="field mt-1" maxlength="40" required></label>
+      <label class="text-sm font-medium">ชื่อผู้ใช้ <span class="font-normal text-stone-500">(a-z, 0-9, _ ยาว 3–20 ตัว)</span><input id="sUser" class="field mt-1" maxlength="20" autocapitalize="none" required></label>
+      <label class="text-sm font-medium">อีเมล <span class="font-normal text-stone-500">(ไม่บังคับ ใช้รับอีเมลต้อนรับ)</span><input id="sEmail" type="email" class="field mt-1" maxlength="80" autocomplete="email"></label>
+      <label class="text-sm font-medium">รหัสผ่าน <span class="font-normal text-stone-500">(อย่างน้อย 8 ตัว)</span><input id="sPass" type="password" class="field mt-1" minlength="8" autocomplete="new-password" required></label>
+      <label class="text-sm font-medium">ยืนยันรหัสผ่าน<input id="sPass2" type="password" class="field mt-1" autocomplete="new-password" required></label>
+      <p id="sErr" class="text-sm text-[#8e3b25] min-h-5" role="alert"></p>
+      <button class="btn btn-main" type="submit">สมัครและเข้าสู่ระบบ</button>
+      <p class="text-xs text-stone-500 text-center">บัญชีและข้อมูลเช็กอินจะเก็บในเบราว์เซอร์เครื่องนี้ ใช้ข้ามเครื่องไม่ได้</p>
+      <button type="button" id="goLogin" class="btn btn-line">← กลับไปเข้าสู่ระบบ</button>
     </form>
   </div>
 </div>
@@ -106,6 +118,7 @@
         </button>
         <div id="menu" class="absolute right-0 mt-2 w-56 rounded-xl bg-white text-[#1f3a2e] shadow-xl border border-stone-200 p-1.5 z-40" hidden>
           <button id="btnProfile" class="w-full text-left px-3 py-2 rounded-lg hover:bg-stone-100 text-sm">👤 โปรไฟล์ของฉัน</button>
+          <button id="btnRank" class="w-full text-left px-3 py-2 rounded-lg hover:bg-stone-100 text-sm">🏅 อันดับสมาชิก</button>
           <button id="btnAdmin" class="w-full text-left px-3 py-2 rounded-lg hover:bg-stone-100 text-sm" hidden>🛠️ จัดการสมาชิก</button>
           <button id="btnLogout" class="w-full text-left px-3 py-2 rounded-lg hover:bg-[#fbeee9] text-sm text-[#8e3b25]">ออกจากระบบ</button>
         </div>
@@ -209,6 +222,12 @@
   </div>
 </dialog>
 
+<dialog id="rankDlg">
+  <div class="topo text-white flex items-center justify-between px-5 py-4"><h2 class="serif text-xl font-extrabold">🏅 อันดับสมาชิก</h2><button id="rankClose" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-sm" aria-label="ปิด">ปิด ✕</button></div>
+  <div class="p-5 overflow-y-auto" style="max-height:calc(100dvh - 10rem)"><div id="rankBody" class="grid gap-2"></div>
+    <p class="text-xs text-stone-500 mt-4">จัดอันดับจากจำนวนอุทยานที่เช็กอิน (ถ้าเท่ากัน ดูจำนวนจังหวัด) ของสมาชิกทุกคนที่เช็กอินแล้ว แสดงเฉพาะชื่อกับจำนวน ไม่แสดงบันทึกส่วนตัว ถ้าเพิ่งมีคนเช็กอิน ให้เปิดหน้านี้ใหม่เพื่อดูอันดับล่าสุด</p></div>
+</dialog>
+
 <dialog id="profDlg">
   <div class="topo text-white flex items-center gap-4 px-5 py-5">
     <button type="button" id="pAvatarBtn" class="relative shrink-0 rounded-full" aria-label="เปลี่ยนรูปโปรไฟล์"><span id="pAvatar" class="grid place-items-center size-16 rounded-full text-2xl font-bold overflow-hidden" style="background:#c9d5b0;color:#1f3a2e">?</span><span class="absolute -right-1 -bottom-1 grid place-items-center size-7 rounded-full bg-white text-sm shadow" style="color:#1f3a2e" aria-hidden="true">📷</span></button>
@@ -251,6 +270,29 @@
 
 <div id="toast" class="fixed bottom-20 md:bottom-4 left-1/2 -translate-x-1/2 max-w-[90vw] text-center px-4 py-2 rounded-lg text-sm text-white z-50" style="background:#1f3a2e" role="status" hidden></div>
 
+<script>
+/* ซิงก์ข้อมูลกับเซิร์ฟเวอร์กลาง (ถ้าเปิดผ่าน server.js) ถ้าไม่มีเซิร์ฟเวอร์จะเก็บในเครื่องเหมือนเดิม */
+var KV = null, RANK = {};
+const isSync = (k) => /^(tnp-users-v1|tnp-news-v1|tnp-data-v2:[\w-]+)$/.test(k);
+const GAS_URL = ""; // วาง URL ของ Web App จาก Apps Script (ลงท้าย /exec) ตรงนี้ ถ้าเว้นว่างจะใช้ server.js หรือเก็บในเครื่อง
+const aurl = (u) => GAS_URL ? GAS_URL + "?p=" + encodeURIComponent(u) : u;
+function afetch(u, o){ o = o || {}; if (!GAS_URL) return fetch(u, o); if (!o.method || o.method === "GET") return fetch(aurl(u));
+  return fetch(GAS_URL, {method:"POST", headers:{"content-type":"text/plain"}, body:JSON.stringify({m:o.method, p:u, b:o.body ? JSON.parse(o.body) : null})}); }
+function kvx(m, u, b){ try { const r = new XMLHttpRequest();
+  if (GAS_URL && m !== "GET") { r.open("POST", GAS_URL, false); r.setRequestHeader("content-type", "text/plain"); r.send(JSON.stringify({m, p:u, b:b == null ? null : b})); }
+  else { r.open(m, aurl(u), false); if (!GAS_URL) r.setRequestHeader("content-type", "application/json"); r.send(b == null ? null : JSON.stringify(b)); }
+  return r.status >= 200 && r.status < 300 ? r : null; } catch(e){ return null; } }
+(function(){
+  if (!GAS_URL && !/^https?:/.test(location.protocol)) return;
+  const r = kvx("GET", "/api/kv"); let j; try { j = JSON.parse(r.responseText); if (j.error) return; } catch(e){ return; }
+  if (!j || typeof j.kv !== "object") return;
+  KV = j.kv; RANK = j.rank || {};
+  if (KV["tnp-users-v1"] === undefined && localStorage.getItem("tnp-users-v1")) { // ครั้งแรก: ย้ายข้อมูลเดิมในเครื่องขึ้นเซิร์ฟเวอร์
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (!isSync(k)) continue;
+      try { const v = JSON.parse(localStorage.getItem(k)); if (kvx("PUT", "/api/kv/" + encodeURIComponent(k), v)) KV[k] = v; } catch(e){} }
+  }
+})();
+</script>
 <script>
 const REGIONS = ["เหนือ", "ตะวันออกเฉียงเหนือ", "กลาง", "ตะวันออก", "ตะวันตก", "ใต้"];
 const RC = {"เหนือ":["⛰️","#dfe8c8"],"ตะวันออกเฉียงเหนือ":["🌾","#efe3c0"],"กลาง":["🌿","#cfe3d2"],"ตะวันออก":["🏝️","#cfe2e6"],"ตะวันตก":["🌲","#d5dfc3"],"ใต้":["🌴","#d3e6d9"]};
@@ -443,8 +485,12 @@ const esc = (s) => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;","
 const today = () => new Date().toLocaleDateString("sv-SE");
 const fmtDate = (s) => s ? new Date(s + "T00:00:00").toLocaleDateString("th-TH", {day:"numeric", month:"short", year:"numeric"}) : "";
 function toast(m){ const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2800); }
-function jget(k, def){ try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? def : v; } catch(e){ return def; } }
-function jset(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ toast("บันทึกไม่ได้ (พื้นที่เบราว์เซอร์เต็มหรือปิดการเก็บข้อมูล)"); return false; } }
+function jget(k, def){ try {
+  if (KV && isSync(k)) { if (!(k in KV)) { const r = kvx("GET", "/api/kv/" + encodeURIComponent(k)); KV[k] = r ? JSON.parse(r.responseText) : null; } return KV[k] == null ? def : KV[k]; } const v = JSON.parse(localStorage.getItem(k)); return v == null ? def : v; } catch(e){ return def; } }
+function jset(k, v){
+  if (KV && isSync(k)) { KV[k] = v; const bad = () => toast("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ข้อมูลอาจยังไม่ถูกบันทึก");
+    afetch("/api/kv/" + encodeURIComponent(k), {method:"PUT", headers:{"content-type":"application/json"}, body:JSON.stringify(v)}).then(r => { if (!r.ok) bad(); }).catch(bad); return true; }
+  try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ toast("บันทึกไม่ได้ (พื้นที่เบราว์เซอร์เต็มหรือปิดการเก็บข้อมูล)"); return false; } }
 
 /* ---------- บัญชีผู้ใช้ ---------- */
 const USERS_KEY = "tnp-users-v1", LOCK_KEY = "tnp-lock-v1", SESS_KEY = "tnp-session-v1", LEGACY_KEY = "tnp-tracker-v1";
@@ -550,6 +596,8 @@ function stats(){
   $("pfill").style.width = pct + "%"; $("pbar").setAttribute("aria-valuenow", pct);
   $("sProv").textContent = new Set(vs.map(p => p.p)).size; $("sReg").textContent = new Set(vs.map(p => p.r)).size + "/" + REGIONS.length;
   renderBadges(vs);
+  { const pv = new Set(vs.map(p => p.p)).size, sig = me.id + ":" + done + "/" + pv;
+    if (KV && stats.sig !== sig) { stats.sig = sig; RANK[me.id] = {n:done, pv}; afetch("/api/rank/" + encodeURIComponent(me.id), {method:"PUT", headers:{"content-type":"application/json"}, body:JSON.stringify({n:done, pv})}).catch(() => {}); } }
   $("greet").textContent = "สวัสดี คุณ" + me.name + (done ? " · เดินทางมาแล้วทั่วไทย" : " · เริ่มเช็กอินแห่งแรกกันเลย");
 }
 
@@ -840,6 +888,22 @@ $("chips").addEventListener("click", e => { const b = e.target.closest("[data-s]
 $("provs").addEventListener("click", e => { const b = e.target.closest("[data-p]"); if (b) { V.prov = b.dataset.p; view(); } });
 $("q").addEventListener("input", e => { V.q = e.target.value; view(); });
 document.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => { setTab(b.dataset.tab); window.scrollTo(0, 0); }));
+async function openRank(){
+  if (KV) { try { const j = await (await afetch("/api/kv")).json(); if (j.kv["tnp-users-v1"]) KV["tnp-users-v1"] = j.kv["tnp-users-v1"]; RANK = Object.assign(j.rank || {}, {[me.id]: RANK[me.id]}); } catch(e){ toast("โหลดอันดับล่าสุดไม่ได้ แสดงข้อมูลที่มีอยู่"); } }
+  const rows = getUsers().filter(u => u.status !== "suspended").map(u => {
+    if (KV) { const r = RANK[u.id] || {}; return {u, n: r.n || 0, pv: r.pv || 0}; }
+    const d = u.id === me.id ? data : jget(dataKey(u.id), {}) || {}, vs = PARKS.filter(p => d[p.id] && d[p.id].visited);
+    return {u, n: vs.length, pv: new Set(vs.map(p => p.p)).size};
+  }).sort((a, b) => b.n - a.n || b.pv - a.pv || a.u.name.localeCompare(b.u.name, "th"));
+  let rk = 0, prev = null;
+  $("rankBody").innerHTML = rows.map((x, i) => { const key = x.n + "/" + x.pv; if (key !== prev) { rk = i + 1; prev = key; }
+    const me_ = x.u.id === me.id, medal = ["🥇","🥈","🥉"][rk - 1] || rk;
+    return `<div class="flex items-center gap-3 rounded-xl border p-3 ${me_ ? "border-[#4f7a3a] bg-[#f3f8ec]" : "border-stone-200"}"><span class="w-8 text-center text-xl font-bold shrink-0">${medal}</span>${avt(x.u)}<div class="min-w-0 flex-1"><div class="font-semibold truncate">${esc(x.u.name)}${me_ ? ' <span class="text-xs text-stone-500">(คุณ)</span>' : ""}</div><div class="text-xs text-stone-500">${x.pv} จังหวัด</div></div><div class="serif text-xl font-extrabold">${x.n}<span class="text-sm font-medium text-stone-500"> / ${PARKS.length}</span></div></div>`; }).join("") || '<p class="text-stone-500">ยังไม่มีสมาชิก</p>';
+  if (!$("rankDlg").open) $("rankDlg").showModal();
+}
+$("btnRank").addEventListener("click", () => { closeMenu(); openRank(); });
+$("rankClose").addEventListener("click", () => $("rankDlg").close());
+$("rankDlg").addEventListener("click", e => { if (e.target === $("rankDlg")) $("rankDlg").close(); });
 $("btnRandom").addEventListener("click", () => { const L = PARKS.filter(p => !isV(p)); if (!L.length) return toast("🎉 คุณไปครบทุกอุทยานแล้ว"); openPark(L[Math.floor(Math.random() * L.length)].id); });
 $("heroCap").addEventListener("click", e => openPark(e.currentTarget.dataset.id));
 
@@ -901,6 +965,24 @@ $("loginForm").addEventListener("submit", async e => {
 });
 
 $("btnLogout").addEventListener("click", logout);
+const showSignup = (on) => { $("signupForm").hidden = !on; $("loginForm").hidden = on; $("sErr").textContent = ""; $("lErr").textContent = ""; };
+$("goSignup").addEventListener("click", () => showSignup(true));
+$("goLogin").addEventListener("click", () => showSignup(false));
+$("signupForm").addEventListener("submit", async e => {
+  e.preventDefault(); const btn = e.submitter, err = $("sErr"); err.textContent = "";
+  const username = $("sUser").value.trim().toLowerCase(), name = $("sName").value.trim(), pw = $("sPass").value;
+  if (!name) { err.textContent = "กรุณาใส่ชื่อที่แสดง"; return; }
+  if (!validUser(username)) { err.textContent = "ชื่อผู้ใช้ใช้ได้เฉพาะ a-z, 0-9 และ _ ยาว 3–20 ตัว"; return; }
+  if (pw.length < 8) { err.textContent = "รหัสผ่านต้องยาวอย่างน้อย 8 ตัว"; return; }
+  if (pw !== $("sPass2").value) { err.textContent = "รหัสผ่านสองช่องไม่ตรงกัน"; return; }
+  const users = getUsers(); if (users.some(x => x.username === username)) { err.textContent = "ชื่อผู้ใช้นี้ถูกใช้แล้ว"; return; }
+  btn.disabled = true;
+  const email = $("sEmail").value.trim(); if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = "รูปแบบอีเมลไม่ถูกต้อง"; btn.disabled = false; return; }
+  try { const nu = await makeUser(username, name, pw, "member", "active"); if (email) nu.email = email; users.push(nu); if (!saveUsers(users)) return;
+    if (GAS_URL && email) afetch("/api/welcome", {method:"POST", body:JSON.stringify({username})}).catch(() => {}); err.textContent = await doLogin(username, pw, false); if (!err.textContent) { e.target.reset(); showSignup(false); } }
+  catch(x){ err.textContent = x.message === "nocrypto" ? CRYPTO_ERR : "เกิดข้อผิดพลาด ลองใหม่อีกครั้ง"; }
+  finally { btn.disabled = false; }
+});
 
 /* ---------- แผงแอดมิน ---------- */
 const requireAdmin = () => { const u = getUsers().find(x => x.id === (me && me.id)); return u && u.role === "admin" && u.status === "active"; };
@@ -937,7 +1019,7 @@ $("adminDlg").addEventListener("click", async e => {
   else if (act === "suspend") { u.status = "suspended"; toast("ระงับ " + u.name + " แล้ว"); }
   else if (act === "delete") {
     if (!confirm("ลบสมาชิก " + u.name + " และข้อมูลเช็กอินทั้งหมดของเขา? ย้อนกลับไม่ได้")) return;
-    users.splice(users.indexOf(u), 1); try { localStorage.removeItem(dataKey(u.id)); } catch(x){} toast("ลบสมาชิกแล้ว");
+    users.splice(users.indexOf(u), 1); try { localStorage.removeItem(dataKey(u.id)); if (KV) { delete KV[dataKey(u.id)]; afetch("/api/kv/" + encodeURIComponent(dataKey(u.id)), {method:"DELETE"}); } } catch(x){} toast("ลบสมาชิกแล้ว");
   }
   else if (act === "reset") {
     const A = "abcdefghjkmnpqrstuvwxyz23456789";
