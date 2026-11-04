@@ -64,6 +64,12 @@
   .vbadge{position:absolute;left:.5rem;top:.5rem;z-index:10;display:inline-flex;align-items:center;gap:.3rem;border-radius:9999px;padding:.3rem .7rem;font-size:.78rem;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,.25)}
   .vbadge.yes{background:#4f7a3a;color:#fff}
   .vbadge.no{background:rgba(255,255,255,.9);color:#78716c;border:1px dashed #a8a29e}
+  /* แผนที่ (Leaflet) */
+  .leaflet-container img.leaflet-tile,.leaflet-container .leaflet-pane img{max-width:none!important;max-height:none!important}
+  #mapBox{isolation:isolate}
+  .mapcard{text-align:left;border-radius:1rem;border:1px solid #d6d3d1;background:#fff;padding:.8rem .9rem}
+  .mapcard:hover{border-color:#4f7a3a}
+  .mapcard[aria-pressed="true"]{border-color:#4f7a3a;box-shadow:0 0 0 2px #4f7a3a inset;background:#f3f8ec}
 </style>
 </head>
 <body>
@@ -142,6 +148,7 @@
       <div class="hidden md:flex md:order-2 gap-1 overflow-x-auto scroll-x" role="tablist">
         <button class="navtab" data-tab="home" aria-pressed="true">🏠 หน้าแรก</button>
         <button class="navtab" data-tab="parks" aria-pressed="false">🌲 อุทยานแห่งชาติ</button>
+        <button class="navtab" data-tab="map" aria-pressed="false">🗺️ แผนที่</button>
         <button class="navtab" data-tab="news" aria-pressed="false">📢 ประชาสัมพันธ์</button>
         <button class="navtab" data-tab="phones" aria-pressed="false">📞 เบอร์สำคัญ</button>
       </div>
@@ -163,6 +170,7 @@
         <div id="pfill" class="bar h-full rounded-full" style="width:0;background:#c9d5b0"></div>
       </div>
       <div id="badges" class="mt-4 flex flex-wrap gap-2" aria-label="เหรียญความสำเร็จ"></div>
+      <button type="button" id="heroShare" class="mt-3 btn !py-1.5 !px-4 text-sm bg-white/15 border border-white/30 text-white hover:bg-white/25">📤 สร้างการ์ดแชร์</button>
     </div>
     <button id="heroCap" class="hero-full absolute left-4 right-4 md:left-auto bottom-2 text-right truncate text-[11px] text-white/80 hover:text-white" hidden></button>
   </div>
@@ -205,6 +213,16 @@
   </main>
 </div>
 
+<!-- ===== แท็บ: แผนที่ ===== -->
+<section id="tabMap" class="max-w-6xl mx-auto px-4 py-6 grid gap-4" hidden>
+  <div><h2 class="serif text-2xl font-extrabold">🗺️ แผนที่เช็กอิน</h2><p class="text-sm text-stone-500 mt-1">หมุดเขียว = ไปแล้ว · หมุดขาว = ยังไม่ไป · ขอบทอง = อยากไป · ขอบประ = ตำแหน่งโดยประมาณ (กลางจังหวัด) แตะการ์ดภูมิภาคเพื่อซูมดู</p></div>
+  <div id="mapRegions" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"></div>
+  <div class="scroll-x flex gap-2 items-center"><div id="mapChips" class="flex gap-2 shrink-0"></div></div>
+  <div id="mapUncovered" class="text-sm"></div>
+  <div id="mapBox" class="rounded-2xl overflow-hidden border border-stone-300" style="height:min(70dvh,34rem);background:#dfe8c8"></div>
+  <p class="text-xs text-stone-500">ตำแหน่งหมุดดึงจากพิกัดในบทความ Wikipedia ของแต่ละอุทยาน ถ้าไม่มีพิกัดจะวางโดยประมาณที่กลางจังหวัด · แผนที่ © OpenStreetMap contributors</p>
+</section>
+
 <!-- ===== แท็บ: ประชาสัมพันธ์ ===== -->
 <section id="tabNews" class="max-w-4xl mx-auto px-4 py-8" hidden>
   <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
@@ -225,7 +243,7 @@
     </div>
     <div id="autoNews" class="grid gap-3"></div>
   </div>
-  <p class="text-xs text-stone-500 mt-4">ประกาศที่แอดมินโพสต์จะเก็บในเบราว์เซอร์เครื่องนี้ ยังไม่แชร์ข้ามเครื่อง</p>
+  <p id="newsNote" class="text-xs text-stone-500 mt-4">ประกาศที่แอดมินโพสต์จะเก็บในเบราว์เซอร์เครื่องนี้ ยังไม่แชร์ข้ามเครื่อง</p>
 </section>
 
 <!-- ===== แท็บ: เบอร์สำคัญ ===== -->
@@ -234,17 +252,18 @@
   <div id="phoneList" class="grid gap-8"></div>
 </section>
 
-<nav id="bottomNav" class="md:hidden fixed bottom-0 inset-x-0 z-30 grid grid-cols-4 bg-white/95 backdrop-blur border-t border-stone-200" style="padding-bottom:env(safe-area-inset-bottom)" aria-label="เมนูหลัก">
+<nav id="bottomNav" class="md:hidden fixed bottom-0 inset-x-0 z-30 grid grid-cols-5 bg-white/95 backdrop-blur border-t border-stone-200" style="padding-bottom:env(safe-area-inset-bottom)" aria-label="เมนูหลัก">
   <button class="bnav" data-tab="home" aria-pressed="true"><span class="ic" aria-hidden="true">🏠</span>หน้าแรก</button>
   <button class="bnav" data-tab="parks" aria-pressed="false"><span class="ic" aria-hidden="true">🌲</span>อุทยาน</button>
-  <button class="bnav" data-tab="news" aria-pressed="false"><span class="ic" aria-hidden="true">📢</span>ประชาสัมพันธ์</button>
-  <button class="bnav" data-tab="phones" aria-pressed="false"><span class="ic" aria-hidden="true">📞</span>เบอร์สำคัญ</button>
+  <button class="bnav" data-tab="map" aria-pressed="false"><span class="ic" aria-hidden="true">🗺️</span>แผนที่</button>
+  <button class="bnav" data-tab="news" aria-pressed="false"><span class="ic" aria-hidden="true">📢</span>ข่าวสาร</button>
+  <button class="bnav" data-tab="phones" aria-pressed="false"><span class="ic" aria-hidden="true">📞</span>เบอร์โทร</button>
 </nav>
 
 <footer class="text-center text-xs text-stone-500 py-8 px-4 grid gap-1">
   <p>รายชื่อจากกรมอุทยานแห่งชาติ สัตว์ป่า และพันธุ์พืช · แบ่งภูมิภาคตามเกณฑ์ราชบัณฑิตยสภา</p>
   <p>รูปภาพใช้ภาพหลักจากบทความของอุทยานนั้นใน Wikipedia (ภาพสถานที่เด่นของอุทยาน) ตามสัญญาอนุญาตของผู้เผยแพร่แต่ละภาพ · อุทยานที่ไม่มีบทความหรือไม่มีรูปจะแสดงภาพประกอบแทน ไม่ใช้รูปอื่นมาแทน</p>
-  <p>ข้อมูลเช็กอินและโปรไฟล์บันทึกอัตโนมัติในเบราว์เซอร์เครื่องนี้ (ไม่แชร์ข้ามเครื่อง)</p>
+  <p id="syncNote">ข้อมูลเช็กอินและโปรไฟล์บันทึกอัตโนมัติในเบราว์เซอร์เครื่องนี้ (ไม่แชร์ข้ามเครื่อง)</p>
 </footer>
 </div>
 
@@ -267,6 +286,15 @@
     <div class="rkpick mb-3" hidden></div>
     <div id="rankBody" class="grid gap-2"></div>
     <p class="text-xs text-stone-500 mt-4">แตะที่ชื่อเพื่อดูรายชื่ออุทยานที่เพื่อนไปแล้ว · จัดอันดับจากจำนวนอุทยานที่เช็กอิน (ถ้าเท่ากัน ดูจำนวนจังหวัด) ของสมาชิกทุกคนที่เช็กอินแล้ว แสดงเฉพาะชื่อกับตัวย่อนามสกุลและจำนวน ไม่แสดงบันทึกส่วนตัว อันดับดึงข้อมูลล่าสุดทุกครั้งที่เปิดหน้านี้ ทุกเครื่องเห็นตรงกัน · รายปี/รายเดือนเลือกช่วงเวลาได้ และนับตามวันที่เช็กอินที่ระบุไว้ในแต่ละอุทยาน (เช็กอินที่ไม่ได้ระบุวันที่จะนับเฉพาะอันดับ “ทั้งหมด”)</p></div>
+</dialog>
+
+<dialog id="shareDlg">
+  <div class="topo text-white flex items-center justify-between px-5 py-4"><h2 class="serif text-xl font-extrabold">📤 การ์ดแชร์</h2><button id="shareClose" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-sm" aria-label="ปิด">ปิด ✕</button></div>
+  <div class="p-5 overflow-y-auto" style="max-height:calc(100dvh - 8rem)">
+    <div id="shareStage" class="grid place-items-center min-h-[12rem]"></div>
+    <div class="mt-4 flex flex-wrap gap-2 justify-center"><button id="shareSend" type="button" class="btn btn-main" hidden>📤 แชร์ (LINE / Facebook ฯลฯ)</button><button id="shareSave" type="button" class="btn btn-line">💾 บันทึกรูป</button></div>
+    <p class="text-xs text-stone-500 mt-3 text-center">การ์ดแสดงเฉพาะชื่อกับตัวย่อนามสกุล และสถิติรวม ไม่มีข้อมูลส่วนตัว · ถ้าปุ่มแชร์ไม่ขึ้น ให้บันทึกรูปแล้วโพสต์เอง</p>
+  </div>
 </dialog>
 
 <dialog id="friendDlg">
@@ -302,7 +330,7 @@
         <label class="text-sm font-medium">เบอร์โทร<input id="pPhone" type="tel" inputmode="tel" class="field mt-1" maxlength="20" autocomplete="tel" placeholder="เช่น 081-234-5678"></label>
         <label class="text-sm font-medium">อีเมล<input id="pEmail" type="email" class="field mt-1" maxlength="80" autocomplete="email" placeholder="name@example.com"></label>
       </div>
-      <p class="text-xs text-stone-500">ข้อมูลนี้เก็บในเบราว์เซอร์เครื่องนี้ และแอดมินมองเห็นเบอร์โทรกับอีเมลได้ในหน้าจัดการสมาชิก</p>
+      <p id="profNote" class="text-xs text-stone-500">ข้อมูลนี้เก็บในเบราว์เซอร์เครื่องนี้ และแอดมินมองเห็นเบอร์โทรกับอีเมลได้ในหน้าจัดการสมาชิก</p>
       <p id="pErr" class="text-sm text-[#8e3b25] min-h-5" role="alert"></p>
       <button class="btn btn-main" type="submit">บันทึกโปรไฟล์</button>
     </form>
@@ -320,6 +348,7 @@
 <div id="menu" class="fixed w-56 rounded-xl bg-white text-[#1f3a2e] shadow-xl border border-stone-200 p-1.5 z-[60]" hidden>
           <button id="btnProfile" class="mbtn"><span class="mi" aria-hidden="true">👤</span><span>โปรไฟล์ของฉัน</span></button>
           <button id="btnRank" class="mbtn"><span class="mi" aria-hidden="true">🏅</span><span>อันดับสมาชิก</span></button>
+          <button id="btnShare" class="mbtn"><span class="mi" aria-hidden="true">📤</span><span>การ์ดแชร์ผลของฉัน</span></button>
           <button id="btnAdmin" class="mbtn" hidden><span class="mi" aria-hidden="true">🛠️</span><span>จัดการสมาชิก</span></button>
           <button id="btnLogout" class="mbtn" style="color:#8e3b25"><span class="mi" aria-hidden="true">🚪</span><span>ออกจากระบบ</span></button>
         </div>
@@ -343,6 +372,7 @@ function kvx(m, u, b){ try { const r = new XMLHttpRequest();
   const r = kvx("GET", "/api/kv"); let j; try { j = JSON.parse(r.responseText); if (j.error) return; } catch(e){ return; }
   if (!j || typeof j.kv !== "object") return;
   KV = j.kv; RANK = j.rank || {};
+  try { const ob = JSON.parse(localStorage.getItem("tnp-outbox-v1") || "{}"); Object.keys(ob).forEach(k => { if (/^tnp-data-v2:/.test(k)) KV[k] = ob[k]; }); } catch(e){} // ข้อมูลที่ยังส่งไม่สำเร็จ ใหม่กว่าบนเซิร์ฟเวอร์
   if (KV["tnp-users-v1"] === undefined && localStorage.getItem("tnp-users-v1")) { // ครั้งแรก: ย้ายข้อมูลเดิมในเครื่องขึ้นเซิร์ฟเวอร์
     for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (!isSync(k)) continue;
       try { const v = JSON.parse(localStorage.getItem(k)); if (kvx("PUT", "/api/kv/" + encodeURIComponent(k), v)) KV[k] = v; } catch(e){} }
@@ -543,9 +573,27 @@ const fmtDate = (s) => s ? new Date(s + "T00:00:00").toLocaleDateString("th-TH",
 function toast(m){ const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2800); }
 function jget(k, def){ try {
   if (KV && isSync(k)) { if (!(k in KV)) { const r = kvx("GET", "/api/kv/" + encodeURIComponent(k)); KV[k] = r ? JSON.parse(r.responseText) : null; } return KV[k] == null ? def : KV[k]; } const v = JSON.parse(localStorage.getItem(k)); return v == null ? def : v; } catch(e){ return def; } }
+/* คิวส่งซ้ำ: เฉพาะข้อมูลเช็กอินของตัวเอง (tnp-data-v2:*) ถ้าส่งขึ้นเซิร์ฟเวอร์ไม่ได้จะเก็บไว้ในเครื่องแล้วส่งใหม่เองเมื่อออนไลน์ */
+const OB_KEY = "tnp-outbox-v1", isMine = (k) => /^tnp-data-v2:/.test(k);
+const obGet = () => { try { return JSON.parse(localStorage.getItem(OB_KEY)) || {}; } catch(e){ return {}; } };
+const obSet = (o) => { try { Object.keys(o).length ? localStorage.setItem(OB_KEY, JSON.stringify(o)) : localStorage.removeItem(OB_KEY); } catch(e){} };
+const obAdd = (k, v) => { const o = obGet(); o[k] = v; obSet(o); };
+const sameJ = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+const obDone = (k, v) => { const o = obGet(); if (k in o && (sameJ(o[k], v) || (KV && sameJ(KV[k], v)))) { delete o[k]; obSet(o); } };
+function pushKey(k, v){ return afetch("/api/kv/" + encodeURIComponent(k), {method:"PUT", headers:{"content-type":"application/json"}, body:JSON.stringify(v)})
+  .then(r => r.ok ? r.json().then(j => !(j && j.error), () => true) : false).catch(() => false); }
+let obBusy = false;
+async function flushOutbox(){
+  if (!KV || obBusy) return; const o = obGet(), ks = Object.keys(o); if (!ks.length) return; obBusy = true;
+  try { for (const k of ks) { if (await pushKey(k, o[k])) obDone(k, o[k]); else break; } } finally { obBusy = false; }
+  if (!Object.keys(obGet()).length) toast("✓ ส่งข้อมูลที่ค้างไว้ขึ้นเซิร์ฟเวอร์แล้ว");
+}
 function jset(k, v){
-  if (KV && isSync(k)) { KV[k] = v; const bad = () => toast("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ข้อมูลอาจยังไม่ถูกบันทึก");
-    afetch("/api/kv/" + encodeURIComponent(k), {method:"PUT", headers:{"content-type":"application/json"}, body:JSON.stringify(v)}).then(r => r.ok ? r.json().then(j => { if (j && j.error) bad(); }).catch(() => {}) : bad()).catch(bad); return true; }
+  if (KV && isSync(k)) { KV[k] = v;
+    pushKey(k, v).then(ok => { if (ok) return obDone(k, v);
+      if (isMine(k)) { if (sameJ(KV[k], v)) obAdd(k, v); toast("ส่งขึ้นเซิร์ฟเวอร์ไม่ได้ในตอนนี้ เก็บการแก้ไขไว้ในเครื่องแล้ว จะส่งให้อัตโนมัติเมื่อเชื่อมต่อได้"); }
+      else toast("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ข้อมูลอาจยังไม่ถูกบันทึก"); });
+    return true; }
   try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ toast("บันทึกไม่ได้ (พื้นที่เบราว์เซอร์เต็มหรือปิดการเก็บข้อมูล)"); return false; } }
 
 /* ---------- บัญชีผู้ใช้ ---------- */
@@ -648,18 +696,32 @@ function enter(u){
   }
   migrateData(u.id); data = jget(dataKey(u.id), {});
   $("authView").hidden = true; $("appView").hidden = false;
-  renderUser();
+  renderUser(); syncNotes(); flushOutbox();
   resetUI();
 }
 
 /* ---------- ข้อมูลเช็กอิน ---------- */
-const save = () => { if (jset(dataKey(me.id), data)) { clearTimeout(save.t); save.t = setTimeout(() => toast("✓ บันทึกการแก้ไขแล้ว"), 400); } };
+const save = () => { if (jset(dataKey(me.id), data)) { clearTimeout(save.t); save.t = setTimeout(() => { if (!Object.keys(obGet()).length) toast("✓ บันทึกการแก้ไขแล้ว"); }, 400); } };
 const isW = (p) => !!(data[p.id] && data[p.id].wish);
 function toggleWish(id){ const d = data[id] = data[id] || {}; d.wish = !d.wish; save(); }
-const BADGES = [["🌱","ก้าวแรก",vs=>vs.length>=1],["🥾","ไปแล้ว 10 แห่ง",vs=>vs.length>=10],["⛰️","ไปแล้ว 25 แห่ง",vs=>vs.length>=25],["🏆","ไปแล้ว 50 แห่ง",vs=>vs.length>=50],
-  ["🗺️","10 จังหวัด",vs=>new Set(vs.map(p=>p.p)).size>=10],["🧭","ครบทุกภูมิภาค",vs=>new Set(vs.map(p=>p.r)).size>=REGIONS.length],
-  ["🏝️","นักสำรวจเกาะ ×5",vs=>vs.filter(p=>/เกาะ/.test(p.n)).length>=5],["🎖️","เก็บครบทั้งภูมิภาค",vs=>REGIONS.some(r=>PARKS.filter(p=>p.r===r).every(isV))]];
-function renderBadges(vs){ $("badges").innerHTML = BADGES.map(([ic,t,f]) => { const ok = f(vs); return `<span class="text-xs px-2.5 py-1 rounded-full border border-white/25 ${ok ? "bg-white/20 font-semibold" : "bg-white/5 opacity-40"}" title="${ok ? "ได้รับแล้ว" : "ยังไม่ได้รับ"}">${ok ? ic : "🔒"} ${t}</span>`; }).join(""); }
+const PROVS = (() => { const m = {}; PARKS.forEach(p => (m[p.p] = m[p.p] || []).push(p)); return m; })();
+const fullProvs = (min) => Object.values(PROVS).filter(L => L.length >= min && L.every(isV)).length;
+const visitMonths = () => [...new Set(PARKS.filter(isV).map(p => monthIdx((data[p.id] || {}).date)).filter(i => i > 0))].sort((a, b) => a - b);
+function maxStreak(){ let best = 0, run = 0, prev = -9; visitMonths().forEach(i => { run = i === prev + 1 ? run + 1 : 1; prev = i; if (run > best) best = run; }); return best; }
+function maxInYear(){ const c = {}; PARKS.filter(isV).forEach(p => { const i = monthIdx((data[p.id] || {}).date); if (i > 0) { const y = Math.floor(i / 12); c[y] = (c[y] || 0) + 1; } }); return Math.max(0, ...Object.values(c)); }
+// [ไอคอน, ชื่อ, เงื่อนไข, คำใบ้ตอนยังไม่ได้]
+const BADGES = [["🌱","ก้าวแรก",vs=>vs.length>=1,"เช็กอิน 1 แห่ง"],["🥾","ไปแล้ว 10 แห่ง",vs=>vs.length>=10,"เช็กอิน 10 แห่ง"],["⛰️","ไปแล้ว 25 แห่ง",vs=>vs.length>=25,"เช็กอิน 25 แห่ง"],["🏆","ไปแล้ว 50 แห่ง",vs=>vs.length>=50,"เช็กอิน 50 แห่ง"],["👑","ไปแล้ว 100 แห่ง",vs=>vs.length>=100,"เช็กอิน 100 แห่ง"],
+  ["🗺️","10 จังหวัด",vs=>new Set(vs.map(p=>p.p)).size>=10,"เช็กอินครบ 10 จังหวัด"],["🌏","20 จังหวัด",vs=>new Set(vs.map(p=>p.p)).size>=20,"เช็กอินครบ 20 จังหวัด"],["🧭","ครบทุกภูมิภาค",vs=>new Set(vs.map(p=>p.r)).size>=REGIONS.length,"ไปให้ครบทั้ง 6 ภูมิภาค"],
+  ["🏝️","นักสำรวจเกาะ ×5",vs=>vs.filter(p=>/เกาะ/.test(p.n)).length>=5,"เช็กอินอุทยานเกาะ 5 แห่ง"],["🏔️","นักไต่ภู ×10",vs=>vs.filter(p=>/^(ภู|ดอย)/.test(p.n)).length>=10,"เช็กอินอุทยานชื่อภู/ดอย 10 แห่ง"],["🎖️","เก็บครบทั้งภูมิภาค",vs=>REGIONS.some(r=>PARKS.filter(p=>p.r===r).every(isV)),"ครบทุกแห่งในภูมิภาคใดภูมิภาคหนึ่ง"],
+  ["🏡","ครบทั้งจังหวัด",vs=>fullProvs(2)>=1,"ครบทุกแห่งในจังหวัดที่มี 2 แห่งขึ้นไป"],["🏘️","ครบ 3 จังหวัด",vs=>fullProvs(2)>=3,"ครบทั้งจังหวัด 3 จังหวัด"],["🌟","ครบจังหวัดใหญ่",vs=>fullProvs(5)>=1,"ครบทุกแห่งในจังหวัดที่มี 5 แห่งขึ้นไป"],
+  ["📅","ติดกัน 3 เดือน",vs=>maxStreak()>=3,"เช็กอินต่อเนื่อง 3 เดือน (ตามวันที่ระบุ)"],["🔥","ติดกัน 6 เดือน",vs=>maxStreak()>=6,"เช็กอินต่อเนื่อง 6 เดือน"],["💎","ติดกัน 12 เดือน",vs=>maxStreak()>=12,"เช็กอินต่อเนื่อง 12 เดือน"],["🎯","10 แห่งในปีเดียว",vs=>maxInYear()>=10,"เช็กอิน 10 แห่งในปีเดียว (ตามวันที่ระบุ)"]];
+let BADGE_ALL = false;
+function renderBadges(vs){
+  const L = BADGES.map(([ic, t, f, h], i) => ({ic, t, h, ok:!!f(vs), i})).sort((a, b) => (b.ok - a.ok) || (a.i - b.i)), got = L.filter(x => x.ok).length;
+  const show = BADGE_ALL ? L : L.filter((x, k) => x.ok || k < got + 3);
+  $("badges").innerHTML = show.map(x => `<span class="text-xs px-2.5 py-1 rounded-full border border-white/25 ${x.ok ? "bg-white/20 font-semibold" : "bg-white/5 opacity-60"}" title="${esc(x.ok ? "ได้รับแล้ว" : "ยังไม่ได้รับ: " + x.h)}">${x.ok ? x.ic : "🔒"} ${esc(x.t)}${!x.ok && BADGE_ALL ? ` <span class="opacity-70 font-normal">(${esc(x.h)})</span>` : ""}</span>`).join("")
+    + `<button type="button" data-badgeall class="text-xs px-2.5 py-1 rounded-full border border-white/40 hover:bg-white/15">${BADGE_ALL ? "ซ่อน" : "ดูเหรียญทั้งหมด"} (${got}/${L.length})</button>`;
+}
 const isV = (p) => !!(data[p.id] && data[p.id].visited);
 const byId = Object.fromEntries(PARKS.map(p => [p.id, p]));
 const V = {tab:"parks", r:null, prov:"all", q:"", s:"all"}; // r: null = หน้าแรก, "all" = ทุกภาค, หรือชื่อภาค
@@ -676,7 +738,7 @@ function stats(){
     v = srt.map(p => +p.id.slice(1)), w = srt.map(p => monthIdx((data[p.id] || {}).date)),
     rc = vs.filter(p => (data[p.id] || {}).date).sort((a, b) => data[b.id].date.localeCompare(data[a.id].date)).slice(0, 3).map(p => [+p.id.slice(1), +data[p.id].date.replace(/-/g, "")]),
     body = {n:done, pv, v, w, rc}, sig = me.id + JSON.stringify(body);
-    if (KV && stats.sig !== sig) { stats.sig = sig; RANK[me.id] = body; afetch("/api/rank/" + encodeURIComponent(me.id), {method:"PUT", headers:{"content-type":"application/json"}, body:JSON.stringify(body)}).catch(() => {}); } }
+    if (KV && stats.sig !== sig) { stats.sig = sig; RANK[me.id] = body; afetch("/api/rank/" + encodeURIComponent(me.id), {method:"PUT", headers:{"content-type":"application/json"}, body:JSON.stringify(body)}).then(r => { if (!r.ok) stats.sig = null; }).catch(() => { stats.sig = null; }); } }
   $("greet").textContent = "สวัสดี คุณ" + me.name + (done ? " · เดินทางมาแล้วทั่วไทย" : " · เริ่มเช็กอินแห่งแรกกันเลย");
 }
 
@@ -841,8 +903,9 @@ function toggleVisit(id){ const d = data[id] = data[id] || {}; d.visited = !d.vi
 function setTab(t){
   V.tab = t;
   document.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-pressed", b.dataset.tab === t));
-  $("tabHome").hidden = t !== "home"; $("tabParks").hidden = t !== "parks"; $("tabNews").hidden = t !== "news"; $("tabPhones").hidden = t !== "phones";
+  $("tabHome").hidden = t !== "home"; $("tabParks").hidden = t !== "parks"; $("tabMap").hidden = t !== "map"; $("tabNews").hidden = t !== "news"; $("tabPhones").hidden = t !== "phones";
   if (t === "home") renderHome();
+  if (t === "map") renderMapTab(true);
   if (t === "news") { renderNews(); loadAutoNews(); } if (t === "phones") renderPhones();
   view();
 }
@@ -850,7 +913,7 @@ function setTab(t){
 /* ---------- ประชาสัมพันธ์ ---------- */
 const NEWS_KEY = "tnp-news-v1";
 const NEWS_SEED = [
-  {id:"n-welcome", pin:true, title:"ยินดีต้อนรับสู่สมุดเช็กอินอุทยานแห่งชาติไทย", body:"เลือกภูมิภาค แล้วกดปุ่ม ✓ ที่มุมรูปของอุทยานเพื่อเช็กอิน กดที่การ์ดเพื่อบันทึกวันที่ไป ให้คะแนน และเขียนความทรงจำ ข้อมูลของคุณเก็บในเบราว์เซอร์เครื่องนี้ ระบบจะบันทึกให้อัตโนมัติทุกครั้งที่แก้ไข"},
+  {id:"n-welcome", pin:true, title:"ยินดีต้อนรับสู่สมุดเช็กอินอุทยานแห่งชาติไทย", body:"เลือกภูมิภาค แล้วกดปุ่ม ✓ ที่มุมรูปของอุทยานเพื่อเช็กอิน กดที่การ์ดเพื่อบันทึกวันที่ไป ให้คะแนน และเขียนความทรงจำ ระบบจะบันทึกข้อมูลของคุณให้อัตโนมัติทุกครั้งที่แก้ไข"},
   {id:"n-book", pin:false, title:"จองที่พักและบริการในอุทยานล่วงหน้า", body:"กรมอุทยานแห่งชาติฯ มีระบบจองบ้านพักออนไลน์ที่ nps.dnp.go.th ช่วงวันหยุดยาวควรจองล่วงหน้า และตรวจสอบเงื่อนไขล่าสุดกับกรมอุทยานฯ ก่อนเดินทาง"},
   {id:"n-check", pin:false, title:"เช็กสถานะอุทยานก่อนออกเดินทาง", body:"อุทยานบางแห่งอาจปิดชั่วคราวตามฤดูกาลหรือสภาพอากาศ โดยเฉพาะอุทยานทางทะเลและเส้นทางเดินป่า สอบถามสถานะล่าสุดได้ที่สายด่วนกรมอุทยานฯ 1362 (24 ชั่วโมง)"},
   {id:"n-safe", pin:false, title:"เที่ยวอย่างปลอดภัยและรักษาธรรมชาติ", body:"แจ้งเส้นทางและเวลากลับให้คนใกล้ชิดทราบ บันทึกเบอร์ฉุกเฉินไว้ในเครื่อง ไม่ให้อาหารสัตว์ป่า และนำขยะกลับออกมาทุกครั้ง ดูเบอร์สำคัญได้ที่แท็บ “เบอร์สำคัญ”"}
@@ -1062,8 +1125,10 @@ function renderPark(){
       <div><div class="text-sm">ให้คะแนน</div><div class="flex">${stars}</div></div>
       <label class="text-sm md:col-span-2">บันทึกความทรงจำ<textarea data-act="note" rows="3" maxlength="2000" placeholder="วันนี้เจออะไรบ้าง…" class="field mt-1">${esc(d.note || "")}</textarea></label></div>` : ""}
     <div id="friendsHere" class="text-sm text-stone-600"></div>
+    ${planInfo(p)}
+    <div id="parkAbout"></div>
     <div class="flex flex-wrap gap-x-5 gap-y-1 text-sm"><a href="${p.url}" target="_blank" rel="noopener" class="underline text-stone-600">ข้อมูลอย่างเป็นทางการ (กรมอุทยานฯ) ↗</a><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.full + ' ' + p.p)}" target="_blank" rel="noopener" class="underline text-stone-600">🧭 นำทางด้วย Google Maps ↗</a><a href="tel:1362" class="underline text-stone-600">สายด่วนกรมอุทยานฯ 1362</a></div></div>`;
-  observePhotos(); paintFriendsHere();
+  observePhotos(); paintFriendsHere(); paintAbout(p.id);
 }
 function paintFriendsHere(){
   const el = $("friendsHere"); if (!el || !cur) return;
@@ -1251,7 +1316,7 @@ pd.addEventListener("change", e => {
     return;
   } if (e.target.dataset.act === "date" && cur) { const d = data[cur] = data[cur] || {}; d.date = e.target.value; save(); } });
 pd.addEventListener("input", e => { if (e.target.dataset.act === "note" && cur) { const d = data[cur] = data[cur] || {}; d.note = e.target.value; save(); } });
-pd.addEventListener("close", () => { cur = null; view(); if (V.tab === "home") renderHome(); });
+pd.addEventListener("close", () => { cur = null; view(); if (V.tab === "home") renderHome(); if (V.tab === "map") renderMapTab(); });
 
 /* ---------- ฟอร์มล็อกอิน ---------- */
 document.addEventListener("click", e => {
@@ -1382,6 +1447,260 @@ $("meForm").addEventListener("submit", async e => {
   } catch(x){ err.textContent = CRYPTO_ERR; return; }
   saveUsers(users); e.target.reset(); toast("เปลี่ยนรหัสผ่านแล้ว");
 });
+
+/* ---------- ข้อความซิงก์ให้ตรงกับโหมดที่ใช้อยู่ ---------- */
+function syncNotes(){
+  const on = !!KV;
+  $("syncNote").textContent = on ? "ข้อมูลเช็กอินและโปรไฟล์ซิงก์กับเซิร์ฟเวอร์ ล็อกอินบัญชีเดียวกันใช้ได้ทุกเครื่อง · ถ้าเน็ตหลุดระหว่างใช้งาน ระบบเก็บไว้ในเครื่องแล้วส่งให้เองเมื่อกลับมาออนไลน์" : "ข้อมูลเช็กอินและโปรไฟล์บันทึกอัตโนมัติในเบราว์เซอร์เครื่องนี้ (ไม่แชร์ข้ามเครื่อง)";
+  $("profNote").textContent = on ? "ข้อมูลนี้ซิงก์กับเซิร์ฟเวอร์ และแอดมินมองเห็นเบอร์โทรกับอีเมลได้ในหน้าจัดการสมาชิก" : "ข้อมูลนี้เก็บในเบราว์เซอร์เครื่องนี้ และแอดมินมองเห็นเบอร์โทรกับอีเมลได้ในหน้าจัดการสมาชิก";
+  $("newsNote").textContent = on ? "ประกาศที่แอดมินโพสต์ซิงก์ให้สมาชิกทุกคนเห็น" : "ประกาศที่แอดมินโพสต์จะเก็บในเบราว์เซอร์เครื่องนี้ ยังไม่แชร์ข้ามเครื่อง";
+}
+window.addEventListener("online", () => { flushOutbox(); if (me) { stats.sig = null; stats(); } });
+setInterval(flushOutbox, 30000);
+$("badges").addEventListener("click", e => { if (e.target.closest("[data-badgeall]")) { BADGE_ALL = !BADGE_ALL; renderBadges(PARKS.filter(isV)); } });
+
+/* ---------- ข้อมูลวางแผนเที่ยว ---------- */
+// ค่าเข้า: ระเบียบกรมอุทยานฯ เริ่มใช้ 7 มิ.ย. 2565 แบ่ง 4 กลุ่ม [ผู้ใหญ่, เด็ก] ใส่เฉพาะอุทยานที่ยืนยันกลุ่มได้จากแหล่งข่าว
+const FEE_G = {1:{t:[20,10],f:[100,50]}, 2:{t:[40,20],f:[200,100]}, 3:{t:[60,30],f:[300,150]}, 4:{t:[100,50],f:[500,250]}};
+const FEE_OF = {p914:1, p961:2, p950:2, p1019:2, p640:2, p642:3, p915:3, p1011:3, p926:3, p997:3, p865:4, p996:4};
+const INFO = {
+  p915:{best:"พ.ย.–ก.พ. อากาศเย็น (ธ.ค.–ม.ค. หนาวสุด) · ปลายฝนน้ำตกน้ำเยอะ", hi:"ยอดดอยอินทนนท์ จุดสูงสุดของประเทศ (ราว 2,565 ม.) · น้ำตกวชิรธาร · พระมหาธาตุนภเมทนีดลและนภพลภูมิสิริ · เส้นทางเดินป่ากิ่วแม่ปาน"},
+  p914:{best:"พ.ย.–ก.พ. อากาศเย็นสบาย", hi:"พระธาตุดอยสุเทพ · น้ำตกมณฑาธาร · ดอยปุยและหมู่บ้านชาวเขา"},
+  p640:{best:"พ.ย.–ก.พ. อากาศเย็น · ฤดูฝนน้ำตกสวยแต่ทางเดินป่ามีทาก", hi:"น้ำตกเฮ้วนรกและเฮ้วสุวัต · จุดชมสัตว์ป่า (ช้างป่า ชะนี นกเงือก) · ทะเลหมอกผาเดียวดาย"},
+  p643:{best:"ปลายฝนถึงต้นหนาว (ราว ต.ค.–ธ.ค.) น้ำเยอะและใส · วันหยุดคนแน่น ไปวันธรรมดาสบายกว่า", hi:"น้ำตกเอราวัณ 7 ชั้น · ถ้ำพระธาตุ"},
+  p945:{best:"เปิดรับนักท่องเที่ยวราว ต.ค.–พ.ค. (ปิดช่วงฤดูฝน) · พ.ย.–ก.พ. หนาวและวิวสวย", hi:"ผานกแอ่น จุดชมพระอาทิตย์ตก/ทะเลหมอก · ผาหมากดูก · ทุ่งหญ้าและป่าสนบนที่ราบสูง · น้ำตกวังกวาง"},
+  p957:{best:"พ.ย.–ก.พ. อากาศดี · ผาแต้มชมพระอาทิตย์ขึ้นได้ก่อนใครในประเทศ", hi:"ภาพเขียนสีโบราณอายุกว่า 3,000 ปี · เสาเฉลียง · น้ำตกสร้อยสวรรค์ · แม่น้ำโขง"},
+  p790:{best:"พ.ย.–ก.พ. กลางวันอบอุ่น กลางคืนหนาว", hi:"ลานหินปุ่ม · ลานหินแตก · ผาชูธง · ที่ตั้งสำนักงานใหญ่ พคท. ในอดีต"},
+  p1016:{best:"พ.ย.–ก.พ. · ถ้ำพระยานครควรไปช่วงเช้าหรือเย็น เลี่ยงแดดร้อน", hi:"ถ้ำพระยานครและพระที่นั่งคูหาคราวิมาน · ทุ่งกกและนกน้ำ · หาดแหลมศาลา"},
+  p865:{best:"เปิดรับนักท่องเที่ยวราว พ.ย.–พ.ค. (ปิดช่วงมรสุม ราวกลาง พ.ค.–ต.ค.) · ทะเลสงบน้ำใสช่วง ม.ค.–เม.ย.", hi:"หินเรือใบ (เกาะ 8) · หาดทรายขาวน้ำใส · จุดดำน้ำตื้น-ลึก"},
+  p996:{best:"เปิดรับนักท่องเที่ยวราว พ.ย.–พ.ค. (ปิดช่วงมรสุม) · ทะเลสงบช่วง ม.ค.–เม.ย.", hi:"ดำน้ำตื้นดูปะการังอ่าวช่องขาด · หมู่บ้านชาวมอแกน"},
+  p997:{best:"พ.ย.–เม.ย. ทะเลสงบ", hi:"พายเรือคายัคลอดถ้ำ · เกาะตาปู (เขาพิงกัน) · เกาะปันหยี หมู่บ้านลอยน้ำ"},
+  p1019:{best:"ม.ค.–เม.ย. ฝนน้อยกว่า (ป่าฝนมีฝนได้ตลอดปี)", hi:"ทะเลสาบเชี่ยวหลานและแพที่พัก · ป่าฝนดิบและเขาหินปูน · สัตว์ป่า"},
+  p971:{best:"พ.ย.–เม.ย. ฟ้าโปร่ง ทะเลสงบ (ฝนชุกราว พ.ค.–ต.ค.)", hi:"น้ำตกคลองพลู · น้ำตกธารมะยม · เกาะบริวารสำหรับดำน้ำ"},
+  p642:{best:"พ.ย.–ก.พ. · บางพื้นที่อาจปิดช่วงฤดูฝน ตรวจสอบก่อนไป", hi:"พะเนินทุ่ง (ทะเลหมอก) · อ่างเก็บน้ำแก่งกระจาน · ดูนกและสัตว์ป่า"},
+  p899:{best:"ดอกกระเจียวบานราว มิ.ย.–ส.ค.", hi:"ทุ่งดอกกระเจียวป่า · ลานหินและเพิงหินรูปร่างแปลกตา"},
+  p897:{best:"ปลายฝน (ราว ก.ย.–พ.ย.) น้ำตกน้ำเยอะ", hi:"น้ำตกตาดโตน"},
+  p937:{best:"ชมพูภูคาบานราว ธ.ค.–ม.ค. · พ.ย.–ก.พ. อากาศหนาว", hi:"ชมพูภูคา (ดอกนางพญาเสือโคร่ง) · ทิวเขาและป่าไม้บนดอยภูคา"},
+  p925:{best:"พ.ย.–ก.พ. · กิจกรรมทางน้ำเปิดตามฤดูกาล", hi:"ช่องเขาออบหลวง หุบเขาลึกริมแม่น้ำแม่แจ่ม"},
+  p969:{best:"พ.ย.–ก.พ. อากาศหนาว · ปลายฝนน้ำตกน้ำเยอะ", hi:"น้ำตกแม่สุรินทร์ (สูงราว 100 ม.)"},
+  p1010:{best:"เปิดรับนักท่องเที่ยวราว พ.ย.–พ.ค. (ปิดช่วงมรสุม ราวกลาง พ.ค.–ต.ค.)", hi:"อ่าวปันเตมะละกา · ถ้ำจระเข้ · อ่าวตะโละวาว · เกาะอาดัง-ราวี"},
+  p1025:{best:"ราว ม.ค.–เม.ย. ทะเลสงบ · ช่วงมรสุมปลายปีเรืออาจงด ตรวจสอบก่อนไป", hi:"ทะเลใน เกาะแม่เกาะ (ทะเลสาบสีมรกต) · เกาะวัวตาหลับ · พายเรือคายัค"},
+  p990:{best:"พ.ย.–เม.ย.", hi:"หาดทรายขาวเกาะเสม็ด · จุดชมวิวเขาแหลมหญ้า"},
+  p926:{best:"พ.ย.–เม.ย.", hi:"ธารน้ำใสไหลผ่านหินปูนเป็นชั้นๆ · ป่าชายเลน · ชายหาด"},
+  p1011:{best:"ปลายฝนถึงต้นหนาว (ราว ก.ย.–ธ.ค.) น้ำตกสวย", hi:"น้ำตกไทรโยคน้อย · ถ้ำละว้า · แพริมแม่น้ำแคว"},
+  p678:{best:"พ.ย.–เม.ย.", hi:"ถ้ำมรกต (เกาะมุก) · เกาะกระดาน · หาดเจ้าไหม"},
+  p927:{best:"พ.ย.–เม.ย. · ช่วงมรสุมเรือไปเกาะรอกอาจงด", hi:"เกาะรอก ดำน้ำตื้น · หาดทรายและป่าชายเลน"},
+  p938:{best:"ก.พ.–ก.ย. ฝนน้อยกว่า · ต.ค.–ธ.ค. ฝนหนักและน้ำป่า", hi:"ยอดเขาหลวง (สูงสุดของภาคใต้ ราว 1,835 ม.) · น้ำตกกรุงชิง"},
+  p961:{best:"พระพุทธบาทพลวงเปิดให้ขึ้นนมัสการเป็นช่วงของปี (ราว ธ.ค.–เม.ย.) ตรวจสอบกับอุทยานก่อนไป", hi:"พระพุทธบาทพลวง · ป่าเขาและน้ำตก"},
+  p950:{best:"พ.ย.–ก.พ. · เป็นพื้นที่ชายแดน ตรวจสอบสถานะเปิด-ปิดกับอุทยานก่อนเดินทาง", hi:"ผามออีแดง จุดชมวิวหน้าผามองเห็นที่ราบกัมพูชา"},
+  p991:{best:"พ.ย.–ก.พ. · อุทยานอาจปิดบางช่วงฤดูฝน ตรวจสอบก่อนไป", hi:"น้ำตกภูสอยดาว · ลานสนสามใบ · ทุ่งดอกไม้ป่า"},
+  p906:{best:"พ.ย.–ก.พ. อากาศเย็น", hi:"ทะเลหมอกและจุดชมวิวหน้าผา"},
+  p911:{best:"พ.ย.–ก.พ.", hi:"เพิงหินและลานหินรูปทรงแปลกตา"},
+  p737:{best:"พ.ย.–ก.พ.", hi:"ทุ่งโนนสน · ทุ่งหญ้าสะวันนา"},
+  p900:{best:"ปลายฝนถึงต้นหนาว (ราว ก.ย.–ธ.ค.) น้ำตกน้ำเยอะ", hi:"น้ำตกคลองลาน"}
+};
+const ANDAMAN = new Set(["กระบี่","พังงา","ภูเก็ต","ระนอง","ตรัง","สตูล"]);
+function bestGeneric(p){
+  if (ANDAMAN.has(p.p)) return "ฝั่งอันดามัน: ทะเลสวยสุดราว พ.ย.–เม.ย. ช่วงมรสุม (ราว พ.ค.–ต.ค.) อุทยานหมู่เกาะบางแห่งปิดรับนักท่องเที่ยว";
+  if (p.r === "ใต้") return "ภาคใต้ฝั่งอ่าวไทย: ฝนชุกช่วงปลายปี (ราว ต.ค.–ธ.ค.) ช่วงต้น–กลางปีทะเลสงบกว่า";
+  if (p.r === "ตะวันออก") return "ราว พ.ย.–เม.ย. ฟ้าโปร่ง ทะเลสงบ (ฤดูฝนราว พ.ค.–ต.ค.)";
+  return "ราว พ.ย.–ก.พ. อากาศเย็นและแห้ง เดินป่าสบาย · ฤดูฝน (ราว พ.ค.–ต.ค.) น้ำตกสวยแต่ทางลื่นและมีทาก บางแห่งปิดเป็นช่วง";
+}
+function planInfo(p){
+  const f = FEE_G[FEE_OF[p.id]], I = INFO[p.id] || {};
+  const fee = f ? `คนไทย ผู้ใหญ่ ${f.t[0]} / เด็ก ${f.t[1]} บาท · ต่างชาติ ผู้ใหญ่ ${f.f[0]} / เด็ก ${f.f[1]} บาท` : "แตกต่างตามกลุ่มอุทยาน: คนไทยผู้ใหญ่ราว 20–100 บาท · ต่างชาติผู้ใหญ่ราว 100–500 บาท (ดูอัตราจริงของอุทยานนี้ที่หน้าทางการ)";
+  const rows = [["💰","ค่าเข้า", fee + " · รถยนต์ 30 บาท · จักรยานยนต์ 20 บาท"], ["🗓️","ช่วงเวลาที่ควรไป", I.best || bestGeneric(p)], I.hi ? ["⭐","ห้ามพลาด", I.hi] : null].filter(Boolean);
+  return `<section class="rounded-xl border border-stone-200 bg-[#fbfaf5] p-3 grid gap-2"><h3 class="serif font-extrabold">🧳 ข้อมูลวางแผนเที่ยว</h3>`
+    + rows.map(([ic, t, x]) => `<div class="text-sm leading-relaxed"><span aria-hidden="true">${ic}</span> <b>${t}:</b> ${esc(x)}</div>`).join("")
+    + `<div class="flex flex-wrap gap-2 pt-1"><a href="https://nps.dnp.go.th" target="_blank" rel="noopener" class="btn btn-main !py-1.5 !text-sm">🏕️ จองที่พัก/เต็นท์ ↗</a><a href="tel:1362" class="btn btn-line !py-1.5 !text-sm">📞 สอบถาม 1362</a></div>`
+    + `<p class="text-[11px] text-stone-500 leading-snug">ค่าเข้าอ้างอิงระเบียบกรมอุทยานฯ ที่เริ่มใช้ 7 มิ.ย. 2565 (ยังไม่รวมค่าบริการอื่น) อาจมีการเปลี่ยนแปลง · เข้าฟรี: ผู้สูงอายุ 60 ปีขึ้นไป (สัญชาติไทย) เด็กอายุต่ำกว่า 3 ปี ผู้พิการ พระ/นักบวช · ช่วงเวลาและจุดเด่นเป็นข้อแนะนำเบื้องต้น ตรวจสอบสถานะเปิด-ปิดล่าสุดกับอุทยานก่อนเดินทาง</p></section>`;
+}
+/* คำอธิบายสั้นๆ จากบทความ Wikipedia ของอุทยานนั้น (ชื่อหน้าต้องตรงกับอุทยานเท่านั้น) */
+const parkTitleOk = (p, t) => { const short = p.n.split(/\s*[–—\-]\s*/)[0], n = norm(t), pre = norm("อุทยานแห่งชาติ"); return n === norm(p.base) || n === norm("อุทยานแห่งชาติ" + short) || (n.startsWith(pre) && n.includes(norm(short))); };
+const titleVariants = (p) => { const short = p.n.split(/\s*[–—\-]\s*/)[0]; return [...new Set([p.base, p.base.replace(/\s*[–—\-]\s*/g, "-"), "อุทยานแห่งชาติ" + short])]; };
+const ABOUT_KEY = "tnp-about-v1"; let ABOUT = jget(ABOUT_KEY, {});
+async function loadAbout(p){
+  if (ABOUT[p.id] !== undefined) return ABOUT[p.id];
+  const wp = {action:"query", prop:"extracts", exintro:"1", explaintext:"1", exsentences:"3", exlimit:"max", redirects:"1"};
+  const pick = (j) => { const pg = pagesOf(j).filter(x => parkTitleOk(p, x.title) && x.extract && x.extract.trim().length > 40)[0];
+    if (!pg) return ""; let x = pg.extract.trim().replace(/\s+/g, " "); if (x.length > 420) x = x.slice(0, 420).replace(/\s*\S*$/, "") + "…"; return {t:pg.title, x}; };
+  try {
+    let res = pick(await jfetch(WIKI_TH, {...wp, titles:titleVariants(p).join("|")}));
+    if (!res) res = pick(await jfetch(WIKI_TH, {...wp, generator:"search", gsrsearch:p.base, gsrnamespace:"0", gsrlimit:"5"}));
+    ABOUT[p.id] = res; try { localStorage.setItem(ABOUT_KEY, JSON.stringify(ABOUT)); } catch(e){}
+    return res;
+  } catch(e){ return null; }
+}
+function paintAbout(id){
+  const el = $("parkAbout"); if (!el) return;
+  const done = (a) => { if (cur !== id) return; const e = $("parkAbout"); if (!e) return;
+    e.innerHTML = a ? `<div class="text-sm text-stone-700 leading-relaxed">${esc(a.x)}</div><div class="text-[11px] text-stone-500 mt-1">ที่มา: <a class="underline" target="_blank" rel="noopener" href="https://th.wikipedia.org/wiki/${encodeURIComponent(a.t.replace(/ /g, "_"))}">Wikipedia</a> (CC BY-SA)</div>` : ""; };
+  if (ABOUT[id] !== undefined) return done(ABOUT[id]);
+  el.innerHTML = '<p class="text-xs text-stone-400">กำลังโหลดข้อมูลเกี่ยวกับอุทยาน…</p>';
+  loadAbout(byId[id]).then(a => done(a));
+}
+
+/* ---------- แผนที่ ---------- */
+// กลางจังหวัดโดยประมาณ (ใช้เมื่อไม่มีพิกัดจริงของอุทยาน)
+const PCEN = {"เชียงราย":[19.91,99.83],"เชียงใหม่":[18.8,98.7],"น่าน":[18.78,100.78],"พะเยา":[19.17,100.2],"แพร่":[18.14,100.14],"แม่ฮ่องสอน":[19.3,97.97],"ลำปาง":[18.29,99.49],"ลำพูน":[18.57,99.01],"อุตรดิตถ์":[17.63,100.1],
+  "ขอนแก่น":[16.44,102.83],"ชัยภูมิ":[15.81,102.03],"นครพนม":[17.41,104.78],"นครราชสีมา":[14.97,102.1],"มุกดาหาร":[16.54,104.72],"เลย":[17.49,101.72],"ศรีสะเกษ":[15.12,104.32],"สกลนคร":[17.16,104.15],"หนองบัวลำภู":[17.2,102.44],"อุดรธานี":[17.41,102.79],"อุบลราชธานี":[15.24,104.85],
+  "กำแพงเพชร":[16.48,99.52],"พิษณุโลก":[16.83,100.26],"เพชรบูรณ์":[16.42,101.16],"สุโขทัย":[17.01,99.82],"สระบุรี":[14.53,100.91],"สุพรรณบุรี":[14.47,100.12],
+  "จันทบุรี":[12.61,102.1],"ตราด":[12.24,102.52],"ปราจีนบุรี":[14.05,101.37],"ระยอง":[12.68,101.28],"สระแก้ว":[13.82,102.07],
+  "ตาก":[16.88,99.13],"กาญจนบุรี":[14.02,99.53],"ประจวบคีรีขันธ์":[11.81,99.8],"เพชรบุรี":[13.11,99.94],"ราชบุรี":[13.53,99.82],
+  "กระบี่":[8.09,98.91],"ชุมพร":[10.49,99.18],"ตรัง":[7.56,99.61],"นครศรีธรรมราช":[8.43,99.96],"นราธิวาส":[6.43,101.82],"ปัตตานี":[6.87,101.25],"พังงา":[8.45,98.53],"พัทลุง":[7.62,100.08],"ภูเก็ต":[7.89,98.39],"ยะลา":[6.54,101.28],"ระนอง":[9.96,98.64],"สงขลา":[7.19,100.6],"สตูล":[6.62,100.07],"สุราษฎร์ธานี":[9.14,99.33]};
+const GEO_KEY = "tnp-geo-v1"; let GEO = jget(GEO_KEY, {}); // id -> [lat,lng] | 0 (ไม่พบพิกัดในบทความที่ชื่อตรงกัน)
+const inTH = (la, lo) => la > 5.5 && la < 20.6 && lo > 97.3 && lo < 105.7;
+const nearProv = (p, la, lo) => { const c = PCEN[p.p]; return !c || (Math.abs(c[0] - la) < 1.6 && Math.abs(c[1] - lo) < 1.6); }; // กันพิกัดผิดที่
+let geoRun = null;
+function loadGeo(){
+  if (geoRun) return geoRun;
+  geoRun = (async () => {
+    const need = PARKS.filter(p => GEO[p.id] === undefined);
+    for (let i = 0; i < need.length; i += 15) {
+      const ch = need.slice(i, i + 15);
+      try {
+        const j = await jfetch(WIKI_TH, {action:"query", prop:"coordinates", colimit:"max", redirects:"1", titles:[...new Set(ch.flatMap(titleVariants))].join("|")});
+        const q = j.query || {}, nm = {}, rd = {}, byT = {};
+        (q.normalized || []).forEach(x => nm[x.from] = x.to); (q.redirects || []).forEach(x => rd[x.from] = x.to);
+        Object.values(q.pages || {}).forEach(pg => byT[pg.title] = pg);
+        ch.forEach(p => { let res = 0;
+          for (const t of titleVariants(p)) { let x = nm[t] || t; x = rd[x] || x; const pg = byT[x], c = pg && pg.coordinates && pg.coordinates[0];
+            if (c && parkTitleOk(p, pg.title) && inTH(c.lat, c.lon) && nearProv(p, c.lat, c.lon)) { res = [+c.lat.toFixed(4), +c.lon.toFixed(4)]; break; } }
+          GEO[p.id] = res; });
+        try { localStorage.setItem(GEO_KEY, JSON.stringify(GEO)); } catch(e){}
+      } catch(e){ break; }
+    }
+  })().finally(() => { geoRun = null; });
+  return geoRun;
+}
+function parkPos(p){
+  const g = GEO[p.id]; if (Array.isArray(g)) return {pos:g, exact:true};
+  const c = PCEN[p.p]; if (!c) return null;
+  const list = PROVS[p.p], n = list.length; if (n === 1) return {pos:c, exact:false};
+  const a = 2 * Math.PI * list.indexOf(p) / n, r = Math.min(0.28, 0.07 + 0.025 * n);
+  return {pos:[c[0] + r * Math.sin(a), c[1] + r * Math.cos(a) / Math.cos(c[0] * Math.PI / 180)], exact:false};
+}
+const MAPS = {map:null, layer:null, filter:"all", region:"all"};
+function loadLeaflet(){
+  if (window.L && window.L.map) return Promise.resolve();
+  if (loadLeaflet.p) return loadLeaflet.p;
+  loadLeaflet.p = new Promise((ok, no) => {
+    const c = document.createElement("link"); c.rel = "stylesheet"; c.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"; document.head.appendChild(c);
+    const sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";
+    sc.onload = ok; sc.onerror = () => { loadLeaflet.p = null; no(new Error("leaflet")); }; document.head.appendChild(sc);
+  });
+  return loadLeaflet.p;
+}
+function renderMapSummary(){
+  const rows = REGIONS.map(r => { const ps = PARKS.filter(p => p.r === r), v = ps.filter(isV).length, pr = [...new Set(ps.map(p => p.p))], pl = pr.filter(x => !PROVS[x].some(isV));
+    return {r, total:ps.length, v, left:ps.length - v, pct:Math.round(v / ps.length * 100), pl}; });
+  const open = rows.filter(x => x.left > 0), emptiest = open.length ? open.slice().sort((a, b) => a.pct - b.pct || b.left - a.left)[0].r : null;
+  $("mapRegions").innerHTML = rows.map(x => `<button type="button" data-mapr="${x.r}" aria-pressed="${MAPS.region === x.r}" class="mapcard">
+    <div class="flex items-center justify-between gap-2"><span class="serif font-extrabold">${RC[x.r][0]} ภาค${x.r}</span>${x.r === emptiest ? '<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#b8892f]/20 text-[#6b4f3a]">🔥 ว่างที่สุด</span>' : x.left === 0 ? '<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#4f7a3a]/15 text-[#2d5230]">🎉 ครบแล้ว</span>' : ""}</div>
+    <div class="mt-2 h-2 rounded-full bg-stone-100 overflow-hidden"><div class="bar h-full rounded-full" style="width:${x.pct}%;background:#4f7a3a"></div></div>
+    <div class="mt-1.5 flex justify-between text-xs text-stone-600"><span>ไปแล้ว ${x.v}/${x.total} (${x.pct}%)</span><span>ยังว่าง ${x.left} แห่ง</span></div>
+    <div class="text-xs text-stone-500 mt-0.5">จังหวัดที่ยังไม่เคยไป ${x.pl.length} จังหวัด</div></button>`).join("");
+  $("mapChips").innerHTML = [["all","ทั้งหมด"],["yes","ไปแล้ว"],["no","ยังไม่ไป"],["wish","❤️ อยากไป"]].map(([k, l]) => chip("data-mapf", k, l, MAPS.filter === k)).join("") + chip("data-mapr", "all", "ทุกภาค", MAPS.region === "all");
+  const sel = rows.find(x => x.r === MAPS.region);
+  $("mapUncovered").innerHTML = sel ? (sel.pl.length ? `<span class="font-semibold">จังหวัดในภาค${sel.r}ที่ยังไม่มีหมุดเขียว:</span> <span class="text-stone-600">${sel.pl.map(esc).join(" · ")}</span>` : `<span class="font-semibold text-[#2d5230]">✓ เคยไปครบทุกจังหวัดในภาค${sel.r}แล้ว</span>`) : "";
+}
+function drawMarkers(fit){
+  if (!MAPS.map || !window.L) return;
+  const Lf = window.L; MAPS.layer.clearLayers(); const pts = [];
+  PARKS.filter(p => (MAPS.region === "all" || p.r === MAPS.region) && (MAPS.filter === "all" || (MAPS.filter === "wish" ? (isW(p) && !isV(p)) : (MAPS.filter === "yes") === isV(p)))).forEach(p => {
+    const g = parkPos(p); if (!g) return; const v = isV(p), w = isW(p) && !v;
+    const m = Lf.circleMarker(g.pos, {radius:g.exact ? 8 : 7, weight:w ? 3 : 2, color:v ? "#2d5230" : w ? "#b8892f" : "#78716c", dashArray:g.exact ? null : "3 2", fillColor:v ? "#4f7a3a" : "#ffffff", fillOpacity:v ? 0.95 : 0.9});
+    m.bindPopup(`<div style="min-width:10rem;font-family:Sarabun,sans-serif"><b>${esc(p.full)}</b><br><span style="color:#57534e">จ.${esc(p.p)} · ภาค${esc(p.r)}</span><br>${v ? "✓ ไปแล้ว" : w ? "❤️ อยากไป" : "ยังไม่เคยไป"}${g.exact ? "" : '<br><i style="color:#78716c;font-size:12px">ตำแหน่งโดยประมาณ (กลางจังหวัด)</i>'}<br><button type="button" data-open="${p.id}" style="margin-top:6px;padding:4px 10px;border-radius:8px;background:#1f3a2e;color:#fff;font-size:13px">ดูรายละเอียด</button></div>`);
+    m.addTo(MAPS.layer); pts.push(g.pos);
+  });
+  if (fit) { if (MAPS.region !== "all" && pts.length) MAPS.map.fitBounds(pts, {padding:[30, 30], maxZoom:9}); else MAPS.map.setView([13.2, 101], 6); }
+}
+async function renderMapTab(fit){
+  renderMapSummary();
+  const box = $("mapBox");
+  try { await loadLeaflet(); } catch(e){ if (!MAPS.map) box.innerHTML = '<p class="p-6 text-sm text-stone-600">โหลดแผนที่ไม่ได้ในตอนนี้ (ต้องเชื่อมต่ออินเทอร์เน็ต) · ดูสรุปรายภูมิภาคด้านบนได้ตามปกติ</p>'; return; }
+  if (V.tab !== "map") return;
+  if (!MAPS.map) {
+    box.innerHTML = ""; const Lf = window.L;
+    MAPS.map = Lf.map(box, {zoomControl:true, minZoom:5}).setView([13.2, 101], 6);
+    Lf.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom:17, attribution:"© OpenStreetMap contributors"}).addTo(MAPS.map);
+    MAPS.layer = Lf.layerGroup().addTo(MAPS.map);
+    MAPS.map.on("popupopen", e => { const b = e.popup.getElement() && e.popup.getElement().querySelector("[data-open]"); if (b) b.onclick = () => openPark(b.dataset.open); });
+    fit = true;
+  }
+  setTimeout(() => MAPS.map && MAPS.map.invalidateSize(), 60);
+  drawMarkers(!!fit);
+  loadGeo().then(() => { if (V.tab === "map") drawMarkers(false); });
+}
+$("tabMap").addEventListener("click", e => {
+  const r = e.target.closest("[data-mapr]"); if (r) { MAPS.region = (MAPS.region === r.dataset.mapr && r.dataset.mapr !== "all") ? "all" : r.dataset.mapr; renderMapSummary(); drawMarkers(true); return; }
+  const f = e.target.closest("[data-mapf]"); if (f) { MAPS.filter = f.dataset.mapf; renderMapSummary(); drawMarkers(false); }
+});
+
+/* ---------- การ์ดแชร์ (วาดเป็นรูปในเครื่อง ไม่อัปโหลดไปไหน) ---------- */
+const SHARE = {blob:null, url:null};
+const rrect = (g, x, y, w, h, r) => { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); };
+const loadCors = (u) => new Promise((ok, no) => { const im = new Image(); im.crossOrigin = "anonymous"; const t = setTimeout(() => no(new Error("timeout")), 7000);
+  im.onload = () => { clearTimeout(t); ok(im); }; im.onerror = () => { clearTimeout(t); no(new Error("img")); }; im.src = u; });
+async function drawShareCard(){
+  try { await Promise.all([document.fonts.load('800 56px "Noto Serif Thai"'), document.fonts.load('600 32px "Sarabun"'), document.fonts.load('400 28px "Sarabun"')]); } catch(e){}
+  const W = 1080, H = 1350, c = document.createElement("canvas"); c.width = W; c.height = H; const g = c.getContext("2d");
+  const SERIF = '"Noto Serif Thai", serif', SANS = '"Sarabun", sans-serif';
+  const vs = PARKS.filter(isV), done = vs.length, total = PARKS.length, pct = Math.round(done / total * 100);
+  const pv = new Set(vs.map(p => p.p)).size, rg = new Set(vs.map(p => p.r)).size, yr = today().slice(0, 4);
+  const thisYear = vs.filter(p => ((data[p.id] || {}).date || "").slice(0, 4) === yr).length;
+  const earned = BADGES.filter(b => b[2](vs));
+  g.fillStyle = "#1f3a2e"; g.fillRect(0, 0, W, H);
+  // รูปอุทยานด้านบน (ถ้าโหลดแบบอนุญาตข้ามโดเมนได้) ไม่งั้นใช้ลายเส้นชั้นความสูง
+  let credit = "";
+  const ph = heroUrls[heroI] || heroUrls[0];
+  if (ph) { try { const im = await loadCors(ph.u), r = Math.max(W / im.width, 500 / im.height), w = im.width * r, h = im.height * r;
+      g.save(); g.beginPath(); g.rect(0, 0, W, 500); g.clip(); g.drawImage(im, (W - w) / 2, (500 - h) / 2, w, h); g.restore(); credit = byId[ph.id].full; } catch(e){ credit = ""; } }
+  if (!credit) { g.save(); g.strokeStyle = "rgba(201,213,176,.14)"; g.lineWidth = 2; for (let r = 40; r < 1500; r += 46) { g.beginPath(); g.arc(W * .85, 620, r, 0, 7); g.stroke(); } g.restore();
+    [["#2d5230", .55, 330], ["#3d6b3f", .8, 400], ["#4f7a3a", 1, 450]].forEach(([col, k, base], j) => { g.fillStyle = col; g.globalAlpha = .55 + j * .15; g.beginPath(); g.moveTo(0, 500);
+      for (let x = 0; x <= W; x += 60) g.lineTo(x, base + Math.sin(x / 130 + j * 2) * 40 * k + Math.cos(x / 70 + j) * 25 * k); g.lineTo(W, 500); g.closePath(); g.fill(); }); g.globalAlpha = 1; }
+  else { const gr = g.createLinearGradient(0, 0, 0, 520); gr.addColorStop(0, "rgba(15,30,22,.75)"); gr.addColorStop(.55, "rgba(15,30,22,.35)"); gr.addColorStop(1, "#1f3a2e"); g.fillStyle = gr; g.fillRect(0, 0, W, 520); }
+  g.textAlign = "center"; g.fillStyle = "#fff"; g.font = `800 50px ${SERIF}`; g.fillText("สมุดเช็กอินอุทยานแห่งชาติไทย", W / 2, 96);
+  g.fillStyle = "#c9d5b0"; g.font = `600 24px ${SANS}`; g.fillText("THAILAND NATIONAL PARKS LOG", W / 2, 138);
+  let nm = "🏞️ " + shortName(me), fs = 44; do { g.font = `600 ${fs}px ${SANS}`; fs -= 2; } while (g.measureText(nm).width > 900 && fs > 22);
+  g.fillStyle = "#fff"; g.fillText(nm, W / 2, 470);
+  // ตัวเลขหลัก
+  g.fillStyle = "#fff"; g.font = `800 210px ${SERIF}`; const ns = String(done), nw = g.measureText(ns).width; g.font = `600 64px ${SERIF}`; const tw = g.measureText(" / " + total).width;
+  const x0 = (W - nw - tw) / 2; g.textAlign = "left"; g.font = `800 210px ${SERIF}`; g.fillText(ns, x0, 690); g.fillStyle = "rgba(255,255,255,.6)"; g.font = `600 64px ${SERIF}`; g.fillText(" / " + total, x0 + nw, 690);
+  g.textAlign = "center"; g.fillStyle = "#dfe8c8"; g.font = `600 36px ${SANS}`; g.fillText("อุทยานแห่งชาติที่เคยไป · " + pct + "%", W / 2, 750);
+  // กล่องสถิติ
+  [[pv, "จังหวัด"], [rg + "/" + REGIONS.length, "ภูมิภาค"], [thisYear, "แห่งในปีนี้"]].forEach(([v, l], i) => { const x = 60 + i * 330;
+    g.fillStyle = "rgba(255,255,255,.12)"; rrect(g, x, 785, 300, 110, 22); g.fill(); g.strokeStyle = "rgba(255,255,255,.25)"; g.lineWidth = 2; g.stroke();
+    g.fillStyle = "#fff"; g.font = `800 48px ${SERIF}`; g.fillText(String(v), x + 150, 840); g.fillStyle = "#c9d5b0"; g.font = `500 26px ${SANS}`; g.fillText(l, x + 150, 878); });
+  // แถบรายภูมิภาค
+  g.textAlign = "left"; REGIONS.forEach((r, i) => { const y = 950 + i * 46, ps = PARKS.filter(p => p.r === r), v = ps.filter(isV).length;
+    g.fillStyle = "#fff"; g.font = `500 28px ${SANS}`; g.fillText(RC[r][0] + " ภาค" + r, 60, y + 8);
+    g.fillStyle = "rgba(255,255,255,.15)"; rrect(g, 430, y - 10, 470, 22, 11); g.fill();
+    if (v) { g.fillStyle = "#c9d5b0"; rrect(g, 430, y - 10, Math.max(22, 470 * v / ps.length), 22, 11); g.fill(); }
+    g.fillStyle = "#fff"; g.textAlign = "right"; g.fillText(v + "/" + ps.length, 1020, y + 8); g.textAlign = "left"; });
+  // เหรียญ
+  g.textAlign = "center"; g.fillStyle = "#c9d5b0"; g.font = `600 26px ${SANS}`; g.fillText("เหรียญที่ได้ " + earned.length + "/" + BADGES.length, W / 2, 1262);
+  g.font = "46px sans-serif"; g.fillStyle = "#fff"; const em = earned.slice(0, 12).map(b => b[0]).join("  "); g.fillText(em || "🌱", W / 2, 1316);
+  if (credit) { g.textAlign = "right"; g.fillStyle = "rgba(255,255,255,.75)"; g.font = `400 22px ${SANS}`; g.fillText("📷 " + credit, W - 30, 540); }
+  return c;
+}
+async function openShare(){
+  const st = $("shareStage"); st.innerHTML = '<p class="text-sm text-stone-500">กำลังสร้างการ์ด…</p>'; $("shareSend").hidden = true; $("shareDlg").showModal();
+  try {
+    const c = await drawShareCard(), blob = await new Promise(r => c.toBlob(r, "image/png")); if (!blob) throw new Error("blob");
+    SHARE.blob = blob; if (SHARE.url) URL.revokeObjectURL(SHARE.url); SHARE.url = URL.createObjectURL(blob);
+    st.innerHTML = `<img src="${SHARE.url}" alt="การ์ดสรุปการเช็กอินอุทยาน" class="max-w-full rounded-xl shadow" style="max-height:58dvh">`;
+    const f = new File([blob], "tnp-checkin.png", {type:"image/png"}); $("shareSend").hidden = !(navigator.canShare && navigator.canShare({files:[f]}));
+  } catch(e){ st.innerHTML = '<p class="text-sm text-[#8e3b25]">สร้างการ์ดไม่สำเร็จ ลองใหม่อีกครั้ง</p>'; }
+}
+$("heroShare").addEventListener("click", openShare);
+$("btnShare").addEventListener("click", () => { closeMenu(); openShare(); });
+$("shareClose").addEventListener("click", () => $("shareDlg").close());
+$("shareDlg").addEventListener("click", e => { if (e.target === $("shareDlg")) $("shareDlg").close(); });
+$("shareSave").addEventListener("click", () => { if (!SHARE.url) return; const a = document.createElement("a"); a.href = SHARE.url; a.download = "tnp-checkin.png"; document.body.appendChild(a); a.click(); a.remove(); });
+$("shareSend").addEventListener("click", async () => { if (!SHARE.blob) return;
+  const vs = PARKS.filter(isV), f = new File([SHARE.blob], "tnp-checkin.png", {type:"image/png"});
+  try { await navigator.share({files:[f], title:"สมุดเช็กอินอุทยานแห่งชาติไทย", text:"ฉันเช็กอินอุทยานแห่งชาติแล้ว " + vs.length + "/" + PARKS.length + " แห่ง"}); } catch(e){ if (e && e.name !== "AbortError") toast("แชร์ไม่สำเร็จ ลองบันทึกรูปแล้วโพสต์เอง"); } });
 
 /* ---------- เริ่มต้น ---------- */
 ensureAdmin();
