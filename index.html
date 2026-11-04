@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1f3a2e">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><link rel="apple-touch-icon" href="icon.svg">
 <title>สมุดเช็กอินอุทยานแห่งชาติไทย</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@600;800&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
@@ -131,6 +132,7 @@
       <div class="mt-5 h-2.5 rounded-full bg-white/20 overflow-hidden max-w-2xl" role="progressbar" aria-label="ความคืบหน้าโดยรวม" aria-valuemin="0" aria-valuemax="100" id="pbar">
         <div id="pfill" class="bar h-full rounded-full" style="width:0;background:#c9d5b0"></div>
       </div>
+      <div id="badges" class="mt-4 flex flex-wrap gap-2" aria-label="เหรียญความสำเร็จ"></div>
     </div>
     <button id="heroCap" class="hero-full absolute left-4 right-4 md:left-auto bottom-2 text-right truncate text-[11px] text-white/80 hover:text-white" hidden></button>
   </div>
@@ -140,7 +142,7 @@
 <div id="tabParks">
   <div class="sticky top-0 z-20 bg-[#eef1e8]/95 backdrop-blur border-b border-stone-300/60">
     <div class="max-w-6xl mx-auto px-4 py-3 grid gap-2">
-      <input id="q" type="search" placeholder="ค้นหาอุทยานหรือจังหวัด เช่น เขาใหญ่ เชียงใหม่" aria-label="ค้นหา" enterkeyhint="search" class="field">
+      <div class="flex gap-2"><input id="q" type="search" placeholder="ค้นหาอุทยานหรือจังหวัด เช่น เขาใหญ่ เชียงใหม่" aria-label="ค้นหา" enterkeyhint="search" class="field min-w-0 flex-1"><button id="btnRandom" type="button" class="btn btn-line shrink-0 !px-3" title="สุ่มอุทยานที่ยังไม่เคยไป">🎲 สุ่ม</button></div>
       <div id="filters" class="scroll-x flex gap-2 items-center" hidden><div id="chips" class="flex gap-2 shrink-0"></div><div id="provs" class="flex gap-2 pl-2 border-l border-stone-300 shrink-0" hidden></div></div>
     </div>
   </div>
@@ -530,6 +532,12 @@ function enter(u){
 
 /* ---------- ข้อมูลเช็กอิน ---------- */
 const save = () => { if (jset(dataKey(me.id), data)) { clearTimeout(save.t); save.t = setTimeout(() => toast("✓ บันทึกการแก้ไขแล้ว"), 400); } };
+const isW = (p) => !!(data[p.id] && data[p.id].wish);
+function toggleWish(id){ const d = data[id] = data[id] || {}; d.wish = !d.wish; save(); }
+const BADGES = [["🌱","ก้าวแรก",vs=>vs.length>=1],["🥾","ไปแล้ว 10 แห่ง",vs=>vs.length>=10],["⛰️","ไปแล้ว 25 แห่ง",vs=>vs.length>=25],["🏆","ไปแล้ว 50 แห่ง",vs=>vs.length>=50],
+  ["🗺️","10 จังหวัด",vs=>new Set(vs.map(p=>p.p)).size>=10],["🧭","ครบทุกภูมิภาค",vs=>new Set(vs.map(p=>p.r)).size>=REGIONS.length],
+  ["🏝️","นักสำรวจเกาะ ×5",vs=>vs.filter(p=>/เกาะ/.test(p.n)).length>=5],["🎖️","เก็บครบทั้งภูมิภาค",vs=>REGIONS.some(r=>PARKS.filter(p=>p.r===r).every(isV))]];
+function renderBadges(vs){ $("badges").innerHTML = BADGES.map(([ic,t,f]) => { const ok = f(vs); return `<span class="text-xs px-2.5 py-1 rounded-full border border-white/25 ${ok ? "bg-white/20 font-semibold" : "bg-white/5 opacity-40"}" title="${ok ? "ได้รับแล้ว" : "ยังไม่ได้รับ"}">${ok ? ic : "🔒"} ${t}</span>`; }).join(""); }
 const isV = (p) => !!(data[p.id] && data[p.id].visited);
 const byId = Object.fromEntries(PARKS.map(p => [p.id, p]));
 const V = {tab:"parks", r:null, prov:"all", q:"", s:"all"}; // r: null = หน้าแรก, "all" = ทุกภาค, หรือชื่อภาค
@@ -541,6 +549,7 @@ function stats(){
   $("vCount").textContent = done; $("tCount").textContent = " / " + total; $("vPct").textContent = pct + "%";
   $("pfill").style.width = pct + "%"; $("pbar").setAttribute("aria-valuenow", pct);
   $("sProv").textContent = new Set(vs.map(p => p.p)).size; $("sReg").textContent = new Set(vs.map(p => p.r)).size + "/" + REGIONS.length;
+  renderBadges(vs);
   $("greet").textContent = "สวัสดี คุณ" + me.name + (done ? " · เดินทางมาแล้วทั่วไทย" : " · เริ่มเช็กอินแห่งแรกกันเลย");
 }
 
@@ -637,6 +646,7 @@ function photo(p, cls, btn){
   const v = isV(p);
   return `<div class="ph relative overflow-hidden ${cls}" data-id="${p.id}" style="background:${RC[p.r][1]}">${scene(p.r)}
     ${btn ? (v ? '<span class="vbadge yes">✓ ไปแล้ว</span>' : '<span class="vbadge no">ยังไม่ได้ไป</span>') : ""}
+    ${btn && !v ? `<button data-act="wish" data-id="${p.id}" aria-pressed="${isW(p)}" aria-label="${isW(p) ? "เอาออกจากรายการอยากไป" : "เพิ่มในรายการอยากไป"}" class="absolute top-14 right-2 z-10 size-9 rounded-full bg-white/90 shadow text-base">${isW(p) ? "❤️" : "🤍"}</button>` : ""}
     <div class="ov absolute inset-x-0 bottom-0 px-3 pt-8 pb-2 text-white text-xs font-medium" style="background:linear-gradient(transparent,rgba(20,36,28,.78))">📍 จ.${esc(p.p)} · ภาค${p.r}</div>
     ${btn ? `<button data-act="toggle" data-id="${p.id}" aria-pressed="${v}" aria-label="${v ? "ยกเลิกเช็กอิน " : "เช็กอินที่ "}${esc(p.full)}" class="absolute top-2 right-2 z-10 size-11 rounded-full border-2 text-lg font-bold shadow ${v ? "text-white border-white" : "bg-white/90 border-white text-stone-400 hover:text-[#4f7a3a]"}" ${v ? 'style="background:#4f7a3a"' : ""}>✓</button>` : ""}</div>`;
 }
@@ -671,11 +681,11 @@ function view(){
     applyCovers(); return;
   }
   const L = PARKS.filter(p => (!inRegion || p.r === V.r) && (!inRegion || V.prov === "all" || p.p === V.prov) &&
-    (V.s === "all" || (V.s === "yes") === isV(p)) && (!q || p.full.toLowerCase().includes(q) || p.p.includes(q)));
+    (V.s === "all" || (V.s === "wish" ? (isW(p) && !isV(p)) : (V.s === "yes") === isV(p))) && (!q || p.full.toLowerCase().includes(q) || p.p.includes(q)));
   const title = q ? "ผลการค้นหา “" + V.q.trim() + "”" : inRegion ? "ภาค" + V.r : "อุทยานแห่งชาติทั้งหมด";
   $("crumb").innerHTML = `<div class="flex flex-wrap items-center gap-3"><button data-back class="btn btn-line !py-1.5">← หมวดภูมิภาค</button><h2 class="serif text-xl md:text-2xl font-extrabold">${inRegion ? RC[V.r][0] + " " : ""}${esc(title)} <span class="text-base font-medium text-stone-500">${L.length} แห่ง</span></h2></div>`;
   $("filters").hidden = false;
-  $("chips").innerHTML = [["all","ทั้งหมด"],["yes","ไปแล้ว"],["no","ยังไม่ไป"]].map(([k, l]) => chip("data-s", k, l, V.s === k)).join("");
+  $("chips").innerHTML = [["all","ทั้งหมด"],["yes","ไปแล้ว"],["no","ยังไม่ไป"],["wish","❤️ อยากไป"]].map(([k, l]) => chip("data-s", k, l, V.s === k)).join("");
   if (inRegion && !q) {
     const provs = [...new Set(PARKS.filter(p => p.r === V.r).map(p => p.p))].sort((a, b) => a.localeCompare(b, "th"));
     $("provs").hidden = false;
@@ -804,17 +814,19 @@ function renderPark(){
   $("parkBody").innerHTML = photo(p, "h-52 md:h-72", false) + `<div class="p-5 grid gap-4">
     <div><h2 class="serif text-2xl font-extrabold leading-snug">${esc(p.full)}</h2><p class="text-sm text-stone-500 mt-1">จังหวัด${esc(p.p)} · ภาค${esc(p.r)}</p></div>
     <button data-act="toggle" aria-pressed="${v}" class="btn ${v ? "btn-main" : "btn-line"}">${v ? "✓ เช็กอินแล้ว (กดเพื่อยกเลิก)" : "เช็กอินที่นี่"}</button>
+    ${v ? "" : `<button data-act="wish" aria-pressed="${isW(p)}" class="btn btn-line">${isW(p) ? "❤️ อยู่ในรายการอยากไป (กดเพื่อเอาออก)" : "🤍 เพิ่มในรายการอยากไป"}</button>`}
     ${v ? `<div class="grid gap-3 md:grid-cols-2">
       <label class="text-sm">วันที่ไปล่าสุด<input data-act="date" type="date" value="${esc(d.date || "")}" max="${today()}" class="field mt-1"></label>
       <div><div class="text-sm">ให้คะแนน</div><div class="flex">${stars}</div></div>
       <label class="text-sm md:col-span-2">บันทึกความทรงจำ<textarea data-act="note" rows="3" maxlength="2000" placeholder="วันนี้เจออะไรบ้าง…" class="field mt-1">${esc(d.note || "")}</textarea></label></div>` : ""}
-    <div class="flex flex-wrap gap-x-5 gap-y-1 text-sm"><a href="${p.url}" target="_blank" rel="noopener" class="underline text-stone-600">ข้อมูลอย่างเป็นทางการ (กรมอุทยานฯ) ↗</a><a href="tel:1362" class="underline text-stone-600">สายด่วนกรมอุทยานฯ 1362</a></div></div>`;
+    <div class="flex flex-wrap gap-x-5 gap-y-1 text-sm"><a href="${p.url}" target="_blank" rel="noopener" class="underline text-stone-600">ข้อมูลอย่างเป็นทางการ (กรมอุทยานฯ) ↗</a><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.full + ' ' + p.p)}" target="_blank" rel="noopener" class="underline text-stone-600">🧭 นำทางด้วย Google Maps ↗</a><a href="tel:1362" class="underline text-stone-600">สายด่วนกรมอุทยานฯ 1362</a></div></div>`;
   observePhotos();
 }
 function openPark(id){ cur = id; renderPark(); const dlg = $("parkDlg"); if (!dlg.open) dlg.showModal(); }
 
 /* ---------- เหตุการณ์ ---------- */
 $("view").addEventListener("click", e => {
+  const w = e.target.closest("[data-act=wish]"); if (w) { toggleWish(w.dataset.id); view(); return; }
   const t = e.target.closest("[data-act=toggle]");
   if (t) { toggleVisit(t.dataset.id); view(); return; }
   const rg = e.target.closest("[data-region]"); if (rg) return go(rg.dataset.region);
@@ -828,6 +840,7 @@ $("chips").addEventListener("click", e => { const b = e.target.closest("[data-s]
 $("provs").addEventListener("click", e => { const b = e.target.closest("[data-p]"); if (b) { V.prov = b.dataset.p; view(); } });
 $("q").addEventListener("input", e => { V.q = e.target.value; view(); });
 document.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => { setTab(b.dataset.tab); window.scrollTo(0, 0); }));
+$("btnRandom").addEventListener("click", () => { const L = PARKS.filter(p => !isV(p)); if (!L.length) return toast("🎉 คุณไปครบทุกอุทยานแล้ว"); openPark(L[Math.floor(Math.random() * L.length)].id); });
 $("heroCap").addEventListener("click", e => openPark(e.currentTarget.dataset.id));
 
 const menu = $("menu"), mb = $("menuBtn");
@@ -863,7 +876,8 @@ const pd = $("parkDlg");
 pd.addEventListener("click", e => {
   if (e.target === pd || e.target.closest("#parkClose")) return pd.close();
   const b = e.target.closest("[data-act]"); if (!b || !cur) return;
-  if (b.dataset.act === "toggle") toggleVisit(cur);
+  if (b.dataset.act === "wish") toggleWish(cur);
+  else if (b.dataset.act === "toggle") toggleVisit(cur);
   else if (b.dataset.act === "rate") { const d = data[cur] = data[cur] || {}, v = +b.dataset.v; d.rating = d.rating === v ? 0 : v; save(); }
   else return;
   renderPark();
@@ -965,6 +979,7 @@ ensureAdmin();
 startHero(); // เริ่มโหลดรูปอุทยานตั้งแต่หน้าล็อกอิน
 const s = currentSession();
 if (s) enter(s); else showAuth();
+if ("serviceWorker" in navigator && /^https?:/.test(location.protocol)) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 </body>
 </html>
