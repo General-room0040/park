@@ -63,7 +63,7 @@
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
         <h1 class="serif text-xl md:text-3xl font-extrabold leading-tight">สมุดเช็กอินอุทยานแห่งชาติไทย</h1>
-        <p class="text-sm mt-1" style="color:#c9d5b0">บันทึกทุกที่ที่คุณไปมาแล้ว</p>
+        <p class="text-sm mt-1" style="color:#c9d5b0">เลือกภูมิภาค แล้วบันทึกทุกที่ที่คุณไปมาแล้ว</p>
       </div>
       <div class="flex flex-wrap items-center gap-2">
         <span id="whoami" class="text-sm px-3 py-2 rounded-lg bg-white/10 border border-white/20"></span>
@@ -71,7 +71,6 @@
         <button id="btnLogout" class="px-3 py-2 rounded-lg text-sm font-medium bg-white/10 hover:bg-white/20 border border-white/25">ออกจากระบบ</button>
       </div>
     </div>
-
     <div class="mt-6 flex items-end gap-4">
       <div class="serif font-extrabold leading-none"><span id="vCount" class="text-6xl md:text-7xl">0</span><span id="tCount" class="text-2xl md:text-3xl text-white/60"> / 0</span></div>
       <div class="pb-1"><div class="text-sm" style="color:#c9d5b0">แห่งที่เคยไป</div><div id="vPct" class="serif text-xl font-semibold">0%</div></div>
@@ -79,35 +78,32 @@
     <div class="mt-4 h-3 rounded-full bg-white/15 overflow-hidden" role="progressbar" aria-label="ความคืบหน้าโดยรวม" aria-valuemin="0" aria-valuemax="100" id="pbar">
       <div id="pfill" class="bar h-full rounded-full" style="width:0;background:#c9d5b0"></div>
     </div>
-    <div id="regionStats" class="mt-5 grid grid-cols-3 lg:grid-cols-6 gap-2 md:gap-3"></div>
   </div>
 </header>
 
 <div class="sticky top-0 z-20 bg-[#eef1e8]/95 backdrop-blur border-b border-stone-300/60">
-  <div class="max-w-6xl mx-auto px-4 py-3 grid gap-3">
-    <input id="q" type="search" placeholder="ค้นหาชื่ออุทยานหรือจังหวัด เช่น เขาใหญ่ เชียงใหม่" aria-label="ค้นหา" class="field">
-    <div class="flex gap-2 items-center">
-      <div id="fStatus" class="flex gap-2 shrink-0" role="group" aria-label="กรองตามสถานะ"></div>
-      <span class="w-px h-6 bg-stone-300 shrink-0" aria-hidden="true"></span>
-      <div id="fRegion" class="scroll-x flex gap-2" role="group" aria-label="กรองตามภูมิภาค"></div>
-    </div>
-    <label class="flex items-center gap-2 text-sm text-stone-600"><input id="fPrep" type="checkbox" class="size-4 accent-[#4f7a3a]"> แสดงอุทยานที่อยู่ระหว่างเตรียมการ (ยังไม่นับในคะแนนรวม)</label>
+  <div class="max-w-6xl mx-auto px-4 py-3 grid gap-2">
+    <input id="q" type="search" placeholder="ค้นหาอุทยานหรือจังหวัด เช่น เขาใหญ่ เชียงใหม่" aria-label="ค้นหา" class="field">
+    <div id="chips" class="scroll-x flex gap-2 items-center" hidden></div>
+    <div id="provs" class="scroll-x flex gap-2 items-center" hidden></div>
   </div>
 </div>
 
-<main class="max-w-6xl mx-auto px-4 py-5">
-  <div class="flex items-center justify-between mb-3 gap-3">
-    <p id="resultInfo" class="text-sm text-stone-600"></p>
-    <div class="flex gap-2">
-      <button id="btnExport" class="btn btn-line !py-1.5 !font-medium">ส่งออกข้อมูลฉัน</button>
-      <label class="btn btn-line !py-1.5 !font-medium cursor-pointer focus-within:outline">นำเข้า
-        <input id="fileImport" type="file" accept="application/json,.json" class="sr-only">
-      </label>
-    </div>
+<main class="max-w-6xl mx-auto px-4 py-6">
+  <div id="crumb" class="flex flex-wrap items-center justify-between gap-3 mb-5"></div>
+  <section id="view"></section>
+  <div class="flex flex-wrap gap-2 justify-center mt-10">
+    <button id="btnExport" class="btn btn-line !py-1.5 !font-medium">ส่งออกข้อมูลฉัน</button>
+    <label class="btn btn-line !py-1.5 !font-medium cursor-pointer focus-within:outline">นำเข้า
+      <input id="fileImport" type="file" accept="application/json,.json" class="sr-only">
+    </label>
   </div>
-  <section id="grid" class="grid gap-8"></section>
 </main>
-<footer class="text-center text-xs text-stone-500 py-8 px-4">รายชื่อจากกรมอุทยานแห่งชาติ สัตว์ป่า และพันธุ์พืช · แบ่งภูมิภาคตามเกณฑ์ราชบัณฑิตยสภา · ข้อมูลบันทึกในเบราว์เซอร์เครื่องนี้เท่านั้น · ควรกดส่งออกเก็บสำรองไว้เป็นระยะ</footer>
+<footer class="text-center text-xs text-stone-500 py-8 px-4 grid gap-1">
+  <p>รายชื่อจากกรมอุทยานแห่งชาติ สัตว์ป่า และพันธุ์พืช · แบ่งภูมิภาคตามเกณฑ์ราชบัณฑิตยสภา</p>
+  <p>รูปภาพจาก Wikipedia / Wikimedia Commons ตามสัญญาอนุญาตของผู้เผยแพร่แต่ละภาพ · อุทยานที่ยังไม่มีรูปจะแสดงภาพประกอบแทน</p>
+  <p>ข้อมูลเช็กอินบันทึกในเบราว์เซอร์เครื่องนี้เท่านั้น · ควรกดส่งออกเก็บสำรองไว้เป็นระยะ</p>
+</footer>
 </div>
 
 <!-- ============ แผงแอดมิน ============ -->
@@ -139,6 +135,8 @@
   </div>
 </dialog>
 
+<dialog id="parkDlg" style="overflow:hidden"><button id="parkClose" class="absolute top-3 left-3 z-20 px-3 py-1.5 rounded-full bg-white/90 text-sm shadow hover:bg-white" aria-label="ปิด">✕ ปิด</button><div id="parkBody" class="overflow-y-auto" style="max-height:calc(100vh - 2rem)"></div></dialog>
+
 <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg text-sm text-white z-50" style="background:#1f3a2e" role="status" hidden></div>
 
 <script>
@@ -157,28 +155,28 @@ const PROV_REGION = {"น่าน": "เหนือ", "พะเยา": "เ�
 const RAW = [
 ["เชียงราย", "ขุนแจ", "903"],
 ["เชียงราย", "ดอยหลวง", "904"],
-["เชียงราย", "ถ้ำหลวง - ขุนน้ำนางนอน (เตรียมการ)", "11653"],
-["เชียงราย", "ภูชี้ฟ้า (เตรียมการ)", "7348"],
-["เชียงราย", "ลำน้ำกก (เตรียมการ)", "905"],
+["เชียงราย", "ถ้ำหลวง - ขุนน้ำนางนอน", "11653"],
+["เชียงราย", "ภูชี้ฟ้า", "7348"],
+["เชียงราย", "ลำน้ำกก", "905"],
 ["เชียงใหม่", "ขุนขาน", "907"],
 ["เชียงใหม่", "ดอยผ้าห่มปก", "908"],
-["เชียงใหม่", "ดอยเวียงผา (เตรียมการ)", "912"],
+["เชียงใหม่", "ดอยเวียงผา", "912"],
 ["เชียงใหม่", "ดอยสุเทพ - ปุย", "914"],
 ["เชียงใหม่", "ดอยอินทนนท์", "915"],
-["เชียงใหม่", "น้ำตกบัวตอง - น้ำพุเจ็ดสี (เตรียมการ)", "7346"],
+["เชียงใหม่", "น้ำตกบัวตอง - น้ำพุเจ็ดสี", "7346"],
 ["เชียงใหม่", "ผาแดง", "916"],
 ["เชียงใหม่", "แม่ตะไคร้", "917"],
-["เชียงใหม่", "แม่โถ (เตรียมการ)", "918"],
+["เชียงใหม่", "แม่โถ", "918"],
 ["เชียงใหม่", "แม่วาง", "920"],
 ["เชียงใหม่", "ศรีลานนา", "921"],
 ["เชียงใหม่", "ห้วยน้ำดัง", "922"],
-["เชียงใหม่", "ออบขาน (เตรียมการ)", "923"],
+["เชียงใหม่", "ออบขาน", "923"],
 ["เชียงใหม่", "ออบหลวง", "925"],
 ["น่าน", "ขุนน่าน", "934"],
 ["น่าน", "ขุนสถาน", "935"],
 ["น่าน", "ดอยภูคา", "937"],
 ["น่าน", "ถ้ำสะเกิน", "940"],
-["น่าน", "นันทบุรี (เตรียมการ)", "942"],
+["น่าน", "นันทบุรี", "942"],
 ["น่าน", "แม่จริม", "943"],
 ["น่าน", "ศรีน่าน", "944"],
 ["พะเยา", "ดอยภูนาง", "947"],
@@ -189,13 +187,13 @@ const RAW = [
 ["แพร่", "เวียงโกศัย", "967"],
 ["แม่ฮ่องสอน", "ถ้ำปลา - น้ำตกผาเสื่อ", "968"],
 ["แม่ฮ่องสอน", "น้ำตกแม่สุรินทร์", "969"],
-["แม่ฮ่องสอน", "แม่เงา (เตรียมการ)", "972"],
-["แม่ฮ่องสอน", "แม่สะเรียง (เตรียมการ)", "7349"],
+["แม่ฮ่องสอน", "แม่เงา", "972"],
+["แม่ฮ่องสอน", "แม่สะเรียง", "7349"],
 ["แม่ฮ่องสอน", "สาละวิน", "973"],
-["ลำปาง", "เขลางค์บรรพต (เตรียมการ)", "7347"],
+["ลำปาง", "เขลางค์บรรพต", "7347"],
 ["ลำปาง", "แจ้ซ้อน", "974"],
 ["ลำปาง", "ดอยจง", "976"],
-["ลำปาง", "ถ้ำผาไท (เตรียมการ)", "977"],
+["ลำปาง", "ถ้ำผาไท", "977"],
 ["ลำปาง", "แม่วะ", "979"],
 ["ลำพูน", "ดอยขุนตาล", "981"],
 ["ลำพูน", "แม่ปิง", "982"],
@@ -221,15 +219,15 @@ const RAW = [
 ["สกลนคร", "ภูผาเหล็ก", "953"],
 ["สกลนคร", "ภูพาน", "954"],
 ["หนองบัวลำภู", "ภูเก้า - ภูพานคำ", "892"],
-["อุดรธานี", "นายูง - น้ำโสม (เตรียมการ)", "955"],
-["อุดรธานี", "ภูหินจอมธาตุ - ภูพระบาท (เตรียมการ)", "2608"],
+["อุดรธานี", "นายูง - น้ำโสม", "955"],
+["อุดรธานี", "ภูหินจอมธาตุ - ภูพระบาท", "2608"],
 ["อุบลราชธานี", "แก่งตะนะ", "956"],
 ["อุบลราชธานี", "ผาแต้ม", "957"],
 ["อุบลราชธานี", "ภูจองนายอย", "958"],
 ["กำแพงเพชร", "คลองลาน", "900"],
 ["กำแพงเพชร", "คลองวังเจ้า", "902"],
 ["กำแพงเพชร", "แม่วงก์", "894"],
-["พิษณุโลก", "แควน้อย (เตรียมการ)", "792"],
+["พิษณุโลก", "แควน้อย", "792"],
 ["พิษณุโลก", "ทุ่งแสลงหลวง", "737"],
 ["พิษณุโลก", "น้ำตกชาติตระการ", "791"],
 ["พิษณุโลก", "ภูหินร่องกล้า", "790"],
@@ -240,7 +238,7 @@ const RAW = [
 ["สุโขทัย", "ศรีสัชนาลัย", "985"],
 ["สระบุรี", "น้ำตกเจ็ดสาวน้อย", "891"],
 ["สระบุรี", "น้ำตกสามหลั่น", "893"],
-["สระบุรี", "เจ็ดคด - โป่งก้อนเส้า (เตรียมการ)", "32645"],
+["สระบุรี", "เจ็ดคด - โป่งก้อนเส้า", "32645"],
 ["สุพรรณบุรี", "พุเตย", "919"],
 ["จันทบุรี", "เขาคิชฌกูฏ", "961"],
 ["จันทบุรี", "เขาสิบห้าชั้น", "962"],
@@ -253,9 +251,9 @@ const RAW = [
 ["สระแก้ว", "ตาพระยา", "910"],
 ["สระแก้ว", "ปางสีดา", "993"],
 ["ตาก", "ขุนพะวอ", "928"],
-["ตาก", "ดอยสอยมาลัย - ไม้กลายเป็นหิน (เตรียมการ)", "2521"],
+["ตาก", "ดอยสอยมาลัย - ไม้กลายเป็นหิน", "2521"],
 ["ตาก", "ตากสินมหาราช", "929"],
-["ตาก", "น้ำตกพาเจริญ (เตรียมการ)", "931"],
+["ตาก", "น้ำตกพาเจริญ", "931"],
 ["ตาก", "แม่เมย", "932"],
 ["ตาก", "ลานสาง", "933"],
 ["กาญจนบุรี", "เขาแหลม", "1002"],
@@ -269,7 +267,7 @@ const RAW = [
 ["ประจวบคีรีขันธ์", "เขาสามร้อยยอด", "1016"],
 ["ประจวบคีรีขันธ์", "น้ำตกห้วยยาง", "1018"],
 ["ประจวบคีรีขันธ์", "หาดวนกร", "1020"],
-["ประจวบคีรีขันธ์", "อ่าวสยาม (เตรียมการ)", "2603"],
+["ประจวบคีรีขันธ์", "อ่าวสยาม", "2603"],
 ["เพชรบุรี", "แก่งกระจาน", "642"],
 ["ราชบุรี", "เฉลิมพระเกียรติไทยประจัน", "1021"],
 ["กระบี่", "เขาพนมเบญจา", "924"],
@@ -282,10 +280,10 @@ const RAW = [
 ["นครศรีธรรมราช", "เขาหลวง", "938"],
 ["นครศรีธรรมราช", "น้ำตกโยง", "939"],
 ["นครศรีธรรมราช", "น้ำตกสี่ขีด", "941"],
-["นครศรีธรรมราช", "หาดขนอม - หมู่เกาะทะเลใต้ (เตรียมการ)", "970"],
-["นราธิวาส", "น้ำตกซีโป (เตรียมการ)", "975"],
+["นครศรีธรรมราช", "หาดขนอม - หมู่เกาะทะเลใต้", "970"],
+["นราธิวาส", "น้ำตกซีโป", "975"],
 ["นราธิวาส", "บูโด - สุไหงปาดี", "978"],
-["นราธิวาส", "อ่าวมะนาว - เขาตันหยง (เตรียมการ)", "980"],
+["นราธิวาส", "อ่าวมะนาว - เขาตันหยง", "980"],
 ["ปัตตานี", "น้ำตกทรายขาว", "984"],
 ["พังงา", "เขาลำปี - หาดท้ายเหมือง", "989"],
 ["พังงา", "เขาหลัก - ลำรู่", "992"],
@@ -301,7 +299,7 @@ const RAW = [
 ["ระนอง", "หมู่เกาะระนอง", "1003"],
 ["ระนอง", "แหลมสน", "1005"],
 ["สงขลา", "เขาน้ำค้าง", "1007"],
-["สงขลา", "สันกาลาคีรี (เตรียมการ)", "1009"],
+["สงขลา", "สันกาลาคีรี", "1009"],
 ["สตูล", "ตะรุเตา", "1010"],
 ["สตูล", "ทะเลบัน", "1012"],
 ["สตูล", "หมู่เกาะเภตรา", "1014"],
@@ -314,8 +312,8 @@ const RAW = [
 ];
 const PARKS = RAW.map(([p, n, cid]) => {
   if (!PROV_REGION[p]) console.error("ไม่พบภูมิภาคของจังหวัด: " + p);
-  const short = n.replace(/\s*\(เตรียมการ\)/, "").trim();
-  return {id:"p" + cid, n:short, full:"อุทยานแห่งชาติ" + short, p, r:PROV_REGION[p], prep:/เตรียมการ/.test(n), url:"https://portal.dnp.go.th/Content/nationalpark?contentId=" + cid};
+  const short = n.trim();
+  return {id:"p" + cid, n:short, full:"อุทยานแห่งชาติ" + short, p, r:PROV_REGION[p], url:"https://portal.dnp.go.th/Content/nationalpark?contentId=" + cid};
 });
 // id เก่า (รุ่นแรก) -> id ใหม่ เพื่อไม่ให้ข้อมูลเช็กอินที่บันทึกไว้หาย
 const OLD_IDS = {"doi-inthanon": "p915", "doi-suthep": "p914", "doi-phu-kha": "p937", "khao-yai": "p640", "phu-kradueng": "p945", "pha-taem": "p957", "phu-ruea": "p946", "nam-tok-sam-lan": "p893", "phu-toei": "p919", "khao-khitchakut": "p961", "samet": "p990", "ko-chang": "p971", "erawan": "p643", "sai-yok": "p1011", "khao-sam-roi-yot": "p1016", "kaeng-krachan": "p642", "khao-sok": "p1019", "similan": "p865", "tarutao-thale-ban": "p1012", "khao-luang": "p938"};
@@ -367,7 +365,6 @@ const validUser = (s) => /^[a-z0-9_]{3,20}$/.test(s);
 
 let me = null;   // ผู้ใช้ที่ล็อกอินอยู่
 let data = {};   // ข้อมูลเช็กอินของผู้ใช้คนนี้
-const F = {q:"", r:"all", s:"all", prep:false};
 
 /* ---------- ล็อกกันเดารหัส ---------- */
 function lockInfo(username){ const L = jget(LOCK_KEY, {}); return L[username] || {fails:0, until:0}; }
@@ -419,89 +416,157 @@ function enter(u){
   $("authView").hidden = true; $("appView").hidden = false;
   $("whoami").textContent = u.name + (u.role === "admin" ? " · แอดมิน" : "");
   $("btnAdmin").hidden = u.role !== "admin";
-  F.q = ""; F.r = "all"; F.s = "all"; F.prep = false; $("q").value = ""; $("fPrep").checked = false; OPEN.clear();
-  buildFilters(); all(); window.scrollTo(0, 0);
+  resetUI();
 }
 
 /* ---------- ข้อมูลเช็กอิน ---------- */
 const save = () => { jset(dataKey(me.id), data); };
 const isV = (p) => !!(data[p.id] && data[p.id].visited);
-const OPEN = new Set(); // การ์ดที่กางรายละเอียดอยู่
-const CORE = PARKS.filter(p => !p.prep);
+const byId = Object.fromEntries(PARKS.map(p => [p.id, p]));
+const V = {r:null, prov:"all", q:"", s:"all"}; // r: null = หน้าแรก, "all" = ทุกภาค, หรือชื่อภาค
+let cur = null; // อุทยานที่เปิดดูรายละเอียดอยู่
 
 function stats(){
-  const done = CORE.filter(isV).length, total = CORE.length, pct = Math.round(done / total * 100);
+  const done = PARKS.filter(isV).length, total = PARKS.length, pct = Math.round(done / total * 100);
   $("vCount").textContent = done; $("tCount").textContent = " / " + total; $("vPct").textContent = pct + "%";
   $("pfill").style.width = pct + "%"; $("pbar").setAttribute("aria-valuenow", pct);
-  $("regionStats").innerHTML = REGIONS.map(r => {
-    const L = CORE.filter(p => p.r === r), v = L.filter(isV).length;
-    return `<div class="rounded-xl bg-white/10 border border-white/15 p-2.5 md:p-3"><div class="text-xs truncate" style="color:#c9d5b0">${RC[r][0]} ${r}</div><div class="serif font-semibold mt-0.5">${v}/${L.length}</div><div class="mt-2 h-1.5 rounded-full bg-white/15 overflow-hidden"><div class="bar h-full" style="width:${L.length ? v / L.length * 100 : 0}%;background:#c9d5b0"></div></div></div>`;
-  }).join("");
 }
 
-function row(p){
-  const d = data[p.id] || {}, v = isV(p), open = v && OPEN.has(p.id), rating = d.rating || 0;
-  const stars = [1,2,3,4,5].map(i => `<button data-act="rate" data-id="${p.id}" data-v="${i}" aria-label="ให้ ${i} ดาว" class="text-3xl leading-none p-0.5 ${i <= rating ? "" : "opacity-30"}" style="color:#b8892f">★</button>`).join("");
-  const sub = v ? "เคยไปแล้ว" + (d.date ? " · " + fmtDate(d.date) : "") + (rating ? " · " + "★".repeat(rating) : "") : "ยังไม่เคยไป";
-  return `<article class="rounded-xl bg-white border-2 ${v ? "border-[#4f7a3a]" : "border-transparent shadow-sm"} ${open ? "md:col-span-2" : ""}">
-    <div class="flex items-center gap-3 p-3">
-      <button data-act="toggle" data-id="${p.id}" aria-pressed="${v}" aria-label="${v ? "ยกเลิกเช็กอิน " : "เช็กอินที่ "}${esc(p.full)}" class="size-10 shrink-0 rounded-full border-2 text-lg font-bold ${v ? "text-white border-[#4f7a3a]" : "border-stone-300 text-transparent hover:border-[#4f7a3a]"}" ${v ? 'style="background:#4f7a3a"' : ""}>✓</button>
-      <div class="flex-1 min-w-0"><div class="font-semibold leading-snug">${esc(p.full)}${p.prep ? ' <span class="text-[11px] font-medium px-1.5 py-0.5 rounded-full bg-[#b8892f]/20 text-[#6b4f3a] align-middle">เตรียมการ</span>' : ""}</div>
-        <div class="text-xs ${v ? "text-[#2d5230]" : "text-stone-500"}">${esc(sub)}</div></div>
-      <a href="${p.url}" target="_blank" rel="noopener" class="text-xs underline text-stone-500 shrink-0 p-1">ข้อมูล</a>
-      ${v ? `<button data-act="more" data-id="${p.id}" aria-expanded="${open}" aria-label="บันทึกรายละเอียด" class="shrink-0 px-2 py-1 rounded-lg text-stone-600 hover:bg-stone-100">${open ? "▴" : "▾"}</button>` : ""}
-    </div>
-    ${open ? `<div class="border-t border-stone-200 p-3 grid gap-3 md:grid-cols-2">
-      <label class="text-sm">วันที่ไปล่าสุด<input data-act="date" data-id="${p.id}" type="date" value="${esc(d.date || "")}" max="${today()}" class="field mt-1"></label>
-      <div><div class="text-sm">ให้คะแนน</div><div class="flex">${stars}</div></div>
-      <label class="text-sm md:col-span-2">บันทึกความทรงจำ<textarea data-act="note" data-id="${p.id}" rows="3" maxlength="2000" placeholder="วันนี้เจออะไรบ้าง…" class="field mt-1">${esc(d.note || "")}</textarea></label>
-    </div>` : ""}</article>`;
+/* ---------- รูปจริงจาก Wikipedia (ค้นตอนเปิดดู แล้วจำไว้ในเครื่อง) ---------- */
+const IMG_KEY = "tnp-img-v1";
+let IMG = jget(IMG_KEY, {});            // id -> url | "" (ไม่มีรูป)
+const PENDING = new Set(), QUEUE = []; let running = 0;
+const norm = (s) => s.replace(/\([^)]*\)/g, "").replace(/[\s–—\-]/g, "");
+async function findPhoto(p){
+  const qs = new URLSearchParams({format:"json", origin:"*", action:"query", generator:"search", gsrsearch:p.full, gsrnamespace:"0", gsrlimit:"6", prop:"pageimages", piprop:"thumbnail", pithumbsize:"720", pilimit:"6"});
+  const r = await fetch("https://th.wikipedia.org/w/api.php?" + qs); if (!r.ok) throw new Error("http");
+  const j = await r.json(), pages = Object.values((j.query && j.query.pages) || {}).sort((a, b) => a.index - b.index);
+  const want = [norm(p.full), norm("อุทยานแห่งชาติ" + p.n.split(/\s*[–—\-]\s*/)[0])];
+  const hit = pages.find(x => x.thumbnail && want.includes(norm(x.title)));
+  return hit ? hit.thumbnail.source : "";
 }
-
-function grid(){
-  const q = F.q.trim().toLowerCase();
-  const L = PARKS.filter(p => (F.prep || !p.prep) && (F.r === "all" || p.r === F.r) &&
-    (F.s === "all" || (F.s === "yes") === isV(p)) &&
-    (!q || p.full.toLowerCase().includes(q) || p.p.toLowerCase().includes(q)));
-  $("resultInfo").textContent = "แสดง " + L.length + " แห่ง";
-  let html = "";
-  REGIONS.forEach(r => {
-    const inR = L.filter(p => p.r === r); if (!inR.length) return;
-    const provs = [...new Set(inR.map(p => p.p))].sort((a, b) => a.localeCompare(b, "th"));
-    html += `<section><div class="relative rounded-xl overflow-hidden" style="background:${RC[r][1]}"><svg class="absolute inset-0 w-full h-full" viewBox="0 0 400 64" preserveAspectRatio="xMidYMax slice" aria-hidden="true">${SCENE[RSCENE[r]]}</svg><h2 class="relative serif text-xl font-extrabold flex items-center gap-2 px-4 py-5"><span aria-hidden="true">${RC[r][0]}</span>ภาค${r}<span class="text-sm font-medium text-stone-600">${inR.filter(isV).length}/${inR.length}</span></h2></div>` +
-      provs.map(pv => `<h3 class="text-sm font-semibold text-stone-600 mt-4 mb-2">จ.${esc(pv)}</h3><div class="grid gap-2 md:grid-cols-2">${inR.filter(p => p.p === pv).map(row).join("")}</div>`).join("") + "</section>";
+function pump(){
+  while (running < 4 && QUEUE.length) {
+    const id = QUEUE.shift(); running++;
+    findPhoto(byId[id]).then(u => { IMG[id] = u; try { localStorage.setItem(IMG_KEY, JSON.stringify(IMG)); } catch(e){} if (u) setImg(id, u); })
+      .catch(() => {}).finally(() => { running--; PENDING.delete(id); pump(); });
+  }
+}
+function loadPhoto(id){ const u = IMG[id]; if (u) return setImg(id, u); if (u === "" || PENDING.has(id)) return; PENDING.add(id); QUEUE.push(id); pump(); }
+function setImg(id, url){
+  document.querySelectorAll('.ph[data-id="' + id + '"]').forEach(el => {
+    if (el.dataset.img) return; el.dataset.img = "1";
+    const im = new Image(); im.alt = ""; im.decoding = "async"; im.className = "absolute inset-0 w-full h-full object-cover";
+    im.onload = () => el.insertBefore(im, el.querySelector(".ov")); im.onerror = () => { delete el.dataset.img; };
+    im.src = url;
   });
-  $("grid").innerHTML = html || '<p class="text-center text-stone-500 py-12">ไม่พบอุทยานที่ตรงกับเงื่อนไข ลองล้างคำค้นหาหรือเปลี่ยนตัวกรอง</p>';
 }
-function all(){ stats(); grid(); }
+const io = "IntersectionObserver" in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { io.unobserve(e.target); loadPhoto(e.target.dataset.id); } }), {rootMargin:"300px"}) : null;
+function observePhotos(){ document.querySelectorAll(".ph[data-id]").forEach(el => { if (el.dataset.img) return; io ? io.observe(el) : loadPhoto(el.dataset.id); }); }
 
-function buildFilters(){
-  $("fStatus").innerHTML = [["all","ทั้งหมด"],["yes","ไปแล้ว"],["no","ยังไม่ไป"]].map(([k,l]) =>
-    `<button class="chip" data-s="${k}" aria-pressed="${F.s === k}">${l}</button>`).join("");
-  $("fRegion").innerHTML = [["all","ทุกภูมิภาค"], ...REGIONS.map(r => [r, r])].map(([k,l]) =>
-    `<button class="chip" data-r="${k}" aria-pressed="${F.r === k}">${l}</button>`).join("");
+/* ---------- ส่วนประกอบหน้าจอ ---------- */
+const scene = (r) => `<svg class="absolute inset-0 w-full h-full" viewBox="0 0 400 64" preserveAspectRatio="xMidYMax slice" aria-hidden="true">${SCENE[RSCENE[r]]}</svg>`;
+function photo(p, cls, btn){
+  const v = isV(p);
+  return `<div class="ph relative overflow-hidden ${cls}" data-id="${p.id}" style="background:${RC[p.r][1]}">${scene(p.r)}
+    <div class="ov absolute inset-x-0 bottom-0 px-3 pt-8 pb-2 text-white text-xs font-medium" style="background:linear-gradient(transparent,rgba(20,36,28,.75))">📍 จ.${esc(p.p)} · ภาค${p.r}</div>
+    ${btn ? `<button data-act="toggle" data-id="${p.id}" aria-pressed="${v}" aria-label="${v ? "ยกเลิกเช็กอิน " : "เช็กอินที่ "}${esc(p.full)}" class="absolute top-2 right-2 z-10 size-10 rounded-full border-2 text-lg font-bold shadow ${v ? "text-white border-white" : "bg-white/90 border-white text-stone-400 hover:text-[#4f7a3a]"}" ${v ? 'style="background:#4f7a3a"' : ""}>✓</button>` : ""}</div>`;
 }
+function tile(r){
+  const L = PARKS.filter(p => p.r === r), v = L.filter(isV).length, pct = Math.round(v / L.length * 100);
+  return `<button data-region="${r}" class="group text-left rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition border border-stone-200">
+    <div class="relative h-36" style="background:${RC[r][1]}">${scene(r)}<span class="absolute left-4 top-3 text-4xl" aria-hidden="true">${RC[r][0]}</span></div>
+    <div class="p-4"><div class="flex items-baseline justify-between"><h3 class="serif text-lg font-extrabold">ภาค${r}</h3><span class="text-sm text-stone-500">${L.length} แห่ง</span></div>
+      <div class="mt-2 h-2 rounded-full bg-stone-100 overflow-hidden"><div class="bar h-full rounded-full" style="width:${pct}%;background:#4f7a3a"></div></div>
+      <div class="mt-1.5 flex justify-between text-xs text-stone-500"><span>ไปแล้ว ${v}/${L.length}</span><span class="font-semibold text-[#2d5230] group-hover:underline">ดูอุทยาน →</span></div></div></button>`;
+}
+function card(p){
+  const d = data[p.id] || {}, v = isV(p), rating = d.rating || 0;
+  const sub = v ? "เคยไปแล้ว" + (d.date ? " · " + fmtDate(d.date) : "") + (rating ? " · " + "★".repeat(rating) : "") : "ยังไม่เคยไป";
+  return `<article data-open="${p.id}" class="cursor-pointer rounded-2xl overflow-hidden bg-white border-2 ${v ? "border-[#4f7a3a]" : "border-transparent shadow-sm"} hover:shadow-lg transition">
+    ${photo(p, "h-44", true)}
+    <div class="p-3"><button data-open="${p.id}" class="text-left font-semibold leading-snug">${esc(p.full)}</button>
+      <div class="text-xs mt-1 ${v ? "text-[#2d5230]" : "text-stone-500"}">${esc(sub)}</div></div></article>`;
+}
+const chip = (attr, key, label, on) => `<button class="chip" ${attr}="${esc(key)}" aria-pressed="${on}">${esc(label)}</button>`;
 
-$("grid").addEventListener("click", e => {
-  const b = e.target.closest("button[data-act]"); if (!b) return;
-  const id = b.dataset.id, d = data[id] = data[id] || {}, act = b.dataset.act;
-  if (act === "toggle") { d.visited = !d.visited; if (d.visited) { if (!d.date) d.date = today(); OPEN.add(id); } else OPEN.delete(id); }
-  else if (act === "rate") { const v = +b.dataset.v; d.rating = d.rating === v ? 0 : v; }
-  else if (act === "more") { OPEN.has(id) ? OPEN.delete(id) : OPEN.add(id); }
-  save(); all();
+function view(){
+  const q = V.q.trim().toLowerCase(), home = V.r === null && !q, inRegion = REGIONS.includes(V.r);
+  stats();
+  if (home) {
+    $("chips").hidden = true; $("provs").hidden = true;
+    $("crumb").innerHTML = `<h2 class="serif text-xl md:text-2xl font-extrabold">เลือกหมวดภูมิภาค</h2><button data-region="all" class="btn btn-line !py-1.5">ดูทั้งหมด ${PARKS.length} แห่ง</button>`;
+    $("view").innerHTML = `<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">${REGIONS.map(tile).join("")}</div>`;
+    observePhotos(); return;
+  }
+  const L = PARKS.filter(p => (!inRegion || p.r === V.r) && (!inRegion || V.prov === "all" || p.p === V.prov) &&
+    (V.s === "all" || (V.s === "yes") === isV(p)) && (!q || p.full.toLowerCase().includes(q) || p.p.includes(q)));
+  const title = q ? "ผลการค้นหา “" + V.q.trim() + "”" : inRegion ? "ภาค" + V.r : "อุทยานแห่งชาติทั้งหมด";
+  $("crumb").innerHTML = `<div class="flex items-center gap-3"><button data-back class="btn btn-line !py-1.5">← หมวดภูมิภาค</button><h2 class="serif text-xl md:text-2xl font-extrabold">${inRegion ? RC[V.r][0] + " " : ""}${esc(title)} <span class="text-base font-medium text-stone-500">${L.length} แห่ง</span></h2></div>`;
+  $("chips").hidden = false;
+  $("chips").innerHTML = [["all","ทั้งหมด"],["yes","ไปแล้ว"],["no","ยังไม่ไป"]].map(([k, l]) => chip("data-s", k, l, V.s === k)).join("");
+  if (inRegion && !q) {
+    const provs = [...new Set(PARKS.filter(p => p.r === V.r).map(p => p.p))].sort((a, b) => a.localeCompare(b, "th"));
+    $("provs").hidden = false;
+    $("provs").innerHTML = chip("data-p", "all", "ทุกจังหวัด", V.prov === "all") + provs.map(pv => chip("data-p", pv, pv, V.prov === pv)).join("");
+  } else $("provs").hidden = true;
+  if (!L.length) { $("view").innerHTML = '<p class="text-center text-stone-500 py-16">ไม่พบอุทยานที่ตรงกับเงื่อนไข ลองล้างคำค้นหาหรือเปลี่ยนตัวกรอง</p>'; return; }
+  const key = inRegion && !q ? "p" : "r", heads = [...new Set(L.map(p => p[key]))];
+  if (key === "p") heads.sort((a, b) => a.localeCompare(b, "th")); else heads.sort((a, b) => REGIONS.indexOf(a) - REGIONS.indexOf(b));
+  $("view").innerHTML = heads.map(h => {
+    const g = L.filter(p => p[key] === h);
+    return `<div class="mb-8"><h3 class="serif text-lg font-extrabold mb-3 flex items-center gap-2">${key === "p" ? "จ." + esc(h) : RC[h][0] + " ภาค" + esc(h)}<span class="text-sm font-medium text-stone-500">${g.filter(isV).length}/${g.length}</span></h3><div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">${g.map(card).join("")}</div></div>`;
+  }).join("");
+  observePhotos();
+}
+function resetUI(){ V.r = null; V.prov = "all"; V.q = ""; V.s = "all"; $("q").value = ""; cur = null; view(); window.scrollTo(0, 0); }
+const go = (r) => { V.r = r; V.prov = "all"; view(); window.scrollTo(0, 0); };
+
+function toggleVisit(id){ const d = data[id] = data[id] || {}; d.visited = !d.visited; if (d.visited && !d.date) d.date = today(); save(); }
+
+/* ---------- หน้ารายละเอียดอุทยาน ---------- */
+function renderPark(){
+  const p = byId[cur], d = data[p.id] || {}, v = isV(p), rating = d.rating || 0;
+  const stars = [1,2,3,4,5].map(i => `<button data-act="rate" data-v="${i}" aria-label="ให้ ${i} ดาว" class="text-3xl leading-none p-0.5 ${i <= rating ? "" : "opacity-30"}" style="color:#b8892f">★</button>`).join("");
+  $("parkBody").innerHTML = photo(p, "h-52 md:h-72", false) + `<div class="p-5 grid gap-4">
+    <div><h2 class="serif text-2xl font-extrabold leading-snug">${esc(p.full)}</h2><p class="text-sm text-stone-500 mt-1">จังหวัด${esc(p.p)} · ภาค${esc(p.r)}</p></div>
+    <button data-act="toggle" aria-pressed="${v}" class="btn ${v ? "btn-main" : "btn-line"}">${v ? "✓ เช็กอินแล้ว (กดเพื่อยกเลิก)" : "เช็กอินที่นี่"}</button>
+    ${v ? `<div class="grid gap-3 md:grid-cols-2">
+      <label class="text-sm">วันที่ไปล่าสุด<input data-act="date" type="date" value="${esc(d.date || "")}" max="${today()}" class="field mt-1"></label>
+      <div><div class="text-sm">ให้คะแนน</div><div class="flex">${stars}</div></div>
+      <label class="text-sm md:col-span-2">บันทึกความทรงจำ<textarea data-act="note" rows="3" maxlength="2000" placeholder="วันนี้เจออะไรบ้าง…" class="field mt-1">${esc(d.note || "")}</textarea></label></div>` : ""}
+    <a href="${p.url}" target="_blank" rel="noopener" class="text-sm underline text-stone-600">ดูข้อมูลอย่างเป็นทางการ (กรมอุทยานฯ) ↗</a></div>`;
+  observePhotos();
+}
+function openPark(id){ cur = id; renderPark(); const dlg = $("parkDlg"); if (!dlg.open) dlg.showModal(); }
+
+/* ---------- เหตุการณ์ ---------- */
+$("view").addEventListener("click", e => {
+  const t = e.target.closest("[data-act=toggle]");
+  if (t) { toggleVisit(t.dataset.id); view(); return; }
+  const rg = e.target.closest("[data-region]"); if (rg) return go(rg.dataset.region);
+  const op = e.target.closest("[data-open]"); if (op) openPark(op.dataset.open);
 });
-$("grid").addEventListener("change", e => {
-  if (e.target.dataset.act !== "date") return;
-  const d = data[e.target.dataset.id] = data[e.target.dataset.id] || {}; d.date = e.target.value; save(); all();
+$("crumb").addEventListener("click", e => {
+  if (e.target.closest("[data-back]")) { V.q = ""; $("q").value = ""; return go(null); }
+  const rg = e.target.closest("[data-region]"); if (rg) go(rg.dataset.region);
 });
-$("grid").addEventListener("input", e => { // พิมพ์โน้ตแล้วบันทึกเลย ไม่วาดใหม่ เพื่อไม่ให้เคอร์เซอร์หลุด
-  if (e.target.dataset.act !== "note") return;
-  const d = data[e.target.dataset.id] = data[e.target.dataset.id] || {}; d.note = e.target.value; save();
+$("chips").addEventListener("click", e => { const b = e.target.closest("[data-s]"); if (b) { V.s = b.dataset.s; view(); } });
+$("provs").addEventListener("click", e => { const b = e.target.closest("[data-p]"); if (b) { V.prov = b.dataset.p; view(); } });
+$("q").addEventListener("input", e => { V.q = e.target.value; view(); });
+
+const pd = $("parkDlg");
+pd.addEventListener("click", e => {
+  if (e.target === pd || e.target.closest("#parkClose")) return pd.close();
+  const b = e.target.closest("[data-act]"); if (!b || !cur) return;
+  if (b.dataset.act === "toggle") toggleVisit(cur);
+  else if (b.dataset.act === "rate") { const d = data[cur] = data[cur] || {}, v = +b.dataset.v; d.rating = d.rating === v ? 0 : v; save(); }
+  else return;
+  renderPark();
 });
-$("q").addEventListener("input", e => { F.q = e.target.value; grid(); });
-$("fPrep").addEventListener("change", e => { F.prep = e.target.checked; grid(); });
-$("fStatus").addEventListener("click", e => { const b = e.target.closest("button[data-s]"); if (!b) return; F.s = b.dataset.s; buildFilters(); grid(); });
-$("fRegion").addEventListener("click", e => { const b = e.target.closest("button[data-r]"); if (!b) return; F.r = b.dataset.r; buildFilters(); grid(); });
+pd.addEventListener("change", e => { if (e.target.dataset.act === "date" && cur) { const d = data[cur] = data[cur] || {}; d.date = e.target.value; save(); } });
+pd.addEventListener("input", e => { if (e.target.dataset.act === "note" && cur) { const d = data[cur] = data[cur] || {}; d.note = e.target.value; save(); } });
+pd.addEventListener("close", () => { cur = null; view(); });
 
 $("btnExport").addEventListener("click", () => {
   const blob = new Blob([JSON.stringify({app:"thailand-national-parks-tracker", version:1, exportedAt:new Date().toISOString(), data}, null, 2)], {type:"application/json"});
@@ -517,7 +582,7 @@ $("fileImport").addEventListener("change", async e => {
     PARKS.forEach(p => { const x = src[p.id] || src[OLD_REV[p.id]]; if (!x || typeof x !== "object") return;
       clean[p.id] = { visited: x.visited === true, date: /^\d{4}-\d{2}-\d{2}$/.test(x.date) ? x.date : "", rating: Number.isInteger(x.rating) && x.rating >= 0 && x.rating <= 5 ? x.rating : 0, note: typeof x.note === "string" ? x.note.slice(0, 2000) : "" }; });
     if (!confirm("นำเข้าข้อมูล " + Object.keys(clean).length + " รายการ และแทนที่ข้อมูลปัจจุบันทั้งหมด ต้องการดำเนินการต่อหรือไม่?")) return;
-    data = clean; save(); all(); toast("นำเข้าข้อมูลเรียบร้อย");
+    data = clean; save(); view(); toast("นำเข้าข้อมูลเรียบร้อย");
   } catch(err){ toast("ไฟล์ไม่ถูกต้อง ต้องเป็นไฟล์ JSON ที่ส่งออกจากแอปนี้"); }
 });
 
