@@ -890,7 +890,7 @@ $("q").addEventListener("input", e => { V.q = e.target.value; view(); });
 document.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => { setTab(b.dataset.tab); window.scrollTo(0, 0); }));
 async function openRank(){
   if (KV) { try { const j = await (await afetch("/api/kv")).json(); if (j.kv["tnp-users-v1"]) KV["tnp-users-v1"] = j.kv["tnp-users-v1"]; RANK = Object.assign(j.rank || {}, {[me.id]: RANK[me.id]}); } catch(e){ toast("โหลดอันดับล่าสุดไม่ได้ แสดงข้อมูลที่มีอยู่"); } }
-  const rows = getUsers().filter(u => u.status !== "suspended").map(u => {
+  const rows = getUsers().filter(u => u.status !== "suspended" && !u.noRank).map(u => {
     if (KV) { const r = RANK[u.id] || {}; return {u, n: r.n || 0, pv: r.pv || 0}; }
     const d = u.id === me.id ? data : jget(dataKey(u.id), {}) || {}, vs = PARKS.filter(p => d[p.id] && d[p.id].visited);
     return {u, n: vs.length, pv: new Set(vs.map(p => p.p)).size};
@@ -899,6 +899,7 @@ async function openRank(){
   $("rankBody").innerHTML = rows.map((x, i) => { const key = x.n + "/" + x.pv; if (key !== prev) { rk = i + 1; prev = key; }
     const me_ = x.u.id === me.id, medal = ["🥇","🥈","🥉"][rk - 1] || rk;
     return `<div class="flex items-center gap-3 rounded-xl border p-3 ${me_ ? "border-[#4f7a3a] bg-[#f3f8ec]" : "border-stone-200"}"><span class="w-8 text-center text-xl font-bold shrink-0">${medal}</span>${avt(x.u)}<div class="min-w-0 flex-1"><div class="font-semibold truncate">${esc(x.u.name)}${me_ ? ' <span class="text-xs text-stone-500">(คุณ)</span>' : ""}</div><div class="text-xs text-stone-500">${x.pv} จังหวัด</div></div><div class="serif text-xl font-extrabold">${x.n}<span class="text-sm font-medium text-stone-500"> / ${PARKS.length}</span></div></div>`; }).join("") || '<p class="text-stone-500">ยังไม่มีสมาชิก</p>';
+  if (me.noRank) $("rankBody").insertAdjacentHTML("afterbegin", '<p class="text-sm text-[#6b4f3a] bg-[#b8892f]/15 rounded-lg px-3 py-2">แอดมินปิดการแสดงชื่อคุณในอันดับ คุณจึงไม่ปรากฏในรายการนี้</p>');
   if (!$("rankDlg").open) $("rankDlg").showModal();
 }
 $("btnRank").addEventListener("click", () => { closeMenu(); openRank(); });
@@ -998,7 +999,7 @@ function userRow(u){
   return `<div class="rounded-xl border border-stone-200 p-3 flex flex-wrap items-center justify-between gap-3">
     <div class="flex items-center gap-3 min-w-0">${avt(u)}<div class="min-w-0"><div class="font-semibold">${esc(u.name)} ${isAdm ? '<span class="text-xs px-2 py-0.5 rounded-full bg-[#b8892f]/20 text-[#6b4f3a]">แอดมิน</span>' : ""}${self ? ' <span class="text-xs text-stone-500">(คุณ)</span>' : ""}</div>
     <div class="text-sm text-stone-500">@${esc(u.username)}${active ? "" : ' · <span style="color:#8e3b25">ถูกระงับ</span>'}</div>${u.phone || u.email ? `<div class="text-xs text-stone-500 mt-0.5">${u.phone ? "📞 " + esc(u.phone) : ""}${u.phone && u.email ? " · " : ""}${u.email ? "✉️ " + esc(u.email) : ""}</div>` : ""}</div></div>
-    <div class="flex flex-wrap gap-2">${actions}</div></div>`;
+    <div class="flex flex-wrap items-center gap-2"><label class="text-sm flex items-center gap-1.5 mr-1 cursor-pointer"><input type="checkbox" data-norank="${u.id}" ${u.noRank ? "checked" : ""} class="size-4 accent-[#4f7a3a]"> ไม่ขึ้นอันดับ</label>${actions}</div></div>`;
 }
 function renderAdmin(){
   $("apMembers").innerHTML = getUsers().map(userRow).join("");
@@ -1034,6 +1035,13 @@ $("adminDlg").addEventListener("click", async e => {
   saveUsers(users); renderAdmin();
 });
 
+$("adminDlg").addEventListener("change", e => {
+  const c = e.target.closest("input[data-norank]"); if (!c || !requireAdmin()) return;
+  const users = getUsers(), u = users.find(x => x.id === c.dataset.norank); if (!u) return;
+  if (c.checked) u.noRank = true; else delete u.noRank;
+  if (saveUsers(users)) toast(c.checked ? "ซ่อน " + u.name + " จากอันดับแล้ว" : "แสดง " + u.name + " ในอันดับแล้ว");
+  renderAdmin();
+});
 $("addForm").addEventListener("submit", async e => {
   e.preventDefault(); if (!requireAdmin()) return; const err = $("aErr"); err.textContent = "";
   const username = $("aUser").value.trim().toLowerCase(), name = $("aName").value.trim(), pw = $("aPass").value;
