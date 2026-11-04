@@ -87,7 +87,8 @@
       <button type="button" id="goSignup" class="btn btn-line">ยังไม่มีบัญชี? สมัครสมาชิก</button>
     </form>
     <form id="signupForm" class="p-6 grid gap-4" autocomplete="off" hidden>
-      <label class="text-sm font-medium">ชื่อที่แสดง<input id="sName" class="field mt-1" maxlength="40" required></label>
+      <p class="text-sm text-stone-600">กรุณาใช้<b>ชื่อและนามสกุลจริง</b> แอดมินเห็นชื่อเต็ม ส่วนหน้าอันดับจะแสดงแค่ชื่อกับตัวย่อนามสกุล เช่น “สมชาย ศ.”</p>
+      <div class="grid grid-cols-2 gap-3"><label class="text-sm font-medium">ชื่อจริง<input id="sFirst" class="field mt-1" maxlength="30" autocomplete="given-name" required></label><label class="text-sm font-medium">นามสกุล<input id="sLast" class="field mt-1" maxlength="30" autocomplete="family-name" required></label></div>
       <label class="text-sm font-medium">ชื่อผู้ใช้ <span class="font-normal text-stone-500">(a-z, 0-9, _ ยาว 3–20 ตัว)</span><input id="sUser" class="field mt-1" maxlength="20" autocapitalize="none" required></label>
       <label class="text-sm font-medium">อีเมล <span class="font-normal text-stone-500">(อีเมลจริง)</span><input id="sEmail" type="email" class="field mt-1" maxlength="80" autocomplete="email" placeholder="name@example.com" required></label>
       <label class="text-sm font-medium">รหัสผ่าน <span class="font-normal text-stone-500">(อย่างน้อย 8 ตัว)</span><input id="sPass" type="password" class="field mt-1" minlength="8" autocomplete="new-password" required></label>
@@ -233,7 +234,7 @@
 <dialog id="rankDlg">
   <div class="topo text-white flex items-center justify-between px-5 py-4"><h2 class="serif text-xl font-extrabold">🏅 อันดับสมาชิก</h2><button id="rankClose" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-sm" aria-label="ปิด">ปิด ✕</button></div>
   <div class="p-5 overflow-y-auto" style="max-height:calc(100dvh - 10rem)"><div id="rankBody" class="grid gap-2"></div>
-    <p class="text-xs text-stone-500 mt-4">จัดอันดับจากจำนวนอุทยานที่เช็กอิน (ถ้าเท่ากัน ดูจำนวนจังหวัด) ของสมาชิกทุกคนที่เช็กอินแล้ว แสดงเฉพาะชื่อกับจำนวน ไม่แสดงบันทึกส่วนตัว อันดับดึงข้อมูลล่าสุดทุกครั้งที่เปิดหน้านี้ ทุกเครื่องเห็นตรงกัน</p></div>
+    <p class="text-xs text-stone-500 mt-4">จัดอันดับจากจำนวนอุทยานที่เช็กอิน (ถ้าเท่ากัน ดูจำนวนจังหวัด) ของสมาชิกทุกคนที่เช็กอินแล้ว แสดงเฉพาะชื่อกับตัวย่อนามสกุลและจำนวน ไม่แสดงบันทึกส่วนตัว อันดับดึงข้อมูลล่าสุดทุกครั้งที่เปิดหน้านี้ ทุกเครื่องเห็นตรงกัน</p></div>
 </dialog>
 
 <dialog id="profDlg">
@@ -255,7 +256,7 @@
         <input id="pFileCam" type="file" accept="image/*" capture="user" class="sr-only" tabindex="-1" aria-label="ถ่ายรูปโปรไฟล์">
         <input id="pFileGal" type="file" accept="image/*" class="sr-only" tabindex="-1" aria-label="เลือกรูปโปรไฟล์จากแกลเลอรี">
       </div>
-      <label class="text-sm font-medium">ชื่อที่แสดง<input id="pName" class="field mt-1" maxlength="40" autocomplete="name"></label>
+      <div class="grid grid-cols-2 gap-3"><label class="text-sm font-medium">ชื่อจริง<input id="pFirst" class="field mt-1" maxlength="30" autocomplete="given-name"></label><label class="text-sm font-medium">นามสกุล<input id="pLast" class="field mt-1" maxlength="30" autocomplete="family-name"></label></div>
       <label class="text-sm font-medium">ที่อยู่<textarea id="pAddr" class="field mt-1" rows="3" maxlength="200" autocomplete="street-address" placeholder="บ้านเลขที่ ถนน ตำบล อำเภอ จังหวัด รหัสไปรษณีย์"></textarea></label>
       <div class="grid gap-3 sm:grid-cols-2">
         <label class="text-sm font-medium">เบอร์โทร<input id="pPhone" type="tel" inputmode="tel" class="field mt-1" maxlength="20" autocomplete="tel" placeholder="เช่น 081-234-5678"></label>
@@ -529,6 +530,25 @@ function ensureAdmin(){
   if (!u.some(x => x.role === "admin")) { u.unshift({...ADMIN_SEED, createdAt:new Date().toISOString()}); saveUsers(u); }
 }
 const validUser = (s) => /^[a-z0-9_]{3,20}$/.test(s);
+const NAME_RE = /^[A-Za-z\u0E01-\u0E3A\u0E40-\u0E4E][A-Za-z\u0E01-\u0E3A\u0E40-\u0E4E'\-]*$/;
+const FAKE_NAME = /^(test|tester|admin|user|guest|none|null|nickname|ทดสอบ|นามแฝง|ไม่ระบุ|ไม่มี|นามสกุล|ชื่อ)$/i;
+function checkRealName(f, l){
+  f = f.trim(); l = l.trim();
+  if (!f || !l) return {err:"กรุณากรอกทั้งชื่อและนามสกุลจริง"};
+  for (const [w, label] of [[f, "ชื่อ"], [l, "นามสกุล"]]) {
+    const n = [...w].length;
+    if (n < 2 || n > 30) return {err: label + "ต้องยาว 2–30 ตัวอักษร"};
+    if (!NAME_RE.test(w)) return {err: label + "ใช้ได้เฉพาะตัวอักษรไทยหรืออังกฤษ (ห้ามเว้นวรรค ตัวเลข อีโมจิ หรือสัญลักษณ์)"};
+    if (/^(.)\1+$/u.test(w) || FAKE_NAME.test(w)) return {err: label + "ดูไม่ใช่ชื่อจริง กรุณาใส่ชื่อจริงของคุณ"};
+  }
+  if (f.toLowerCase() === l.toLowerCase()) return {err:"ชื่อกับนามสกุลต้องไม่เหมือนกัน"};
+  return {first:f, last:l, name:f + " " + l};
+}
+// ชื่อที่แสดงต่อสาธารณะ (หน้าอันดับ): ชื่อ + ตัวย่อนามสกุล
+function shortName(u){
+  const parts = u.first && u.last ? [u.first, u.last] : String(u.name || "").trim().split(/\s+/);
+  return parts.length >= 2 ? parts[0] + " " + ([...parts[parts.length - 1]][0] || "") + "." : (u.name || "");
+}
 
 let me = null;   // ผู้ใช้ที่ล็อกอินอยู่
 let data = {};   // ข้อมูลเช็กอินของผู้ใช้คนนี้
@@ -834,18 +854,21 @@ function openProfile(){
   const u = userRec() || me, vs = PARKS.filter(isV);
   setAv($("pAvatar"), u); $("pHead").textContent = u.name; $("pDel").hidden = !u.photo;
   $("pSub").textContent = "@" + u.username + (u.role === "admin" ? " · แอดมิน" : " · สมาชิก") + " · เช็กอินแล้ว " + vs.length + " แห่ง";
-  $("pName").value = u.name || ""; $("pAddr").value = u.address || ""; $("pPhone").value = u.phone || ""; $("pEmail").value = u.email || "";
+  { const sp = u.first && u.last ? [u.first, u.last] : String(u.name || "").trim().split(/\s+/); $("pFirst").value = sp[0] || ""; $("pLast").value = sp.slice(1).join(" "); } $("pAddr").value = u.address || ""; $("pPhone").value = u.phone || ""; $("pEmail").value = u.email || "";
   $("pErr").textContent = ""; $("mErr").textContent = ""; setPTab("info"); $("profDlg").showModal();
 }
 $("profForm").addEventListener("submit", e => {
   e.preventDefault(); const err = $("pErr"); err.textContent = "";
-  const name = $("pName").value.trim(), addr = $("pAddr").value.trim(), phone = $("pPhone").value.trim(), email = $("pEmail").value.trim();
-  if (!name) { err.textContent = "กรุณากรอกชื่อ"; return; }
+  const addr = $("pAddr").value.trim(), phone = $("pPhone").value.trim(), email = $("pEmail").value.trim();
+  let nm;
+  if (me.role === "admin") { const f = $("pFirst").value.trim(), l = $("pLast").value.trim(); if (!f) { err.textContent = "กรุณากรอกชื่อ"; return; } nm = {first:f, last:l, name:(f + " " + l).trim()}; }
+  else { nm = checkRealName($("pFirst").value, $("pLast").value); if (nm.err) { err.textContent = nm.err; return; } }
+  const name = nm.name;
   if (phone && !/^\+?\d{9,12}$/.test(phone.replace(/[\s\-]/g, ""))) { err.textContent = "เบอร์โทรไม่ถูกต้อง ใส่ตัวเลข 9–12 หลัก (เว้นวรรคหรือขีดได้)"; return; }
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { err.textContent = "รูปแบบอีเมลไม่ถูกต้อง"; return; }
   const users = getUsers(), u = users.find(x => x.id === me.id); if (!u) return;
-  Object.assign(u, {name, address:addr, phone, email}); if (!saveUsers(users)) return;
-  Object.assign(me, {name, address:addr, phone, email}); renderUser(); stats(); openProfileHead(u);
+  Object.assign(u, {name, first:nm.first, last:nm.last, address:addr, phone, email}); if (!saveUsers(users)) return;
+  Object.assign(me, {name, first:nm.first, last:nm.last, address:addr, phone, email}); renderUser(); stats(); openProfileHead(u);
   toast("บันทึกโปรไฟล์แล้ว");
 });
 function openProfileHead(u){ setAv($("pAvatar"), u); $("pHead").textContent = u.name; }
@@ -933,7 +956,7 @@ function rankRows(){
 }
 function rankItem(x){
   const mine = me && x.u.id === me.id, medal = ["🥇","🥈","🥉"][x.rk - 1] || x.rk;
-  return `<div class="flex items-center gap-3 rounded-xl border p-3 ${mine ? "border-[#4f7a3a] bg-[#f3f8ec]" : "border-stone-200"}"><span class="w-8 text-center text-xl font-bold shrink-0">${medal}</span>${avt(x.u)}<div class="min-w-0 flex-1"><div class="font-semibold truncate">${esc(x.u.name)}${mine ? ' <span class="text-xs text-stone-500">(คุณ)</span>' : ""}</div><div class="text-xs text-stone-500">${x.pv} จังหวัด</div></div><div class="serif text-xl font-extrabold">${x.n}<span class="text-sm font-medium text-stone-500"> / ${PARKS.length}</span></div></div>`;
+  return `<div class="flex items-center gap-3 rounded-xl border p-3 ${mine ? "border-[#4f7a3a] bg-[#f3f8ec]" : "border-stone-200"}"><span class="w-8 text-center text-xl font-bold shrink-0">${medal}</span>${avt(x.u)}<div class="min-w-0 flex-1"><div class="font-semibold truncate">${esc(shortName(x.u))}${mine ? ' <span class="text-xs text-stone-500">(คุณ)</span>' : ""}</div><div class="text-xs text-stone-500">${x.pv} จังหวัด</div></div><div class="serif text-xl font-extrabold">${x.n}<span class="text-sm font-medium text-stone-500"> / ${PARKS.length}</span></div></div>`;
 }
 function paintTopRank(){
   const el = $("topRankBody"); if (!el) return;
@@ -1047,15 +1070,16 @@ $("resetForm").addEventListener("submit", async e => {
 });
 $("signupForm").addEventListener("submit", async e => {
   e.preventDefault(); const btn = e.submitter, err = $("sErr"); err.textContent = "";
-  const username = $("sUser").value.trim().toLowerCase(), name = $("sName").value.trim(), pw = $("sPass").value;
-  if (!name) { err.textContent = "กรุณาใส่ชื่อที่แสดง"; return; }
+  const username = $("sUser").value.trim().toLowerCase(), pw = $("sPass").value;
+  const nm = checkRealName($("sFirst").value, $("sLast").value); if (nm.err) { err.textContent = nm.err; return; }
+  const name = nm.name;
   if (!validUser(username)) { err.textContent = "ชื่อผู้ใช้ใช้ได้เฉพาะ a-z, 0-9 และ _ ยาว 3–20 ตัว"; return; }
   if (pw.length < 8) { err.textContent = "รหัสผ่านต้องยาวอย่างน้อย 8 ตัว"; return; }
   if (pw !== $("sPass2").value) { err.textContent = "รหัสผ่านสองช่องไม่ตรงกัน"; return; }
   btn.disabled = true; await syncUsers();
   const users = getUsers(); if (users.some(x => x.username === username)) { err.textContent = "ชื่อผู้ใช้นี้ถูกใช้แล้ว"; btn.disabled = false; return; }
   const email = $("sEmail").value.trim(); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = "กรุณาใส่อีเมลจริง เช่น name@example.com"; btn.disabled = false; return; }
-  try { const nu = await makeUser(username, name, pw, "member", "active"); nu.email = email; users.push(nu); if (!saveUsers(users)) return;
+  try { const nu = await makeUser(username, name, pw, "member", "active"); nu.email = email; nu.first = nm.first; nu.last = nm.last; users.push(nu); if (!saveUsers(users)) return;
     if (GAS_URL) afetch("/api/welcome", {method:"POST", body:JSON.stringify({username})}).catch(() => {}); err.textContent = await doLogin(username, pw, false); if (!err.textContent) { e.target.reset(); showSignup(false); } }
   catch(x){ err.textContent = x.message === "nocrypto" ? CRYPTO_ERR : "เกิดข้อผิดพลาด ลองใหม่อีกครั้ง"; }
   finally { btn.disabled = false; }
