@@ -69,7 +69,8 @@
   /* แผนที่ (Leaflet) */
   .leaflet-container img.leaflet-tile,.leaflet-container .leaflet-pane img{max-width:none!important;max-height:none!important}
   #mapBox{isolation:isolate}
-  .mapcard{text-align:left;border-radius:1rem;border:1px solid #d6d3d1;background:#fff;padding:.8rem .9rem}
+  .dtip{background:transparent;border:0;box-shadow:none;font-size:11px;font-weight:600;color:#1f3a2e;text-shadow:0 0 3px #fff,0 0 3px #fff;padding:0}.dtip:before{display:none}
+   .mapcard{text-align:left;border-radius:1rem;border:1px solid #d6d3d1;background:#fff;padding:.8rem .9rem}
   .mapcard:hover{border-color:#4f7a3a}
   .mapcard[aria-pressed="true"]{border-color:#4f7a3a;box-shadow:0 0 0 2px #4f7a3a inset;background:#f3f8ec}
 </style>
@@ -151,7 +152,7 @@
         <button class="navtab" data-tab="home" aria-pressed="true">🏠 หน้าแรก</button>
         <button class="navtab" data-tab="parks" aria-pressed="false">🌲 อุทยานแห่งชาติ</button>
         <button class="navtab" data-tab="map" aria-pressed="false">🗺️ แผนที่</button>
-        <button class="navtab" data-tab="amp" aria-pressed="false">📍 อำเภอ</button>
+        <button class="navtab" data-tab="dist" aria-pressed="false">📍 อำเภอ</button>
         <button class="navtab" data-tab="news" aria-pressed="false">📢 ประชาสัมพันธ์</button>
         <button class="navtab" data-tab="phones" aria-pressed="false">📞 เบอร์สำคัญ</button>
       </div>
@@ -227,15 +228,13 @@
 </section>
 
 <!-- ===== แท็บ: อำเภอ ===== -->
-<section id="tabAmp" class="max-w-6xl mx-auto px-4 py-6 grid gap-4" hidden>
-  <div><h2 class="serif text-2xl font-extrabold">📍 แผนที่อำเภอ</h2><p class="text-sm text-stone-500 mt-1">เลือกจังหวัด แล้วแตะอำเภอที่คุณเคยไปเพื่อติ๊กไว้ · ข้อมูลเป็นของคุณคนเดียว ไม่ซ้ำกับใคร และไม่นับเข้าอันดับ</p></div>
-  <div class="rounded-2xl bg-white border border-stone-200 shadow-sm p-4 grid gap-3">
-    <div class="flex flex-wrap items-center gap-2"><label class="text-sm font-medium" for="ampProv">จังหวัด</label><select id="ampProv" class="field !w-auto min-w-[12rem]"></select>
-      <button type="button" id="ampSelAll" class="btn btn-line !py-1.5">ติ๊กทั้งจังหวัด</button><button type="button" id="ampClear" class="btn btn-danger !py-1.5">ล้างจังหวัดนี้</button></div>
-    <div><div id="ampHead" class="serif text-lg font-bold"></div><div class="mt-2 h-2.5 rounded-full bg-stone-200 overflow-hidden"><div id="ampBar" class="bar h-full rounded-full" style="width:0;background:#4f7a3a"></div></div><p id="ampParks" class="text-xs text-stone-500 mt-2"></p></div>
-    <div id="ampList" class="grid gap-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"></div>
-  </div>
-  <div class="rounded-2xl bg-white border border-stone-200 shadow-sm p-4 grid gap-3"><h3 class="serif text-lg font-bold">ภาพรวมทุกจังหวัด</h3><p id="ampTotal" class="text-sm text-stone-600"></p><div id="ampAll" class="flex flex-wrap gap-1.5"></div><p class="text-xs text-stone-500">สีเข้ม = ครบทุกอำเภอแล้ว · แตะชื่อจังหวัดเพื่อเปิดดู</p></div>
+<section id="tabDist" class="max-w-6xl mx-auto px-4 py-6 grid gap-4" hidden>
+  <div><h2 class="serif text-2xl font-extrabold">📍 แผนที่อำเภอที่ไปมาแล้ว</h2><p class="text-sm text-stone-500 mt-1">เลือกจังหวัด แล้วแตะอำเภอบนแผนที่หรือในรายการเพื่อติ๊กว่าไปมาแล้ว · เป็นข้อมูลของคุณคนเดียว ไม่นับเป็นอันดับ ไม่แสดงให้คนอื่นเห็น</p></div>
+  <div class="flex flex-wrap items-center gap-3"><select id="dProv" class="field !w-auto min-w-[14rem]" aria-label="เลือกจังหวัด"><option value="">กำลังโหลดรายชื่อจังหวัด…</option></select><div id="dSum" class="text-sm text-stone-600"></div></div>
+  <div id="dMsg" class="text-sm text-stone-600"></div>
+  <div id="dMap" class="rounded-2xl overflow-hidden border border-stone-300" style="height:min(60dvh,30rem);background:#eef1e8" hidden></div>
+  <div id="dList" class="flex flex-wrap gap-2"></div>
+  <p class="text-xs text-stone-500">ขอบเขตอำเภอจากข้อมูลขอบเขตการปกครอง (UN OCHA / กรมแผนที่ทหาร) แบบย่อขนาด ขอบอาจคลาดเคลื่อนเล็กน้อย</p>
 </section>
 
 <!-- ===== แท็บ: ประชาสัมพันธ์ ===== -->
@@ -271,7 +270,7 @@
   <button class="bnav" data-tab="home" aria-pressed="true"><span class="ic" aria-hidden="true">🏠</span>หน้าแรก</button>
   <button class="bnav" data-tab="parks" aria-pressed="false"><span class="ic" aria-hidden="true">🌲</span>อุทยาน</button>
   <button class="bnav" data-tab="map" aria-pressed="false"><span class="ic" aria-hidden="true">🗺️</span>แผนที่</button>
-  <button class="bnav" data-tab="amp" aria-pressed="false"><span class="ic" aria-hidden="true">📍</span>อำเภอ</button>
+  <button class="bnav" data-tab="dist" aria-pressed="false"><span class="ic" aria-hidden="true">📍</span>อำเภอ</button>
   <button class="bnav" data-tab="news" aria-pressed="false"><span class="ic" aria-hidden="true">📢</span>ข่าวสาร</button>
   <button class="bnav" data-tab="phones" aria-pressed="false"><span class="ic" aria-hidden="true">📞</span>เบอร์โทร</button>
 </nav>
@@ -919,10 +918,10 @@ function toggleVisit(id){ const d = data[id] = data[id] || {}; d.visited = !d.vi
 function setTab(t){
   V.tab = t;
   document.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-pressed", b.dataset.tab === t));
-  $("tabHome").hidden = t !== "home"; $("tabParks").hidden = t !== "parks"; $("tabMap").hidden = t !== "map"; $("tabAmp").hidden = t !== "amp"; $("tabNews").hidden = t !== "news"; $("tabPhones").hidden = t !== "phones";
+  $("tabHome").hidden = t !== "home"; $("tabParks").hidden = t !== "parks"; $("tabMap").hidden = t !== "map"; $("tabNews").hidden = t !== "news"; $("tabPhones").hidden = t !== "phones"; $("tabDist").hidden = t !== "dist";
   if (t === "home") renderHome();
   if (t === "map") renderMapTab(true);
-  if (t === "amp") renderAmp();
+  if (t === "dist") renderDist();
   if (t === "news") { renderNews(); loadAutoNews(); } if (t === "phones") renderPhones();
   view();
 }
@@ -1606,6 +1605,48 @@ function parkPos(p){
   const a = 2 * Math.PI * list.indexOf(p) / n, r = Math.min(0.28, 0.07 + 0.025 * n);
   return {pos:[c[0] + r * Math.sin(a), c[1] + r * Math.cos(a) / Math.cos(c[0] * Math.PI / 180)], exact:false};
 }
+
+/* ---------- แผนที่อำเภอ: ติ๊กอำเภอที่ไปมาแล้ว (เก็บใน data._amp เฉพาะของตัวเอง ไม่ส่งเข้าอันดับ) ---------- */
+/* ไฟล์ขอบเขตอำเภอ (GeoJSON) ต้องมีฟิลด์ adm2_th, adm2_pcode, adm1_th, adm1_pcode (หรือชื่อตัวพิมพ์ใหญ่) · วางไฟล์ชื่อ amphoe.geojson ไว้ข้าง index.html จะโหลดก่อนเสมอ */
+const DIST_URLS = ["amphoe.geojson", "https://cdn.jsdelivr.net/gh/piyayut-ch/mapthai@master/data-raw/tha2.geojson"];
+const DS = {geo:null, prov:"", map:null, layer:null, loading:null};
+const gp = (p, k) => p[k] != null ? p[k] : p[k.toUpperCase()];
+const dCode = (f) => String(gp(f.properties, "adm2_pcode") || ""), dName = (f) => String(gp(f.properties, "adm2_th") || "").replace(/^อำเภอ/, "");
+const dProvCode = (f) => String(gp(f.properties, "adm1_pcode") || dCode(f).slice(0, 4)), dProvName = (f) => String(gp(f.properties, "adm1_th") || dProvCode(f));
+const ampSet = () => new Set(Array.isArray(data._amp) ? data._amp : []);
+function ampToggle(c){ const S = ampSet(); S.has(c) ? S.delete(c) : S.add(c); data._amp = [...S]; save(); }
+function loadDistGeo(){
+  if (DS.geo) return Promise.resolve(DS.geo);
+  if (DS.loading) return DS.loading;
+  DS.loading = (async () => { for (const u of DIST_URLS) { try { const r = await fetch(u); if (!r.ok) continue; const j = await r.json();
+      if (j && Array.isArray(j.features) && j.features.length > 100 && j.features[0].properties && dCode(j.features[0])) { DS.geo = j.features; return DS.geo; } } catch(e){} }
+    DS.loading = null; throw new Error("nogeo"); })();
+  return DS.loading;
+}
+async function renderDist(){
+  try { await loadDistGeo(); } catch(e){ $("dMsg").innerHTML = "โหลดข้อมูลแผนที่อำเภอไม่ได้ในตอนนี้ (ต้องเชื่อมต่ออินเทอร์เน็ต และมีไฟล์ขอบเขตอำเภอ amphoe.geojson วางไว้ข้าง index.html)"; $("dProv").innerHTML = '<option value="">—</option>'; return; }
+  $("dMsg").textContent = "";
+  const F = DS.geo, S = ampSet(), PV = {};
+  F.forEach(f => { const k = dProvCode(f); (PV[k] = PV[k] || {n:dProvName(f), L:[]}).L.push(f); });
+  const keys = Object.keys(PV).sort((a, b) => PV[a].n.localeCompare(PV[b].n, "th"));
+  $("dProv").innerHTML = '<option value="">— เลือกจังหวัด —</option>' + keys.map(k => `<option value="${esc(k)}"${k === DS.prov ? " selected" : ""}>${esc(PV[k].n)} (${PV[k].L.filter(f => S.has(dCode(f))).length}/${PV[k].L.length})</option>`).join("");
+  $("dSum").textContent = "ไปมาแล้ว " + F.filter(f => S.has(dCode(f))).length + " / " + F.length + " อำเภอทั่วไทย";
+  const L = (PV[DS.prov] || {}).L || [];
+  $("dList").innerHTML = L.slice().sort((a, b) => dName(a).localeCompare(dName(b), "th")).map(f => `<button class="chip" data-amp="${esc(dCode(f))}" aria-pressed="${S.has(dCode(f))}">${S.has(dCode(f)) ? "✓ " : ""}${esc(dName(f))}</button>`).join("");
+  const box = $("dMap"); box.hidden = !L.length; if (!L.length) return;
+  try { await loadLeaflet(); } catch(e){ box.hidden = true; return; }
+  if (V.tab !== "dist") return;
+  const Lf = window.L;
+  if (!DS.map) { DS.map = Lf.map(box, {zoomControl:true, attributionControl:false}); DS.layer = Lf.layerGroup().addTo(DS.map); }
+  DS.layer.clearLayers();
+  const gl = Lf.geoJSON({type:"FeatureCollection", features:L}, {
+    style: f => { const on = S.has(dCode(f)); return {color:"#1f3a2e", weight:1.2, fillColor:on ? "#4f7a3a" : "#ffffff", fillOpacity:on ? .75 : .85}; },
+    onEachFeature: (f, ly) => { ly.bindTooltip(dName(f), {permanent:true, direction:"center", className:"dtip"}); ly.on("click", () => { ampToggle(dCode(f)); renderDist(); }); }
+  }).addTo(DS.layer);
+  setTimeout(() => { DS.map.invalidateSize(); DS.map.fitBounds(gl.getBounds(), {padding:[8, 8]}); }, 60);
+}
+$("dProv").addEventListener("change", e => { DS.prov = e.target.value; renderDist(); });
+$("dList").addEventListener("click", e => { const b = e.target.closest("[data-amp]"); if (b) { ampToggle(b.dataset.amp); renderDist(); } });
 const MAPS = {map:null, layer:null, filter:"all", region:"all"};
 function loadLeaflet(){
   if (window.L && window.L.map) return Promise.resolve();
@@ -1736,109 +1777,6 @@ $("shareSave").addEventListener("click", () => { if (!SHARE.url) return; const a
 $("shareSend").addEventListener("click", async () => { if (!SHARE.blob) return;
   const vs = PARKS.filter(isV), f = new File([SHARE.blob], "tnp-checkin.png", {type:"image/png"});
   try { await navigator.share({files:[f], title:"สมุดสะสมตราประทับอุทยานแห่งชาติไทย", text:"ฉันสะสมตราประทับอุทยานแห่งชาติแล้ว " + vs.length + "/" + PARKS.length + " แห่ง"}); } catch(e){ if (e && e.name !== "AbortError") toast("แชร์ไม่สำเร็จ ลองบันทึกรูปแล้วโพสต์เอง"); } });
-
-/* ---------- แผนที่อำเภอ: ติ๊กอำเภอที่เคยไป (เก็บในข้อมูลของแต่ละคน ไม่เข้าอันดับ) ---------- */
-const AMP_RAW = `กรุงเทพมหานคร:พระนคร,ดุสิต,หนองจอก,บางรัก,บางเขน,บางกะปิ,ปทุมวัน,ป้อมปราบศัตรูพ่าย,พระโขนง,มีนบุรี,ลาดกระบัง,ยานนาวา,สัมพันธวงศ์,พญาไท,ธนบุรี,บางกอกใหญ่,ห้วยขวาง,คลองสาน,ตลิ่งชัน,บางกอกน้อย,บางขุนเทียน,ภาษีเจริญ,หนองแขม,ราษฎร์บูรณะ,บางพลัด,ดินแดง,บึงกุ่ม,สาทร,บางซื่อ,จตุจักร,บางคอแหลม,ประเวศ,คลองเตย,สวนหลวง,จอมทอง,ดอนเมือง,ราชเทวี,ลาดพร้าว,วัฒนา,บางแค,หลักสี่,สายไหม,คันนายาว,สะพานสูง,วังทองหลาง,คลองสามวา,บางนา,ทวีวัฒนา,ทุ่งครุ,บางบอน
-กระบี่:*,เขาพนม,เกาะลันตา,คลองท่อม,อ่าวลึก,ปลายพระยา,ลำทับ,เหนือคลอง
-กาญจนบุรี:*,ไทรโยค,บ่อพลอย,ศรีสวัสดิ์,ท่ามะกา,ท่าม่วง,ทองผาภูมิ,สังขละบุรี,พนมทวน,เลาขวัญ,ด่านมะขามเตี้ย,หนองปรือ,ห้วยกระเจา
-กาฬสินธุ์:*,นามน,กมลาไสย,ร่องคำ,กุฉินารายณ์,เขาวง,ยางตลาด,ห้วยเม็ก,สหัสขันธ์,คำม่วง,ท่าคันโท,หนองกุงศรี,สมเด็จ,ห้วยผึ้ง,สามชัย,นาคู,ดอนจาน,ฆ้องชัย
-กำแพงเพชร:*,ไทรงาม,คลองลาน,ขาณุวรลักษบุรี,คลองขลุง,พรานกระต่าย,ลานกระบือ,ทรายทองวัฒนา,ปางศิลาทอง,บึงสามัคคี,โกสัมพีนคร
-ขอนแก่น:*,บ้านฝาง,พระยืน,หนองเรือ,ชุมแพ,สีชมพู,น้ำพอง,อุบลรัตน์,กระนวน,บ้านไผ่,เปือยน้อย,พล,แวงใหญ่,แวงน้อย,หนองสองห้อง,ภูเวียง,มัญจาคีรี,ชนบท,เขาสวนกวาง,ภูผาม่าน,ซำสูง,โคกโพธิ์ไชย,หนองนาคำ,บ้านแฮด,โนนศิลา,เวียงเก่า
-จันทบุรี:*,ขลุง,ท่าใหม่,โป่งน้ำร้อน,มะขาม,แหลมสิงห์,สอยดาว,แก่งหางแมว,นายายอาม,เขาคิชฌกูฏ
-ฉะเชิงเทรา:*,บางคล้า,บางน้ำเปรี้ยว,บางปะกง,บ้านโพธิ์,พนมสารคาม,สนามชัยเขต,แปลงยาว,ราชสาส์น,ท่าตะเกียบ,คลองเขื่อน
-ชลบุรี:*,บ้านบึง,หนองใหญ่,บางละมุง,พานทอง,พนัสนิคม,ศรีราชา,เกาะสีชัง,สัตหีบ,บ่อทอง,เกาะจันทร์
-ชัยนาท:*,มโนรมย์,วัดสิงห์,สรรพยา,สรรคบุรี,หันคา,หนองมะโมง,เนินขาม
-ชัยภูมิ:*,บ้านเขว้า,คอนสวรรค์,เกษตรสมบูรณ์,หนองบัวแดง,จัตุรัส,บำเหน็จณรงค์,หนองบัวระเหว,เทพสถิต,ภูเขียว,บ้านแท่น,แก้งคร้อ,คอนสาร,ภักดีชุมพล,เนินสง่า,ซับใหญ่
-ชุมพร:*,ท่าแซะ,ปะทิว,หลังสวน,ละแม,พะโต๊ะ,สวี,ทุ่งตะโก
-เชียงราย:*,เวียงชัย,เชียงของ,เทิง,พาน,ป่าแดด,แม่จัน,เชียงแสน,แม่สาย,แม่สรวย,เวียงป่าเป้า,พญาเม็งราย,เวียงแก่น,ขุนตาล,แม่ฟ้าหลวง,แม่ลาว,เวียงเชียงรุ้ง,ดอยหลวง
-เชียงใหม่:*,จอมทอง,เชียงดาว,ดอยสะเก็ด,แม่แตง,แม่ริม,สะเมิง,ฝาง,แม่อาย,พร้าว,สันป่าตอง,สันกำแพง,สันทราย,หางดง,ฮอด,ดอยเต่า,อมก๋อย,สารภี,เวียงแหง,ไชยปราการ,แม่วาง,แม่ออน,ดอยหล่อ,กัลยาณิวัฒนา
-ตรัง:*,กันตัง,ย่านตาขาว,ปะเหลียน,สิเกา,ห้วยยอด,วังวิเศษ,นาโยง,รัษฎา,หาดสำราญ
-ตราด:*,คลองใหญ่,เขาสมิง,บ่อไร่,แหลมงอบ,เกาะกูด,เกาะช้าง
-ตาก:*,บ้านตาก,สามเงา,แม่ระมาด,ท่าสองยาง,แม่สอด,พบพระ,อุ้มผาง,วังเจ้า
-นครนายก:*,ปากพลี,บ้านนา,องครักษ์
-นครปฐม:*,กำแพงแสน,นครชัยศรี,ดอนตูม,บางเลน,สามพราน,พุทธมณฑล
-นครพนม:*,ปลาปาก,ท่าอุเทน,บ้านแพง,ธาตุพนม,เรณูนคร,นาแก,ศรีสงคราม,นาหว้า,โพนสวรรค์,นาทม,วังยาง
-นครราชสีมา:*,ครบุรี,เสิงสาง,คง,บ้านเหลื่อม,จักราช,โชคชัย,ด่านขุนทด,โนนไทย,โนนสูง,ขามสะแกแสง,บัวใหญ่,ประทาย,ปักธงชัย,พิมาย,ห้วยแถลง,ชุมพวง,สูงเนิน,ขามทะเลสอ,สีคิ้ว,ปากช่อง,หนองบุญมาก,แก้งสนามนาง,โนนแดง,วังน้ำเขียว,เทพารักษ์,เมืองยาง,พระทองคำ,ลำทะเมนชัย,บัวลาย,สีดา,เฉลิมพระเกียรติ
-นครศรีธรรมราช:*,พรหมคีรี,ลานสกา,ฉวาง,พิปูน,เชียรใหญ่,ชะอวด,ท่าศาลา,ทุ่งสง,นาบอน,ทุ่งใหญ่,ปากพนัง,ร่อนพิบูลย์,สิชล,ขนอม,หัวไทร,บางขัน,ถ้ำพรรณรา,จุฬาภรณ์,พระพรหม,นบพิตำ,ช้างกลาง,เฉลิมพระเกียรติ
-นครสวรรค์:*,โกรกพระ,ชุมแสง,หนองบัว,บรรพตพิสัย,เก้าเลี้ยว,ตาคลี,ท่าตะโก,ไพศาลี,พยุหะคีรี,ลาดยาว,ตากฟ้า,แม่วงก์,แม่เปิน,ชุมตาบง
-นนทบุรี:*,บางกรวย,บางใหญ่,บางบัวทอง,ไทรน้อย,ปากเกร็ด
-นราธิวาส:*,ตากใบ,บาเจาะ,ยี่งอ,ระแงะ,รือเสาะ,ศรีสาคร,แว้ง,สุคิริน,สุไหงโก-ลก,สุไหงปาดี,จะแนะ,เจาะไอร้อง
-น่าน:*,แม่จริม,บ้านหลวง,นาน้อย,ปัว,ท่าวังผา,เวียงสา,ทุ่งช้าง,เชียงกลาง,นาหมื่น,สันติสุข,บ่อเกลือ,สองแคว,ภูเพียง,เฉลิมพระเกียรติ
-บึงกาฬ:*,พรเจริญ,โซ่พิสัย,เซกา,ปากคาด,บึงโขงหลง,ศรีวิไล,บุ่งคล้า
-บุรีรัมย์:*,คูเมือง,กระสัง,นางรอง,หนองกี่,ละหานทราย,ประโคนชัย,บ้านกรวด,พุทไธสง,ลำปลายมาศ,สตึก,ปะคำ,นาโพธิ์,หนองหงส์,พลับพลาชัย,ห้วยราช,โนนสุวรรณ,ชำนิ,บ้านใหม่ไชยพจน์,โนนดินแดง,บ้านด่าน,แคนดง,เฉลิมพระเกียรติ
-ปทุมธานี:*,คลองหลวง,ธัญบุรี,หนองเสือ,ลาดหลุมแก้ว,ลำลูกกา,สามโคก
-ประจวบคีรีขันธ์:*,กุยบุรี,ทับสะแก,บางสะพาน,บางสะพานน้อย,ปราณบุรี,หัวหิน,สามร้อยยอด
-ปราจีนบุรี:*,กบินทร์บุรี,นาดี,บ้านสร้าง,ประจันตคาม,ศรีมหาโพธิ,ศรีมโหสถ
-ปัตตานี:*,โคกโพธิ์,หนองจิก,ปะนาเระ,มายอ,ทุ่งยางแดง,สายบุรี,ไม้แก่น,ยะหริ่ง,ยะรัง,กะพ้อ,แม่ลาน
-พระนครศรีอยุธยา:*,ท่าเรือ,นครหลวง,บางไทร,บางบาล,บางปะอิน,บางปะหัน,ผักไห่,ภาชี,ลาดบัวหลวง,วังน้อย,เสนา,บางซ้าย,อุทัย,มหาราช,บ้านแพรก
-พะเยา:*,จุน,เชียงคำ,เชียงม่วน,ดอกคำใต้,ปง,แม่ใจ,ภูซาง,ภูกามยาว
-พังงา:*,เกาะยาว,กะปง,ตะกั่วทุ่ง,ตะกั่วป่า,คุระบุรี,ทับปุด,ท้ายเหมือง
-พัทลุง:*,กงหรา,เขาชัยสน,ตะโหมด,ควนขนุน,ปากพะยูน,ศรีบรรพต,ป่าบอน,บางแก้ว,ป่าพะยอม,ศรีนครินทร์
-พิจิตร:*,วังทรายพูน,โพธิ์ประทับช้าง,ตะพานหิน,บางมูลนาก,โพทะเล,สามง่าม,ทับคล้อ,สากเหล็ก,บึงนาราง,ดงเจริญ,วชิรบารมี
-พิษณุโลก:*,นครไทย,ชาติตระการ,บางระกำ,บางกระทุ่ม,พรหมพิราม,วัดโบสถ์,วังทอง,เนินมะปราง
-เพชรบุรี:*,เขาย้อย,หนองหญ้าปล้อง,ชะอำ,ท่ายาง,บ้านลาด,บ้านแหลม,แก่งกระจาน
-เพชรบูรณ์:*,ชนแดน,หล่มสัก,หล่มเก่า,วิเชียรบุรี,ศรีเทพ,หนองไผ่,บึงสามพัน,น้ำหนาว,วังโป่ง,เขาค้อ
-แพร่:*,ร้องกวาง,ลอง,สูงเม่น,เด่นชัย,สอง,วังชิ้น,หนองม่วงไข่
-ภูเก็ต:*,กะทู้,ถลาง
-มหาสารคาม:*,แกดำ,โกสุมพิสัย,กันทรวิชัย,เชียงยืน,บรบือ,นาเชือก,พยัคฆภูมิพิสัย,วาปีปทุม,นาดูน,ยางสีสุราช,กุดรัง,ชื่นชม
-มุกดาหาร:*,นิคมคำสร้อย,ดอนตาล,ดงหลวง,คำชะอี,หว้านใหญ่,หนองสูง
-แม่ฮ่องสอน:*,ขุนยวม,ปาย,แม่สะเรียง,แม่ลาน้อย,สบเมย,ปางมะผ้า
-ยโสธร:*,ทรายมูล,กุดชุม,คำเขื่อนแก้ว,ป่าติ้ว,มหาชนะชัย,ค้อวัง,เลิงนกทา,ไทยเจริญ
-ยะลา:*,เบตง,บันนังสตา,ธารโต,ยะหา,รามัน,กาบัง,กรงปินัง
-ร้อยเอ็ด:*,เกษตรวิสัย,ปทุมรัตต์,จตุรพักตรพิมาน,ธวัชบุรี,พนมไพร,โพนทอง,โพธิ์ชัย,หนองพอก,เสลภูมิ,สุวรรณภูมิ,เมืองสรวง,โพนทราย,อาจสามารถ,เมยวดี,ศรีสมเด็จ,จังหาร,เชียงขวัญ,หนองฮี,ทุ่งเขาหลวง
-ระนอง:*,ละอุ่น,กะเปอร์,กระบุรี,สุขสำราญ
-ระยอง:*,บ้านฉาง,แกลง,วังจันทร์,บ้านค่าย,ปลวกแดง,เขาชะเมา,นิคมพัฒนา
-ราชบุรี:*,จอมบึง,สวนผึ้ง,ดำเนินสะดวก,บ้านโป่ง,บางแพ,โพธาราม,ปากท่อ,วัดเพลง,บ้านคา
-ลพบุรี:*,พัฒนานิคม,โคกสำโรง,ชัยบาดาล,ท่าวุ้ง,บ้านหมี่,ท่าหลวง,สระโบสถ์,โคกเจริญ,ลำสนธิ,หนองม่วง
-ลำปาง:*,แม่เมาะ,เกาะคา,เสริมงาม,งาว,แจ้ห่ม,วังเหนือ,เถิน,แม่พริก,แม่ทะ,สบปราบ,ห้างฉัตร,เมืองปาน
-ลำพูน:*,แม่ทา,บ้านโฮ่ง,ลี้,ทุ่งหัวช้าง,ป่าซาง,บ้านธิ,เวียงหนองล่อง
-เลย:*,นาด้วง,เชียงคาน,ปากชม,ด่านซ้าย,นาแห้ว,ภูเรือ,ท่าลี่,วังสะพุง,ภูกระดึง,ภูหลวง,ผาขาว,เอราวัณ,หนองหิน
-ศรีสะเกษ:*,ยางชุมน้อย,กันทรารมย์,กันทรลักษ์,ขุขันธ์,ไพรบึง,ปรางค์กู่,ขุนหาญ,ราษีไศล,อุทุมพรพิสัย,บึงบูรพ์,ห้วยทับทัน,โนนคูณ,ศรีรัตนะ,น้ำเกลี้ยง,วังหิน,ภูสิงห์,เมืองจันทร์,เบญจลักษ์,พยุห์,โพธิ์ศรีสุวรรณ,ศิลาลาด
-สกลนคร:*,กุสุมาลย์,กุดบาก,พรรณานิคม,พังโคน,วาริชภูมิ,นิคมน้ำอูน,วานรนิวาส,คำตากล้า,บ้านม่วง,อากาศอำนวย,สว่างแดนดิน,ส่องดาว,เต่างอย,โคกศรีสุพรรณ,เจริญศิลป์,โพนนาแก้ว,ภูพาน
-สงขลา:*,สทิงพระ,จะนะ,นาทวี,เทพา,สะบ้าย้อย,ระโนด,กระแสสินธุ์,รัตภูมิ,สะเดา,หาดใหญ่,นาหม่อม,ควนเนียง,บางกล่ำ,สิงหนคร,คลองหอยโข่ง
-สตูล:*,ควนโดน,ควนกาหลง,ท่าแพ,ละงู,ทุ่งหว้า,มะนัง
-สมุทรปราการ:*,บางบ่อ,บางพลี,พระประแดง,พระสมุทรเจดีย์,บางเสาธง
-สมุทรสงคราม:*,บางคนที,อัมพวา
-สมุทรสาคร:*,กระทุ่มแบน,บ้านแพ้ว
-สระแก้ว:*,คลองหาด,ตาพระยา,วังน้ำเย็น,วัฒนานคร,อรัญประเทศ,เขาฉกรรจ์,โคกสูง,วังสมบูรณ์
-สระบุรี:*,แก่งคอย,หนองแค,วิหารแดง,หนองแซง,บ้านหมอ,ดอนพุด,หนองโดน,พระพุทธบาท,เสาไห้,มวกเหล็ก,วังม่วง,เฉลิมพระเกียรติ
-สิงห์บุรี:*,บางระจัน,ค่ายบางระจัน,พรหมบุรี,ท่าช้าง,อินทร์บุรี
-สุโขทัย:*,บ้านด่านลานหอย,คีรีมาศ,กงไกรลาศ,ศรีสัชนาลัย,ศรีสำโรง,สวรรคโลก,ศรีนคร,ทุ่งเสลี่ยม
-สุพรรณบุรี:*,เดิมบางนางบวช,ด่านช้าง,บางปลาม้า,ศรีประจันต์,ดอนเจดีย์,สองพี่น้อง,สามชุก,อู่ทอง,หนองหญ้าไซ
-สุราษฎร์ธานี:*,กาญจนดิษฐ์,ดอนสัก,เกาะสมุย,เกาะพะงัน,ไชยา,ท่าชนะ,คีรีรัฐนิคม,บ้านตาขุน,พนม,ท่าฉาง,บ้านนาสาร,บ้านนาเดิม,เคียนซา,เวียงสระ,พระแสง,พุนพิน,ชัยบุรี,วิภาวดี
-สุรินทร์:*,ชุมพลบุรี,ท่าตูม,จอมพระ,ปราสาท,กาบเชิง,รัตนบุรี,สนม,ศีขรภูมิ,สังขะ,ลำดวน,สำโรงทาบ,บัวเชด,พนมดงรัก,ศรีณรงค์,เขวาสินรินทร์,โนนนารายณ์
-หนองคาย:*,ท่าบ่อ,โพนพิสัย,ศรีเชียงใหม่,สังคม,สระใคร,เฝ้าไร่,รัตนวาปี,โพธิ์ตาก
-หนองบัวลำภู:*,นากลาง,โนนสัง,ศรีบุญเรือง,สุวรรณคูหา,นาวัง
-อ่างทอง:*,ไชโย,ป่าโมก,โพธิ์ทอง,แสวงหา,วิเศษชัยชาญ,สามโก้
-อำนาจเจริญ:*,ชานุมาน,ปทุมราชวงศา,พนา,เสนางคนิคม,หัวตะพาน,ลืออำนาจ
-อุดรธานี:*,กุดจับ,หนองวัวซอ,กุมภวาปี,โนนสะอาด,หนองหาน,ทุ่งฝน,ไชยวาน,ศรีธาตุ,วังสามหมอ,บ้านดุง,บ้านผือ,น้ำโสม,เพ็ญ,สร้างคอม,หนองแสง,นายูง,พิบูลย์รักษ์,กู่แก้ว,ประจักษ์ศิลปาคม
-อุตรดิตถ์:*,ตรอน,ท่าปลา,น้ำปาด,ฟากท่า,บ้านโคก,พิชัย,ลับแล,ทองแสนขัน
-อุทัยธานี:*,ทัพทัน,สว่างอารมณ์,หนองฉาง,หนองขาหย่าง,บ้านไร่,ลานสัก,ห้วยคต
-อุบลราชธานี:*,ศรีเมืองใหม่,โขงเจียม,เขื่องใน,เขมราฐ,เดชอุดม,นาจะหลวย,น้ำยืน,บุณฑริก,ตระการพืชผล,กุดข้าวปุ้น,ม่วงสามสิบ,วารินชำราบ,พิบูลมังสาหาร,ตาลสุม,โพธิ์ไทร,สำโรง,ดอนมดแดง,สิรินธร,ทุ่งศรีอุดม,นาเยีย,นาตาล,เหล่าเสือโก้ก,สว่างวีระวงศ์,น้ำขุ่น`;
-const AMP = {};
-AMP_RAW.split("\n").forEach(l => { const i = l.indexOf(":"), p = l.slice(0, i); AMP[p] = l.slice(i + 1).split(",").map(x => x === "*" ? "เมือง" + p : x); });
-const AMP_P = Object.keys(AMP).sort((a, b) => a.localeCompare(b, "th")), BKK = "กรุงเทพมหานคร";
-let ampP = "เชียงใหม่";
-const ampDone = (p) => new Set(((data.__amp || {})[p] || []).filter(x => AMP[p].includes(x)));
-function ampSet(p, names){ const a = data.__amp = data.__amp || {}; if (names.length) a[p] = names; else delete a[p]; save(); renderAmp(); }
-function renderAmp(){
-  const sel = $("ampProv"), L = AMP[ampP], done = ampDone(ampP), u = ampP === BKK ? "เขต" : "อำเภอ";
-  if (!sel.options.length) sel.innerHTML = AMP_P.map(p => `<option>${esc(p)}</option>`).join("");
-  sel.value = ampP;
-  $("ampHead").textContent = `${ampP} · ไปแล้ว ${done.size}/${L.length} ${u}`;
-  $("ampBar").style.width = Math.round(done.size / L.length * 100) + "%";
-  const ps = PROVS[ampP]; $("ampParks").textContent = ps ? `จังหวัดนี้มีอุทยานแห่งชาติ ${ps.length} แห่ง (ได้ตราแล้ว ${ps.filter(isV).length})` : "";
-  $("ampList").innerHTML = L.map(n => `<button type="button" class="chip text-left" data-amp="${esc(n)}" aria-pressed="${done.has(n)}">${done.has(n) ? "✓ " : ""}${esc(n)}</button>`).join("");
-  let got = 0, tot = 0, pv = 0; AMP_P.forEach(p => { const d = ampDone(p).size; got += d; tot += AMP[p].length; if (d) pv++; });
-  $("ampTotal").textContent = `รวมทั้งประเทศ: ไปแล้ว ${got}/${tot} อำเภอ/เขต · เริ่มสะสมแล้ว ${pv}/${AMP_P.length} จังหวัด`;
-  $("ampAll").innerHTML = AMP_P.map(p => { const d = ampDone(p).size, n = AMP[p].length;
-    return `<button type="button" class="chip !px-2.5 !py-1 !text-xs${p === ampP ? " ring-2 ring-[#b8892f]" : ""}" data-ap="${esc(p)}" aria-pressed="${d === n}">${esc(p)} ${d ? d + "/" + n : ""}</button>`; }).join("");
-}
-$("ampProv").onchange = (e) => { ampP = e.target.value; renderAmp(); };
-$("ampList").onclick = (e) => { const b = e.target.closest("[data-amp]"); if (!b) return; const s = ampDone(ampP), n = b.dataset.amp; s.has(n) ? s.delete(n) : s.add(n); ampSet(ampP, AMP[ampP].filter(x => s.has(x))); };
-$("ampAll").onclick = (e) => { const b = e.target.closest("[data-ap]"); if (!b) return; ampP = b.dataset.ap; renderAmp(); $("ampProv").scrollIntoView({block:"center"}); };
-$("ampSelAll").onclick = () => ampSet(ampP, AMP[ampP].slice());
-$("ampClear").onclick = () => { if (ampDone(ampP).size && confirm("ล้างการติ๊กของจังหวัดนี้ทั้งหมด?")) ampSet(ampP, []); };
 
 /* ---------- เริ่มต้น ---------- */
 ensureAdmin();
