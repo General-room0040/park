@@ -72,6 +72,9 @@
   .rg{border:1px solid #d6d3c8;background:#fff;border-radius:14px;padding:10px 8px;text-align:center;font-weight:700;cursor:pointer;line-height:1.3}.rg .e{font-size:1.7rem;display:block}.rg small{display:block;font-weight:500;color:#78716c}.rg[aria-pressed=true]{background:#1f3a2e;color:#fff;border-color:#1f3a2e}.rg[aria-pressed=true] small{color:#d9e6d3}
   .pv{border:1px solid #d6d3c8;background:#fff;border-radius:12px;padding:8px 10px;text-align:left;cursor:pointer;font-weight:600}.pv small{display:block;font-weight:500;color:#78716c}.pv i{display:block;height:4px;border-radius:4px;background:#e7e5df;margin-top:4px;overflow:hidden}.pv i b{display:block;height:100%;background:#4f7a3a}.pv[aria-pressed=true]{border-color:#4f7a3a;background:#eaf3e3}
   .rgb{position:relative;border-radius:16px;overflow:hidden;height:130px;margin-bottom:8px}.rgb svg{width:100%;height:100%;display:block}.rgb span{position:absolute;left:14px;bottom:8px;color:#fff;font-weight:800;font-size:1.5rem;text-shadow:0 1px 6px rgba(0,0,0,.55)}
+  .dcard{border-radius:20px;overflow:hidden;border:1px solid #d6d3c8;background:#fffefb}.dhero{height:150px;background:linear-gradient(135deg,#1f3a2e,#4f7a3a) center/cover;position:relative;display:flex;align-items:flex-end}.dhero:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 30%,rgba(0,0,0,.6))}.dhl{position:relative;z-index:1;padding:14px 16px;color:#fff}.dhl small{display:block;opacity:.9}.dhl b{font-size:1.7rem;line-height:1.2}
+  .dbody{padding:16px;display:grid;gap:16px;font-size:.95rem;line-height:1.8;color:#44403c}.dbody p{margin:0 0 6px}.dsec h4{font-weight:800;margin-bottom:6px;font-size:1.05rem}.dgh{font-weight:700;margin:12px 0 6px;color:#4f7a3a}
+  .dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}.dit{border:1px solid #e7e5df;border-radius:14px;overflow:hidden;background:#fff;display:flex;flex-direction:column}.dit[hidden]{display:none}.dim{height:84px;background:#eef1e8;display:grid;place-items:center;font-size:2rem}.dim img{width:100%;height:100%;object-fit:cover}.dnm{padding:6px 8px 2px;font-weight:600;line-height:1.35;font-size:.88rem}.dit a{padding:0 8px 8px;font-size:.78rem;color:#4f7a3a;text-decoration:underline}
   .dlbl{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;font-size:11px;font-weight:700;color:#1f3a2e;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;pointer-events:none}.dlw{background:none;border:0}
    .mapcard{text-align:left;border-radius:1rem;border:1px solid #d6d3d1;background:#fff;padding:.8rem .9rem}
   .mapcard:hover{border-color:#4f7a3a}
@@ -1767,22 +1770,59 @@ function parseInfo(tx){
   const pick = (re) => secs.find(x => re.test(x.h) && x.b);
   return {intro:P[0].trim(), tour:tour.trim(), more:[["📜 ประวัติ", pick(/ประวัติ/)], ["⛰️ ภูมิศาสตร์", pick(/ภูมิศาสตร์/)], ["👥 ประชากร / การปกครอง", pick(/ประชากร|การปกครอง/)]].filter(x => x[1])};
 }
+const ICONS = [[/วัด|พระธาตุ|เจดีย์|สถูป|โบสถ์|วิหาร|ศาล/, "🛕"], [/น้ำตก|น้ำพุ|ธาร/, "💧"], [/อุทยาน|ป่า|เขตรักษา/, "🌲"], [/ถ้ำ/, "🕳️"], [/ดอย|ภู|เขา|ยอด|ผา/, "⛰️"], [/ตลาด|ถนนคนเดิน|ห้าง/, "🛍️"], [/พิพิธภัณฑ์|อนุสาวรีย์|อนุสรณ์|วัง|โบราณสถาน|กำแพง|เมืองเก่า|หอ/, "🏛️"], [/หาด|เกาะ|ทะเล|แหลม|อ่าว/, "🏖️"], [/เขื่อน|อ่างเก็บน้ำ|ทะเลสาบ|บึง|หนอง|แม่น้ำ|คลอง|แก่ง|สะพาน/, "🌊"], [/สวน|ไร่|ฟาร์ม/, "🌿"]];
+const iconOf = (n) => (ICONS.find(x => x[0].test(n)) || [0, "📍"])[1];
+const cleanN = (n) => n.replace(/\s*[(（].*$/, "").replace(/\s*[-–:].*$/, "").trim();
+function tourParts(t){
+  const G = []; let g = {h:"", items:[], prose:[]}; G.push(g);
+  t.split("\n").forEach(l => { l = l.trim(); if (!l) return; if (l[0] === "▸") { g = {h:l.slice(1).trim(), items:[], prose:[]}; G.push(g); return; }
+    l = l.replace(/^[-•*·]\s*/, ""); (l.length <= 60 ? g.items : g.prose).push(l); });
+  return G.filter(x => x.items.length || x.prose.length);
+}
+async function thumbs(names, prov, dn){
+  const out = {};
+  for (let i = 0; i < names.length; i += 20) {
+    const b = names.slice(i, i + 20); let d;
+    try { d = await wj("action=query&redirects=1&prop=pageimages|extracts&piprop=thumbnail&pithumbsize=480&exintro=1&explaintext=1&exlimit=20&titles=" + encodeURIComponent(b.join("|"))); } catch(e){ continue; }
+    const q = d.query || {}, mp = {}, pg = {};
+    (q.normalized || []).forEach(x => mp[x.from] = x.to); (q.redirects || []).forEach(x => mp[x.from] = x.to);
+    Object.values(q.pages || {}).forEach(p => pg[p.title] = p);
+    b.forEach(n => { let t = mp[n] || n; t = mp[t] || t; const p = pg[t]; if (p && p.thumbnail && p.extract && (p.extract.indexOf(prov) >= 0 || p.extract.indexOf(dn) >= 0)) out[n] = {src:p.thumbnail.source, title:p.title}; });
+  }
+  return out;
+}
 async function showInfo(name){
-  const prov = DS.prov, box = $("dInfo"), gq = "https://www.google.com/search?q=" + encodeURIComponent("ที่เที่ยว " + (prov === "กรุงเทพมหานคร" ? "เขต" : "อำเภอ") + name + " " + prov);
-  box.innerHTML = '<div class="rounded-2xl border border-stone-300 bg-white/80 p-4 text-sm text-stone-600">กำลังหาข้อมูลอำเภอ' + esc(name) + "…</div>";
-  box.scrollIntoView({behavior:"smooth", block:"nearest"});
-  let r; try { r = await loadInfo(prov, name); } catch(e){ box.innerHTML = '<div class="rounded-2xl border border-stone-300 bg-white/80 p-4 text-sm">โหลดข้อมูลไม่ได้ในตอนนี้ (ต้องต่อเน็ต) · <a class="underline" target="_blank" rel="noopener" href="' + gq + '">ค้นหาที่เที่ยวใน Google</a></div>'; return; }
-  if (DS.prov !== prov) return;
-  if (!r.text) { box.innerHTML = '<div class="rounded-2xl border border-stone-300 bg-white/80 p-4 text-sm">ยังไม่พบบทความของอำเภอ' + esc(name) + " ในวิกิพีเดีย · <a class=\"underline\" target=\"_blank\" rel=\"noopener\" href=\"" + gq + '">ค้นหาที่เที่ยวใน Google</a></div>'; return; }
-  const p = parseInfo(r.text), pre = 'style="white-space:pre-line;line-height:1.7"';
-  box.innerHTML = '<div class="rounded-2xl border border-stone-300 bg-white/80 p-4 grid gap-3 text-sm text-stone-700"><div class="serif text-lg font-bold">📖 ' + esc(r.title) + "</div>"
-    + (p.intro ? "<div " + pre + ">" + esc(cut(p.intro, 700)) + "</div>" : "")
-    + '<div><b>🎯 ที่เที่ยวและสถานที่สำคัญ</b><div ' + pre + ' class="mt-1">' + (p.tour ? esc(cut(p.tour, 1400)) : 'บทความยังไม่มีหัวข้อสถานที่ท่องเที่ยว · <a class="underline" target="_blank" rel="noopener" href="' + gq + '">ค้นหาใน Google</a>') + "</div></div>"
-    + p.more.map(m => "<details><summary class=\"font-bold cursor-pointer\">" + m[0] + "</summary><div " + pre + ' class="mt-1">' + esc(cut(m[1].b, 800)) + "</div></details>").join("")
-    + '<div class="text-xs text-stone-500">ข้อมูลจากวิกิพีเดียภาษาไทย (CC BY-SA) อาจไม่ครบหรือไม่ล่าสุด · <a class="underline" target="_blank" rel="noopener" href="https://th.wikipedia.org/wiki/' + encodeURIComponent(r.title) + '">อ่านบทความเต็ม</a></div></div>';
+  const prov = DS.prov, box = $("dInfo"), bkk = prov === "กรุงเทพมหานคร", label = (bkk ? "เขต" : "อำเภอ") + name, key = dKey(prov, name), tok = DS.tok = {};
+  const gq = "https://www.google.com/search?q=" + encodeURIComponent("ที่เที่ยว " + label + " " + prov), gm = (q) => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
+  const msg = (h) => { box.innerHTML = '<div class="dcard"><div class="dbody">' + h + "</div></div>"; };
+  msg("กำลังหาข้อมูล" + esc(label) + "…"); box.scrollIntoView({behavior:"smooth", block:"nearest"});
+  let r; try { r = await loadInfo(prov, name); } catch(e){ msg('โหลดข้อมูลไม่ได้ในตอนนี้ (ต้องต่อเน็ต) · <a class="underline" target="_blank" rel="noopener" href="' + gq + '">ค้นหาที่เที่ยวใน Google</a>'); return; }
+  if (DS.tok !== tok) return;
+  if (!r.text) { msg("ยังไม่พบบทความของ" + esc(label) + ' ในวิกิพีเดีย · <a class="underline" target="_blank" rel="noopener" href="' + gq + '">ค้นหาที่เที่ยวใน Google</a>'); return; }
+  const p = parseInfo(r.text), on = ampSet().has(key), G = tourParts(p.tour), names = [];
+  const intro = p.intro.replace(/\([^()]*:\s*\)/g, "").replace(/\(\s*\)/g, "").replace(/[ \t]{2,}/g, " ").trim().split("\n").filter(x => x.trim()).map(x => "<p>" + esc(cut(x, 600)) + "</p>").join("");
+  let idx = 0, hid = 0;
+  const tour = G.map(g => (g.h ? '<div class="dgh">' + esc(g.h) + "</div>" : "")
+    + (g.items.length ? '<div class="dgrid">' + g.items.map(it => { const n = cleanN(it), lb = it.length > 48 ? cut(it, 48) : it, h = idx >= 12; idx++; if (h) hid++; if (names.length < 24 && n && !names.includes(n)) names.push(n);
+        return '<div class="dit' + (h ? " dx" : "") + '"' + (h ? " hidden" : "") + ' data-n="' + esc(n) + '"><div class="dim">' + iconOf(n) + '</div><div class="dnm">' + esc(lb) + '</div><a target="_blank" rel="noopener" href="' + gm(n + " " + label + " " + prov) + '">📍 ดูแผนที่</a></div>'; }).join("") + "</div>" : "")
+    + g.prose.map(x => "<p>" + esc(cut(x, 500)) + "</p>").join("")).join("");
+  box.innerHTML = '<div class="dcard"><div id="dHero" class="dhero"><div class="dhl"><small>' + esc(prov) + '</small><b class="serif">' + esc(label) + "</b></div></div><div class=\"dbody\">"
+    + '<div class="flex flex-wrap gap-2"><button class="chip" data-tick="' + esc(key) + '" aria-pressed="' + on + '">' + (on ? "✓ ไปมาแล้ว" : "ติ๊กว่าไปมาแล้ว") + '</button><a class="chip" target="_blank" rel="noopener" href="' + gm(label + " " + prov) + '">📍 ดูในแผนที่</a></div>'
+    + '<div class="dsec"><h4>📖 เกี่ยวกับ' + esc(label) + "</h4>" + (intro || "<p>—</p>") + "</div>"
+    + '<div class="dsec"><h4>🎯 ที่เที่ยวและสถานที่สำคัญ</h4>' + (tour || '<p>บทความยังไม่มีหัวข้อสถานที่ท่องเที่ยว · <a class="underline" target="_blank" rel="noopener" href="' + gq + '">ค้นหาใน Google</a></p>') + (hid ? '<button class="chip mt-3" data-more="1">ดูสถานที่เพิ่ม (' + hid + ")</button>" : "") + "</div>"
+    + p.more.map(m => '<details class="dsec"><summary class="font-bold cursor-pointer">' + m[0] + "</summary>" + cut(m[1].b, 800).split("\n").filter(x => x.trim()).map(x => "<p>" + esc(x) + "</p>").join("") + "</details>").join("")
+    + '<div class="text-xs text-stone-500">ข้อมูลและรูปจากวิกิพีเดียภาษาไทย (CC BY-SA) อาจไม่ครบหรือไม่ล่าสุด · รูปแสดงเฉพาะบทความที่ตรวจแล้วว่าเกี่ยวกับจังหวัดนี้ · <a class="underline" target="_blank" rel="noopener" href="https://th.wikipedia.org/wiki/' + encodeURIComponent(r.title) + '">อ่านบทความเต็ม</a></div></div></div>';
+  if (!names.length) return;
+  const T = await thumbs(names, prov, name); if (DS.tok !== tok) return;
+  let hero = "";
+  box.querySelectorAll(".dit").forEach(el => { const t = T[el.dataset.n]; if (!t) return; el.querySelector(".dim").innerHTML = '<img loading="lazy" alt="" src="' + esc(t.src) + '">'; if (!hero) hero = t.src; });
+  if (hero) $("dHero").style.backgroundImage = "linear-gradient(135deg,#1f3a2e,#4f7a3a)," + 'url("' + hero.replace(/"/g, "%22") + '")', $("dHero").style.backgroundImage = 'url("' + hero.replace(/"/g, "%22") + '")';
 }
 $("tabDist").addEventListener("click", e => { const r = e.target.closest("[data-reg]"), p = e.target.closest("[data-prov]"), f = e.target.closest("[data-info]");
   if (f) { showInfo(f.dataset.info); return; }
+  const tk = e.target.closest("[data-tick]"), mo = e.target.closest("[data-more]");
+  if (tk) { ampToggle(tk.dataset.tick); const o = ampSet().has(tk.dataset.tick); tk.setAttribute("aria-pressed", o); tk.textContent = o ? "✓ ไปมาแล้ว" : "ติ๊กว่าไปมาแล้ว"; renderDist(); return; }
+  if (mo) { $("dInfo").querySelectorAll(".dx").forEach(x => x.hidden = false); mo.remove(); return; }
   if (r) { DS.reg = r.dataset.reg; if (!(REG.find(x => x.n === DS.reg).P.includes(DS.prov))) { DS.prov = ""; $("dInfo").innerHTML = ""; } renderDist(); }
   else if (p) { DS.prov = p.dataset.prov; $("dInfo").innerHTML = ""; renderDist(); setTimeout(() => $("dHead").scrollIntoView({behavior:"smooth", block:"start"}), 80); } });
 $("dList").addEventListener("click", e => { const b = e.target.closest("[data-amp]"); if (b) { ampToggle(b.dataset.amp); renderDist(); } });
