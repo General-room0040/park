@@ -69,7 +69,7 @@
   /* แผนที่ (Leaflet) */
   .leaflet-container img.leaflet-tile,.leaflet-container .leaflet-pane img{max-width:none!important;max-height:none!important}
   #mapBox{isolation:isolate}
-  .dtip{background:transparent;border:0;box-shadow:none;font-size:11px;font-weight:600;color:#1f3a2e;text-shadow:0 0 3px #fff,0 0 3px #fff;padding:0}.dtip:before{display:none}
+  .dlbl{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;font-size:11px;font-weight:700;color:#1f3a2e;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;pointer-events:none}.dlw{background:none;border:0}
    .mapcard{text-align:left;border-radius:1rem;border:1px solid #d6d3d1;background:#fff;padding:.8rem .9rem}
   .mapcard:hover{border-color:#4f7a3a}
   .mapcard[aria-pressed="true"]{border-color:#4f7a3a;box-shadow:0 0 0 2px #4f7a3a inset;background:#f3f8ec}
@@ -1715,8 +1715,11 @@ async function renderDist(){
   DS.layer.clearLayers();
   const gl = Lf.geoJSON({type:"FeatureCollection", features:F}, {
     style: f => { const on = S.has(k(f)); return {color:"#1f3a2e", weight:1.2, fillColor:on ? "#4f7a3a" : "#ffffff", fillOpacity:on ? .75 : .85}; },
-    onEachFeature: (f, ly) => { ly.bindTooltip(f.properties.a, {permanent:true, direction:"center", className:"dtip"}); ly.on("click", () => { ampToggle(k(f)); renderDist(); }); }
+    onEachFeature: (f, ly) => { ly.on("click", () => { ampToggle(k(f)); renderDist(); }); }
   }).addTo(DS.layer);
+  F.forEach(f => { const g = f.geometry, P = g.type === "Polygon" ? [g.coordinates] : g.coordinates; let best = null, ba = -1;
+    P.forEach(pl => { const r = pl[0]; let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; r.forEach(c => { x0 = Math.min(x0, c[0]); x1 = Math.max(x1, c[0]); y0 = Math.min(y0, c[1]); y1 = Math.max(y1, c[1]); }); const a = (x1 - x0) * (y1 - y0); if (a > ba) { ba = a; best = [(y0 + y1) / 2, (x0 + x1) / 2]; } });
+    if (best) Lf.marker(best, {interactive:false, keyboard:false, icon:Lf.divIcon({className:"dlw", html:'<span class="dlbl">' + esc(f.properties.a) + '</span>', iconSize:[0, 0]})}).addTo(DS.layer); });
   setTimeout(() => { DS.map.invalidateSize(); DS.map.fitBounds(gl.getBounds(), {padding:[8, 8]}); }, 60);
 }
 $("dProv").addEventListener("change", e => { DS.prov = e.target.value; renderDist(); });
