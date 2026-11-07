@@ -232,7 +232,7 @@
   <div><h2 class="serif text-2xl font-extrabold">📍 แผนที่อำเภอที่ไปมาแล้ว</h2><p class="text-sm text-stone-500 mt-1">เลือกจังหวัด แล้วแตะชื่ออำเภอเพื่อติ๊กว่าไปมาแล้ว · เป็นข้อมูลของคุณคนเดียว ไม่นับเป็นอันดับ ไม่แสดงให้คนอื่นเห็น</p></div>
   <div class="flex flex-wrap items-center gap-3"><select id="dProv" class="field !w-auto min-w-[14rem]" aria-label="เลือกจังหวัด"><option value="">— เลือกจังหวัด —</option></select><div id="dSum" class="text-sm text-stone-600"></div></div>
   <div id="dMsg" class="text-sm text-stone-600"></div>
-  <div id="dMap" class="rounded-2xl overflow-hidden border border-stone-300" style="height:min(60dvh,30rem);background:#eef1e8" hidden></div>
+  <div id="dWrap" class="relative rounded-2xl overflow-hidden border border-stone-300" hidden><div id="dTitle" class="serif" aria-hidden="true" style="position:absolute;z-index:500;left:14px;top:8px;pointer-events:none;font-size:clamp(1.6rem,6vw,2.4rem);font-weight:800;color:#fff;-webkit-text-stroke:6px #1f3a2e;paint-order:stroke fill;line-height:1.2"></div><div id="dMap" style="height:min(60dvh,30rem);background:#eef1e8"></div></div>
   <div id="dList" class="flex flex-wrap gap-2"></div>
   </section>
 
@@ -1704,13 +1704,13 @@ async function renderDist(){
   $("dSum").textContent = "ไปมาแล้ว " + keys.reduce((a, p) => a + cnt(p), 0) + " / " + dTotal + " อำเภอทั่วไทย";
   const L = DIST[DS.prov] || [];
   $("dList").innerHTML = L.map(n => { const on = S.has(dKey(DS.prov, n)); return `<button class="chip" data-amp="${esc(dKey(DS.prov, n))}" aria-pressed="${on}">${on ? "✓ " : ""}${esc(n)}</button>`; }).join("");
-  const box = $("dMap"); box.hidden = true;
+  const box = $("dMap"), wrap = $("dWrap"); wrap.hidden = true;
   if (!L.length) return;
   $("dMsg").textContent = DS.geo || DS.tried ? "" : "กำลังโหลดรูปแผนที่…";
   const geo = await loadDistGeo(); $("dMsg").textContent = geo ? "" : "โหลดรูปแผนที่ไม่ได้ในตอนนี้ แสดงเป็นรายชื่ออำเภอแทน"; if (!geo || V.tab !== "dist" || DS.prov !== (L.length ? DS.prov : "")) return;
   const F = geo.filter(f => f.properties.v === DS.prov && L.includes(f.properties.a)); if (!F.length) return;
   try { await loadLeaflet(); } catch(e){ return; }
-  box.hidden = false; const Lf = window.L, k = (f) => dKey(DS.prov, f.properties.a);
+  wrap.hidden = false; $("dTitle").textContent = DS.prov; const Lf = window.L, k = (f) => dKey(DS.prov, f.properties.a);
   if (!DS.map) { DS.map = Lf.map(box, {zoomControl:true, attributionControl:false}); DS.layer = Lf.layerGroup().addTo(DS.map); }
   DS.layer.clearLayers();
   const gl = Lf.geoJSON({type:"FeatureCollection", features:F}, {
