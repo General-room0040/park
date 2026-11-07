@@ -1685,17 +1685,17 @@ const DIST_RAW = `กรุงเทพมหานคร|พระนคร,ด
 อุทัยธานี|เมืองอุทัยธานี,ทัพทัน,สว่างอารมณ์,หนองฉาง,หนองขาหย่าง,บ้านไร่,ลานสัก,ห้วยคต
 อุบลราชธานี|เมืองอุบลราชธานี,ศรีเมืองใหม่,โขงเจียม,เขื่องใน,เขมราฐ,เดชอุดม,นาจะหลวย,น้ำยืน,บุณฑริก,ตระการพืชผล,กุดข้าวปุ้น,พิบูลมังสาหาร,ม่วงสามสิบ,วารินชำราบ,สิรินธร,ทุ่งศรีอุดม,นาเยีย,นาตาล,เหล่าเสือโก้ก,สว่างวีระวงศ์,น้ำขุ่น,ดอนมดแดง,ตาลสุม,โพธิ์ไทร,สำโรง`;
 const DIST = {}; DIST_RAW.split("\n").forEach(l => { const i = l.indexOf("|"); DIST[l.slice(0, i)] = l.slice(i + 1).split(","); });
-const DIST_URLS = ["amphoe.geojson"];
+const DIST_URLS = ["amphoe.geojson", "https://raw.githubusercontent.com/chingchai/OpenGISData-Thailand/master/districts.geojson", "https://cdn.jsdelivr.net/gh/chingchai/OpenGISData-Thailand@master/districts.geojson"];
 const DS = {geo:null, prov:"", map:null, layer:null, tried:false};
 const dKey = (p, n) => p + "|" + n, dTotal = Object.values(DIST).reduce((a, L) => a + L.length, 0);
 const dClean = (s) => String(s || "").replace(/^(อำเภอ|เขต)/, "").trim();
-const gp = (o, k) => o[k] != null ? o[k] : o[k.toUpperCase()];
+const gA = (p) => dClean(p.amp_th || p.adm2_th || p.AMP_TH), gV = (p) => dClean(p.pro_th || p.adm1_th || p.PRO_TH);
 const ampSet = () => new Set(Array.isArray(data._amp) ? data._amp : []);
 function ampToggle(k){ const S = ampSet(); S.has(k) ? S.delete(k) : S.add(k); data._amp = [...S]; save(); }
 async function loadDistGeo(){
   if (DS.tried) return DS.geo; DS.tried = true;
   for (const u of DIST_URLS) { try { const r = await fetch(u); if (!r.ok) continue; const j = await r.json();
-    if (j && Array.isArray(j.features) && j.features.length > 100 && gp(j.features[0].properties, "adm2_th")) { DS.geo = j.features; break; } } catch(e){} }
+    if (j && Array.isArray(j.features) && j.features.length > 100 && gA(j.features[0].properties)) { DS.geo = j.features.map(f => ({type:"Feature", geometry:f.geometry, properties:{a:gA(f.properties), v:gV(f.properties)}})); break; } } catch(e){} }
   return DS.geo;
 }
 async function renderDist(){
@@ -1706,15 +1706,16 @@ async function renderDist(){
   $("dList").innerHTML = L.map(n => { const on = S.has(dKey(DS.prov, n)); return `<button class="chip" data-amp="${esc(dKey(DS.prov, n))}" aria-pressed="${on}">${on ? "✓ " : ""}${esc(n)}</button>`; }).join("");
   const box = $("dMap"); box.hidden = true;
   if (!L.length) return;
-  const geo = await loadDistGeo(); if (!geo || V.tab !== "dist") return;
-  const F = geo.filter(f => dClean(gp(f.properties, "adm1_th")) === DS.prov && L.includes(dClean(gp(f.properties, "adm2_th")))); if (!F.length) return;
+  $("dMsg").textContent = DS.geo || DS.tried ? "" : "กำลังโหลดรูปแผนที่…";
+  const geo = await loadDistGeo(); $("dMsg").textContent = geo ? "" : "โหลดรูปแผนที่ไม่ได้ในตอนนี้ แสดงเป็นรายชื่ออำเภอแทน"; if (!geo || V.tab !== "dist" || DS.prov !== (L.length ? DS.prov : "")) return;
+  const F = geo.filter(f => f.properties.v === DS.prov && L.includes(f.properties.a)); if (!F.length) return;
   try { await loadLeaflet(); } catch(e){ return; }
-  box.hidden = false; const Lf = window.L, k = (f) => dKey(DS.prov, dClean(gp(f.properties, "adm2_th")));
+  box.hidden = false; const Lf = window.L, k = (f) => dKey(DS.prov, f.properties.a);
   if (!DS.map) { DS.map = Lf.map(box, {zoomControl:true, attributionControl:false}); DS.layer = Lf.layerGroup().addTo(DS.map); }
   DS.layer.clearLayers();
   const gl = Lf.geoJSON({type:"FeatureCollection", features:F}, {
     style: f => { const on = S.has(k(f)); return {color:"#1f3a2e", weight:1.2, fillColor:on ? "#4f7a3a" : "#ffffff", fillOpacity:on ? .75 : .85}; },
-    onEachFeature: (f, ly) => { ly.bindTooltip(dClean(gp(f.properties, "adm2_th")), {permanent:true, direction:"center", className:"dtip"}); ly.on("click", () => { ampToggle(k(f)); renderDist(); }); }
+    onEachFeature: (f, ly) => { ly.bindTooltip(f.properties.a, {permanent:true, direction:"center", className:"dtip"}); ly.on("click", () => { ampToggle(k(f)); renderDist(); }); }
   }).addTo(DS.layer);
   setTimeout(() => { DS.map.invalidateSize(); DS.map.fitBounds(gl.getBounds(), {padding:[8, 8]}); }, 60);
 }
