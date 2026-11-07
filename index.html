@@ -236,7 +236,7 @@
   <div class="rounded-2xl border border-stone-300 bg-white/70 p-4 grid gap-2 text-sm text-stone-700">
     <div class="font-bold">🧭 วิธีใช้</div>
     <div><b>① เลือกภาค</b> ด้านล่าง → <b>② เลือกจังหวัด</b> → <b>③ แตะชื่ออำเภอ</b> (บนแผนที่หรือในรายการ) ที่เคยไป</div>
-    <div class="flex flex-wrap gap-x-4 gap-y-1"><span><span style="display:inline-block;width:14px;height:14px;border-radius:4px;background:#4f7a3a;vertical-align:-2px"></span> ไปมาแล้ว</span><span><span style="display:inline-block;width:14px;height:14px;border-radius:4px;background:#fff;border:1px solid #1f3a2e;vertical-align:-2px"></span> ยังไม่เคยไป</span><span>แตะซ้ำเพื่อยกเลิก</span></div>
+    <div class="flex flex-wrap gap-x-4 gap-y-1"><span><span style="display:inline-block;width:14px;height:14px;border-radius:4px;background:#4f7a3a;vertical-align:-2px"></span> ไปมาแล้ว</span><span><span style="display:inline-block;width:14px;height:14px;border-radius:4px;background:#fff;border:1px solid #1f3a2e;vertical-align:-2px"></span> ยังไม่เคยไป</span><span>แตะซ้ำเพื่อยกเลิก</span><span>ⓘ = ดูที่เที่ยวและข้อมูลของอำเภอ</span></div>
   </div>
   <div id="dSum" class="text-sm text-stone-700"></div>
   <div id="dRegs" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2"></div>
@@ -246,6 +246,7 @@
   <div id="dMsg" class="text-sm text-stone-600"></div>
   <div id="dWrap" class="relative rounded-2xl overflow-hidden border border-stone-300" hidden><div id="dTitle" class="serif" aria-hidden="true" style="position:absolute;z-index:500;left:14px;top:8px;pointer-events:none;font-size:clamp(1.6rem,6vw,2.4rem);font-weight:800;color:#fff;-webkit-text-stroke:6px #1f3a2e;paint-order:stroke fill;line-height:1.2"></div><div id="dMap" style="height:min(60dvh,30rem);background:#eef1e8"></div></div>
   <div id="dList" class="flex flex-wrap gap-2"></div>
+  <div id="dInfo"></div>
 </section>
 
 <!-- ===== แท็บ: ประชาสัมพันธ์ ===== -->
@@ -1721,7 +1722,7 @@ async function renderDist(){
   $("dProvs").innerHTML = R ? R.P.slice().sort((a, b) => a.localeCompare(b, "th")).map(p => `<button class="pv" data-prov="${esc(p)}" aria-pressed="${p === DS.prov}">${esc(p)}<small>${cnt(p)}/${DIST[p].length} อำเภอ</small><i><b style="width:${cnt(p) / DIST[p].length * 100}%"></b></i></button>`).join("") : "";
   const L = DIST[DS.prov] || [];
   $("dHead").hidden = !L.length; $("dHead").textContent = L.length ? "อำเภอใน" + (DS.prov === "กรุงเทพมหานคร" ? "" : "จังหวัด") + DS.prov + " · " + cnt(DS.prov) + "/" + L.length : "";
-  $("dList").innerHTML = L.map(n => { const on = S.has(dKey(DS.prov, n)); return `<button class="chip" data-amp="${esc(dKey(DS.prov, n))}" aria-pressed="${on}">${on ? "✓ " : ""}${esc(n)}</button>`; }).join("");
+  $("dList").innerHTML = L.map(n => { const on = S.has(dKey(DS.prov, n)); return `<span style="display:inline-flex;gap:3px"><button class="chip" data-amp="${esc(dKey(DS.prov, n))}" aria-pressed="${on}">${on ? "✓ " : ""}${esc(n)}</button><button class="chip" data-info="${esc(n)}" aria-label="ดูข้อมูลอำเภอ${esc(n)}" title="ดูที่เที่ยวและข้อมูล">ⓘ</button></span>`; }).join("");
   const box = $("dMap"), wrap = $("dWrap"); wrap.hidden = true;
   if (!L.length) return;
   $("dMsg").textContent = DS.geo || DS.tried ? "" : "กำลังโหลดรูปแผนที่…";
@@ -1740,9 +1741,50 @@ async function renderDist(){
     if (best) Lf.marker(best, {interactive:false, keyboard:false, icon:Lf.divIcon({className:"dlw", html:'<span class="dlbl">' + esc(f.properties.a) + '</span>', iconSize:[0, 0]})}).addTo(DS.layer); });
   setTimeout(() => { DS.map.invalidateSize(); DS.map.fitBounds(gl.getBounds(), {padding:[8, 8]}); }, 60);
 }
-$("tabDist").addEventListener("click", e => { const r = e.target.closest("[data-reg]"), p = e.target.closest("[data-prov]");
-  if (r) { DS.reg = r.dataset.reg; if (!(REG.find(x => x.n === DS.reg).P.includes(DS.prov))) DS.prov = ""; renderDist(); }
-  else if (p) { DS.prov = p.dataset.prov; renderDist(); setTimeout(() => $("dHead").scrollIntoView({behavior:"smooth", block:"start"}), 80); } });
+
+/* ---------- ข้อมูลอำเภอ: ที่เที่ยวและข้อมูลทั่วไป ดึงจากวิกิพีเดียภาษาไทยตอนกดปุ่ม ⓘ (CC BY-SA) ---------- */
+const DINFO = {};
+const wj = async (p) => { const r = await fetch("https://th.wikipedia.org/w/api.php?format=json&origin=*&" + p); if (!r.ok) throw new Error("net"); return r.json(); };
+async function loadInfo(prov, name){
+  const key = dKey(prov, name); if (DINFO[key]) return DINFO[key];
+  const bkk = prov === "กรุงเทพมหานคร", q = (bkk ? "เขต" + name + " " : "อำเภอ" + name + " จังหวัด") + prov;
+  const sr = await wj("action=query&list=search&srlimit=5&srsearch=" + encodeURIComponent(q));
+  const cands = (((sr.query || {}).search) || []).map(x => x.title).filter(t => t.indexOf(name) >= 0 && /^(อำเภอ|เขต)/.test(t));
+  for (const t of cands) {
+    const d = await wj("action=query&prop=extracts&explaintext=1&exlimit=1&redirects=1&titles=" + encodeURIComponent(t));
+    const pg = Object.values((d.query || {}).pages || {})[0], tx = (pg && pg.extract) || "";
+    if (tx.length > 80 && tx.indexOf(prov) >= 0) return DINFO[key] = {title:pg.title, text:tx};
+  }
+  return DINFO[key] = {title:"", text:""};
+}
+const cut = (t, n) => { if (t.length <= n) return t; const c = t.slice(0, n), i = Math.max(c.lastIndexOf("\n"), c.lastIndexOf(" ")); return c.slice(0, i > n * .6 ? i : n).trim() + " …"; };
+function parseInfo(tx){
+  const P = tx.split(/\n={2,}\s*(.+?)\s*={2,}\s*\n/), secs = [];
+  for (let i = 1; i < P.length; i += 2) secs.push({h:P[i], b:(P[i + 1] || "").replace(/^=+\s*(.+?)\s*=+\s*$/gm, "▸ $1").trim()});
+  const stop = /ประชากร|เศรษฐกิจ|การศึกษา|การคมนาคม|สาธารณสุข|อ้างอิง|แหล่งข้อมูล|ดูเพิ่ม|การปกครอง|ประวัติ|ภูมิศาสตร์|หมายเหตุ/;
+  let tour = "", ti = secs.findIndex(x => /ท่องเที่ยว|สถานที่สำคัญ|สถานที่น่าสนใจ|แหล่งท่องเที่ยว/.test(x.h));
+  if (ti >= 0) { tour = secs[ti].b; for (let j = ti + 1; j < secs.length && j < ti + 8 && !stop.test(secs[j].h); j++) tour += "\n▸ " + secs[j].h + "\n" + secs[j].b; }
+  const pick = (re) => secs.find(x => re.test(x.h) && x.b);
+  return {intro:P[0].trim(), tour:tour.trim(), more:[["📜 ประวัติ", pick(/ประวัติ/)], ["⛰️ ภูมิศาสตร์", pick(/ภูมิศาสตร์/)], ["👥 ประชากร / การปกครอง", pick(/ประชากร|การปกครอง/)]].filter(x => x[1])};
+}
+async function showInfo(name){
+  const prov = DS.prov, box = $("dInfo"), gq = "https://www.google.com/search?q=" + encodeURIComponent("ที่เที่ยว " + (prov === "กรุงเทพมหานคร" ? "เขต" : "อำเภอ") + name + " " + prov);
+  box.innerHTML = '<div class="rounded-2xl border border-stone-300 bg-white/80 p-4 text-sm text-stone-600">กำลังหาข้อมูลอำเภอ' + esc(name) + "…</div>";
+  box.scrollIntoView({behavior:"smooth", block:"nearest"});
+  let r; try { r = await loadInfo(prov, name); } catch(e){ box.innerHTML = '<div class="rounded-2xl border border-stone-300 bg-white/80 p-4 text-sm">โหลดข้อมูลไม่ได้ในตอนนี้ (ต้องต่อเน็ต) · <a class="underline" target="_blank" rel="noopener" href="' + gq + '">ค้นหาที่เที่ยวใน Google</a></div>'; return; }
+  if (DS.prov !== prov) return;
+  if (!r.text) { box.innerHTML = '<div class="rounded-2xl border border-stone-300 bg-white/80 p-4 text-sm">ยังไม่พบบทความของอำเภอ' + esc(name) + " ในวิกิพีเดีย · <a class=\"underline\" target=\"_blank\" rel=\"noopener\" href=\"" + gq + '">ค้นหาที่เที่ยวใน Google</a></div>'; return; }
+  const p = parseInfo(r.text), pre = 'style="white-space:pre-line;line-height:1.7"';
+  box.innerHTML = '<div class="rounded-2xl border border-stone-300 bg-white/80 p-4 grid gap-3 text-sm text-stone-700"><div class="serif text-lg font-bold">📖 ' + esc(r.title) + "</div>"
+    + (p.intro ? "<div " + pre + ">" + esc(cut(p.intro, 700)) + "</div>" : "")
+    + '<div><b>🎯 ที่เที่ยวและสถานที่สำคัญ</b><div ' + pre + ' class="mt-1">' + (p.tour ? esc(cut(p.tour, 1400)) : 'บทความยังไม่มีหัวข้อสถานที่ท่องเที่ยว · <a class="underline" target="_blank" rel="noopener" href="' + gq + '">ค้นหาใน Google</a>') + "</div></div>"
+    + p.more.map(m => "<details><summary class=\"font-bold cursor-pointer\">" + m[0] + "</summary><div " + pre + ' class="mt-1">' + esc(cut(m[1].b, 800)) + "</div></details>").join("")
+    + '<div class="text-xs text-stone-500">ข้อมูลจากวิกิพีเดียภาษาไทย (CC BY-SA) อาจไม่ครบหรือไม่ล่าสุด · <a class="underline" target="_blank" rel="noopener" href="https://th.wikipedia.org/wiki/' + encodeURIComponent(r.title) + '">อ่านบทความเต็ม</a></div></div>';
+}
+$("tabDist").addEventListener("click", e => { const r = e.target.closest("[data-reg]"), p = e.target.closest("[data-prov]"), f = e.target.closest("[data-info]");
+  if (f) { showInfo(f.dataset.info); return; }
+  if (r) { DS.reg = r.dataset.reg; if (!(REG.find(x => x.n === DS.reg).P.includes(DS.prov))) { DS.prov = ""; $("dInfo").innerHTML = ""; } renderDist(); }
+  else if (p) { DS.prov = p.dataset.prov; $("dInfo").innerHTML = ""; renderDist(); setTimeout(() => $("dHead").scrollIntoView({behavior:"smooth", block:"start"}), 80); } });
 $("dList").addEventListener("click", e => { const b = e.target.closest("[data-amp]"); if (b) { ampToggle(b.dataset.amp); renderDist(); } });
 const MAPS = {map:null, layer:null, filter:"all", region:"all"};
 function loadLeaflet(){
